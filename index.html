@@ -395,6 +395,19 @@ textarea{width:100%;min-height:96px;background:var(--black);border:1px solid var
 .mtr:last-child{border-bottom:0}
 .mtr span:not(:first-child){text-align:right;font:400 24px var(--display)}
 .mth span{font:700 15px var(--label) !important;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:flex-end;align-items:center;gap:6px}
+.h2hcard{background:var(--surface);border:1px solid var(--line);border-top:2px solid var(--green);border-radius:var(--r2);padding:var(--s3) var(--s2);display:flex;flex-direction:column;gap:var(--s2)}
+.h2hcard .h2h{background:transparent;border:0;padding:0}
+.h2ht .mtr{grid-template-columns:1fr 1.4fr 1fr}
+.h2ht .mtr span:first-child{text-align:left;font:400 24px var(--display)}
+.h2ht .mtr span:last-child{text-align:right}
+.h2ht .mtr .c{text-align:center !important;font:500 14px var(--body) !important}
+.h2ht .mtr.sub{border-bottom:0;padding-top:var(--s2)}
+.h2ht .mtr.sub .kicker{font:700 12px var(--label) !important;letter-spacing:.16em}
+.h2ht .lead{color:var(--cream);text-decoration:underline;text-decoration-color:var(--green);text-decoration-thickness:2px;text-underline-offset:6px}
+.h2ht .tab:not(.lead){color:var(--muted)}
+.c{text-align:center}
+.h2hf{align-self:center}
+.recent b.win{color:var(--cream);text-decoration:underline;text-decoration-color:var(--green);text-underline-offset:4px}
 .h2h{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:var(--s2);background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s2) var(--s3)}
 .h2h .big{font:400 48px/1 var(--display);text-align:center}
 .h2h .side{display:flex;flex-direction:column;gap:4px}
@@ -801,6 +814,7 @@ let confirmStop=false;
 function quit(){ stopCountdown(); speaker.cancel(); game=null; confirmStop=false; saveGame(); screen="home"; render(); releaseAwake(); }
 
 /* ---------- de app spreekt terug ---------- */
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
 const speaker={
   speaking:false, _gen:0,
   style(){ const D=store.data; if(D.voiceStyle) return D.voiceStyle; return D.speak===false ? "off" : "normal"; },
@@ -818,7 +832,7 @@ const speaker={
     }
     return null;
   },
-  unlock(){ if(this._u || !("speechSynthesis" in window)) return; this._u=true; try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; speechSynthesis.speak(u); }catch(e){} },
+  unlock(){ if(this._u || !("speechSynthesis" in window)) return; this._u=true; try{ const u=new SpeechSynthesisUtterance("."); u.volume=0.01; u.rate=2; speechSynthesis.speak(u); }catch(e){} },
   /* say(tekst) of say([{t, rate, pitch, pause}], {lang}) */
   say(parts, opt){
     if(!this.ok()) return;
@@ -828,20 +842,33 @@ const speaker={
     if(!parts.length) return;
     const caller=this.style()==="caller", v=this.pickVoice(lang);
     const baseRate = caller ? 0.9 : 1.08, basePitch = caller ? 0.72 : 1;
-    try{
-      speechSynthesis.cancel();
-      const gen=++this._gen; this.speaking=true; voice.muteUntil=Infinity;
-      const done=()=>{ if(gen!==this._gen) return; this.speaking=false; voice.muteUntil=Date.now()+900; };
-      let total=0;
-      parts.forEach((p,i)=>{
-        const u=new SpeechSynthesisUtterance(p.t.replace(/\s+/g," ").trim());
-        u.lang=(v&&v.lang)||(lang==="en"?"en-GB":"nl-BE"); if(v) u.voice=v;
-        u.rate=Math.max(.4,Math.min(1.6,(p.rate||1)*baseRate)); u.pitch=Math.max(0,Math.min(2,(p.pitch||1)*basePitch));
-        if(i===parts.length-1){ u.onend=done; u.onerror=done; }
-        speechSynthesis.speak(u); total+=p.t.length;
-      });
-      setTimeout(()=>{ if(gen===this._gen && this.speaking && !speechSynthesis.speaking) done(); }, 800+total*140);
-    }catch(e){ this.speaking=false; voice.muteUntil=0; }
+    const gen=++this._gen; this.speaking=true; voice.muteUntil=Infinity;
+    // iPhone: de microfoon blokkeert de luidspreker; even pauzeren tijdens het spreken
+    const useHold = IS_IOS && store.data.micDuringSpeech==='pause';
+    this.lastSpoken=parts.map(p=>p.t).join(' ');
+    if(useHold) voice.hold(true);
+    const done=()=>{ if(gen!==this._gen) return; this.speaking=false; this.lastEnd=Date.now(); voice.muteUntil=Date.now()+(useHold?300:500); if(useHold) setTimeout(()=>{ if(gen===this._gen) voice.hold(false); },250); };
+    const go=()=>{
+      if(gen!==this._gen) return;
+      try{
+        try{ speechSynthesis.resume(); }catch(e){}
+        let total=0;
+        parts.forEach((p,i)=>{
+          const u=new SpeechSynthesisUtterance(p.t.replace(/\s+/g," ").trim());
+          u.lang=(v&&v.lang)||(lang==="en"?"en-GB":"nl-BE"); if(v) u.voice=v;
+          u.rate=Math.max(.4,Math.min(1.6,(p.rate||1)*baseRate)); u.pitch=Math.max(0,Math.min(2,(p.pitch||1)*basePitch)); u.volume=1;
+          if(i===0) u.onstart=()=>{ this.lastStart=Date.now(); };
+          if(i===parts.length-1){ u.onend=done; u.onerror=e=>{ this.lastError=(e&&e.error)||"fout"; done(); }; }
+          speechSynthesis.speak(u); total+=p.t.length;
+        });
+        setTimeout(()=>{ if(gen===this._gen && this.speaking && !speechSynthesis.speaking && !speechSynthesis.pending) done(); }, 1500+total*150);
+      }catch(e){ this.lastError=String(e); done(); }
+    };
+    // iPhone laat een nieuwe zin soms vallen als je net "cancel" deed: dan even wachten
+    let busy=false; try{ busy=speechSynthesis.speaking||speechSynthesis.pending; }catch(e){}
+    if(busy){ try{ speechSynthesis.cancel(); }catch(e){} setTimeout(go, IS_IOS?250:60); }
+    else if(useHold && voice.on() && voice.mode==="web") setTimeout(go,200);   // eerst de microfoon laten loslaten
+    else go();
   },
   busy(){ return this.speaking; },
   cancel(){ this._gen++; try{ speechSynthesis.cancel(); }catch(e){} this.speaking=false; voice.muteUntil=0; }
@@ -919,7 +946,7 @@ function dutchNum(w){
   return sub(w);
 }
 function parseSpeech(text, allowTotal){
-  const tk=tokenize(text), out=[]; let mult=null, bullMod=null, known=0, unknown=0;
+  const tk=tokenize(text), out=[]; let mult=null, bullMod=null, known=0, unknown=0, forceTotal=false;
   for(let i=0;i<tk.length;i++){
     const w=tk[i], nx=tk[i+1];
     if(UNDOW.has(w)){ out.push({undo:true}); mult=null; known++; continue; }
@@ -929,10 +956,12 @@ function parseSpeech(text, allowTotal){
     if(REDW.has(w)){ bullMod=50; known++; continue; }
     if(BULLW.has(w)){ const v=bullMod || (mult===1?25:50); out.push({seg:25,mult:v===25?1:2}); mult=null; bullMod=null; known++; continue; }
     if(allowTotal && (w==="bust"||w==="buster")){ out.push({total:0}); mult=null; known++; continue; }
+    if(allowTotal && /^(totaal|total|totale|totaalscore)$/.test(w)){ forceTotal=true; mult=null; known++; continue; }
     if(MISSW.has(w)){ out.push({seg:0,mult:0}); mult=null; known++; continue; }
     if(isNum(w)){
       let n=dutchNum(w);
       if(n===100){ let j=i+1; if(tk[j]==="en") j++; const nx2=tk[j]!==undefined?dutchNum(tk[j]):undefined; if(nx2!==undefined && nx2<100){ n+=nx2; i=j; } }
+      if(forceTotal){ forceTotal=false; if(n>=0 && n<=180){ out.push({total:n}); known++; } else unknown++; continue; }
       if((w==="een"||w==="één"||w==="eén") && nx && (MULTW[nx]!==undefined||BULLW.has(nx)||isNum(nx)||GREENW.has(nx)||REDW.has(nx))) continue; // lidwoord
       if(nx==="keer" && n>=1 && n<=3){ mult=n; i++; known++; continue; }
       if(n>=1&&n<=20) out.push({seg:n,mult:mult||1});
@@ -943,16 +972,24 @@ function parseSpeech(text, allowTotal){
       else { unknown++; continue; }
       mult=null; known++; continue;
     }
-    if(FILLW.has(w)) continue;
+    if(FILLW.has(w) || store.data.players.some(p=>String(p.name).toLowerCase()===w) || ["gooit","eerst","begint","nodig","nog","je","hebt","score","leg","game","shot","on"].includes(w)) continue;
     unknown++;
   }
   if(unknown>0 && unknown>=known) return {actions:[], rejected:true};
   return {actions:out};
 }
 const AGAINW=/\b(opnieuw|nog (een )?keer|nog eens|nogmaals|herbegin|again|revanche)\b/;
+function stripEcho(text){
+  // de microfoon kan de laatste zin van de app nog hebben opgevangen: die woorden vooraan weglaten
+  if(!speaker.lastSpoken || Date.now()-(speaker.lastEnd||0) > 6000) return text;
+  const own=new Set(tokenize(speaker.lastSpoken)), tk=tokenize(text);
+  let i=0; while(i<tk.length && own.has(tk[i])) i++;
+  return i ? tk.slice(i).join(" ") : text;
+}
 function handleSpeech(text){
   text=String(text).trim(); if(!text) return;
   if(Date.now() < (voice.muteUntil||0)) return;   // dat was de app zelf
+  text=stripEcho(text); if(!text.trim()) return;
   voice.used();
   const low=text.toLowerCase();
   if(screen==="result" && /\b(volgende|verder|door)\b/.test(low) && game && game.session){ voice.heard=text; nextInSession(); return; }
@@ -1011,11 +1048,18 @@ const voice={
       const r=new SR(); r.lang=store.data.lang||"nl-BE"; r.continuous=true; r.interimResults=true; r.maxAlternatives=1;
       r.onresult=e=>{ let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const res=e.results[i]; if(res.isFinal) handleSpeech(res[0].transcript); else interim+=res[0].transcript; } this.partial=Date.now()<(this.muteUntil||0)?"":interim; this.fails=[]; renderVoice(); };
       r.onerror=e=>{
-        if(e.error==="not-allowed"||e.error==="service-not-allowed"){ this.want=false; this.note="Microfoon niet toegestaan. Zet hem aan in de instellingen van je browser."; }
+        if(e.error==="not-allowed"||e.error==="service-not-allowed"){
+          if(this.auto && this.want){
+            // automatisch herstarten mag niet op dit toestel: microfoon voortaan laten aanstaan tijdens de stem
+            if(store.data.micDuringSpeech==="pause"){ store.data.micDuringSpeech="keep"; store.save(); toast("Je iPhone laat de microfoon niet vanzelf herstarten. Hij blijft voortaan aan tijdens de stem."); }
+            this.note="Tik één keer op de microfoon";
+          } else this.note="Microfoon niet toegestaan. Zet hem aan in de instellingen van je browser.";
+          this.want=false;
+        }
         renderVoice();   // "no-speech", "network", "aborted": gewoon opnieuw starten via onend
       };
       r.onstart=()=>{ this.state="listening"; renderVoice(); };
-      r.onend=()=>{ this.state="idle"; this.partial=""; renderVoice(); if(this.want) this.restart(); };
+      r.onend=()=>{ this.state="idle"; this.partial=""; renderVoice(); if(this.want && !this.held) this.restart(); };
       this.rec=r;
     }
     renderVoice();
@@ -1025,7 +1069,7 @@ const voice={
     const now=Date.now(); this.fails=this.fails.filter(t=>now-t<15000); this.fails.push(now);
     if(this.fails.length>8){ this.want=false; this.note="De microfoon blijft uitvallen: tik één keer om opnieuw te starten"; renderVoice(); return; }
     clearTimeout(this._timer);
-    this._timer=setTimeout(()=>{ if(this.want && this.state==="idle" && document.visibilityState==="visible"){ try{ this.rec.start(); }catch(e){} } }, this.fails.length>3?1000:150);
+    this._timer=setTimeout(()=>{ if(this.want && !this.held && this.state==="idle" && document.visibilityState==="visible"){ try{ this.auto=true; this.rec.start(); }catch(e){} } }, this.fails.length>3?1000:150);
   },
   start(){   // altijd rechtstreeks vanuit een tik aanroepen
     this.lastUse=Date.now();
@@ -1040,11 +1084,17 @@ const voice={
         renderVoice();
       });
     } else if(this.mode==="web"){
-      this.fails=[]; this.note="";
+      this.fails=[]; this.note=""; this.auto=false;
       if(!this.want){ this.want=true; }
       if(this.state==="idle"){ try{ this.rec.start(); }catch(e){} }
       renderVoice();
     }
+  },
+  hold(on){   // microfoon even pauzeren terwijl de app praat (iPhone)
+    if(this.mode!=="web") return;
+    if(on){ if(this.want && !this.held){ this.held=true; try{ this.rec.abort(); }catch(e){ try{ this.rec.stop(); }catch(e2){} } } }
+    else if(this.held){ this.held=false; if(!this.want) return; this.fails=[]; this.auto=true;
+      try{ this.rec.start(); }catch(e){ try{ this.rec.abort(); }catch(e2){} setTimeout(()=>{ if(this.want && !this.held){ try{ this.auto=true; this.rec.start(); }catch(e3){} } },350); } }
   },
   stop(){ this.want=false; clearTimeout(this._timer);
     if(this.mode==="claude" && this.d && this.d.active()) this.d.stop().catch(()=>{});
@@ -1126,7 +1176,7 @@ function voicePickHTML(){
   return '<div class="setrow"><span>Welke stem<br><span class="muted small">Kies de zwaarste stem die je toestel heeft</span></span><div class="vpick">'
     +(nl?'<select class="vsel" data-lang="nl" aria-label="Nederlandse stem">'+opt("nl",store.data.voiceNl)+'</select>':'<span class="muted small">Geen Nederlandse stem op dit toestel</span>')
     +(showEn?(en?'<select class="vsel" data-lang="en" aria-label="Engelse stem">'+opt("en",store.data.voiceEn)+'</select>':'<span class="muted small">Geen Engelse stem op dit toestel</span>'):'')
-    +'<button class="secondary small-btn" data-act="vtest">Test de stem</button></div></div>';
+    +'<button class="secondary small-btn" data-act="vtest">Test de stem</button><p id="vdiag" class="small muted"></p></div></div>';
 }
 function goalStrip(){
   const g=store.data.weekGoal||0; if(!g) return '';
@@ -1148,6 +1198,7 @@ function renderHome(){
   const settings='<div class="setrow"><span>Stem van de app<br><span class="muted small">Zegt wie gooit, het doel en de score</span></span><div class="seg" role="group" aria-label="Stem">'+[["off","Uit"],["normal","Gewoon"],["caller","Caller"]].map(([v,l])=>'<button data-act="vstyle" data-v="'+v+'" aria-pressed="'+(speaker.style()===v)+'">'+l+'</button>').join('')+'</div></div>'
     +(speaker.style()==="caller"?'<div class="setrow"><span>Caller in wedstrijden<br><span class="muted small">Oefeningen blijven in het Nederlands</span></span><div class="seg" role="group" aria-label="Taal caller"><button data-act="clang" data-v="nl" aria-pressed="'+(store.data.callLang!=="en")+'">Nederlands</button><button data-act="clang" data-v="en" aria-pressed="'+(store.data.callLang==="en")+'">English</button></div></div>':'')
     +(speaker.style()!=="off"?voicePickHTML():'')
+    +(speaker.style()!=="off"?'<div class="setrow"><span>Microfoon terwijl de app spreekt<br><span class="muted small">"Blijft aan" is volledig handenvrij. Alleen als je de stem op je iPhone niet hoort: kies "Pauzeert".</span></span><div class="seg" role="group" aria-label="Microfoon tijdens de stem"><button data-act="mds" data-v="keep" aria-pressed="'+(store.data.micDuringSpeech!=="pause")+'">Blijft aan</button><button data-act="mds" data-v="pause" aria-pressed="'+(store.data.micDuringSpeech==="pause")+'">Pauzeert</button></div></div>':'')
     +'<div class="setrow"><span>Weekdoel<br><span class="muted small">Aantal oefeningen per speler per week</span></span><div class="seg" role="group" aria-label="Weekdoel">'+goalBtns+'</div></div>'
     +'<div class="setrow"><span>Microfoon bij start</span><div class="seg" role="group" aria-label="Microfoon bij start"><button data-act="autov" data-v="1" aria-pressed="'+(store.data.autoVoice!==false)+'">Vanzelf aan</button><button data-act="autov" data-v="0" aria-pressed="'+(store.data.autoVoice===false)+'">Zelf aanzetten</button></div></div>'
     +'<div class="setrow"><span>Geluid bij raak/mis</span><div class="seg" role="group" aria-label="Geluid"><button data-act="sound" data-v="1" aria-pressed="'+(store.data.sound!==false)+'">Aan</button><button data-act="sound" data-v="0" aria-pressed="'+(store.data.sound===false)+'">Uit</button></div></div>'
@@ -1358,12 +1409,52 @@ function renderStats(){
     +'<section><h2>Twee gsm\'s samenvoegen</h2><p class="muted small">Gooien jullie elk op je eigen gsm? Kopieer de back-up op de ene gsm, stuur hem door (bv. via WhatsApp) en plak hem hier op de andere. Resultaten worden samengevoegd, niets wordt dubbel geteld.</p><textarea id="bk" aria-label="Back-up" placeholder="Plak hier een back-up"></textarea><div class="btnrow"><button class="secondary" data-act="bcopy">Back-up kopiëren</button><button class="primary" data-act="bmerge">Plakken en samenvoegen</button></div></section>'
     +'</div>';
 }
+let h2hFilter={};
 function h2hHTML(){
-  const M=store.data.history.filter(h=>h.match && h.res.length===2);
+  const M=store.data.history.filter(h=>h.match && h.res.length===2).sort((a,b)=>b.at-a.at);
   if(!M.length) return '';
   const pairs={};
-  M.forEach(h=>{ const ids=h.res.map(r=>r.pid).sort(), k=ids.join("|"); const p=pairs[k] ||= {ids,w:{[ids[0]]:0,[ids[1]]:0},n:0}; p.n++; const win=h.res.find(r=>r.extra&&r.extra.won); if(win) p.w[win.pid]++; });
-  return '<section><h2>Onderling</h2>'+Object.values(pairs).map(p=>{ const [a,b]=p.ids; return '<div class="h2h"><div class="side"><span class="who2"><i class="dot" style="background:'+pColor(a)+'"></i>'+esc(pName(a))+'</span><span class="muted small">'+p.n+' wedstrijd'+(p.n>1?'en':'')+'</span></div><div class="big tab">'+p.w[a]+' – '+p.w[b]+'</div><div class="side"><span class="who2"><i class="dot" style="background:'+pColor(b)+'"></i>'+esc(pName(b))+'</span></div></div>'; }).join('')+'</section>';
+  const ord=id=>{ const i=store.data.players.findIndex(p=>p.id===id); return i<0?99:i; };
+  M.forEach(h=>{ const ids=h.res.map(r=>r.pid).sort((x,y)=>ord(x)-ord(y)), k=ids.join("|"); (pairs[k] ||= {k,ids,list:[]}).list.push(h); });
+  const card=p=>{
+    const [A,B]=p.ids, f=h2hFilter[p.k]||"all";
+    const L=p.list.filter(h=>f==="all" || String(h.match.start)===f);
+    const starts=[...new Set(p.list.map(h=>String(h.match.start)))].sort((x,y)=>y-x);
+    const agg=pid=>{ const a={w:0,l:0,legs:0,sc:0,dt:0,avgs:[],f9s:0,f9d:0,f9a:[],c100:0,c140:0,c180:0,co:0,best:null,hi:0};
+      L.forEach(h=>{ const r=h.res.find(x=>x.pid===pid), e=(r&&r.extra)||{}; if(!r) return;
+        e.won?a.w++:a.l++; a.legs+=e.legs||0; a.c100+=e.c100||0; a.c140+=e.c140||0; a.c180+=e.c180||0; a.co=Math.max(a.co,e.co||0); a.hi=Math.max(a.hi,e.hi||0);
+        if(e.bestLeg) a.best=a.best===null?e.bestLeg:Math.min(a.best,e.bestLeg);
+        if(e.sc!==undefined && e.dt){ a.sc+=e.sc; a.dt+=e.dt; } else a.avgs.push(r.score);
+        if(e.f9d){ a.f9s+=e.f9s; a.f9d+=e.f9d; } else if(e.f9) a.f9a.push(e.f9); });
+      const parts=[]; if(a.dt) parts.push([30*a.sc/a.dt, a.dt]); a.avgs.forEach(v=>parts.push([v*10,30]));
+      a.avg = parts.length ? parts.reduce((s,[v,w])=>s+v*w,0)/parts.reduce((s,[,w])=>s+w,0)/10 : 0;
+      const f9=[]; if(a.f9d) f9.push([30*a.f9s/a.f9d, a.f9d]); a.f9a.forEach(v=>f9.push([v*10,9]));
+      a.f9 = f9.length ? f9.reduce((s,[v,w])=>s+v*w,0)/f9.reduce((s,[,w])=>s+w,0)/10 : 0;
+      return a; };
+    const a=agg(A), b=agg(B), nm=pName;
+    const better=(x,y,low)=> x===y||x==null||y==null ? ['',''] : ((low? x<y : x>y) ? [' lead',''] : ['',' lead']);
+    const row=(label,x,y,fmtv,low)=>{ const [cx,cy]=better(x,y,low); return '<div class="mtr"><span class="tab'+cx+'">'+(x==null?'–':fmtv(x))+'</span><span class="muted c">'+label+'</span><span class="tab'+cy+'">'+(y==null?'–':fmtv(y))+'</span></div>'; };
+    const I=v=>String(v), F=v=>fmt(v);
+    const seg = starts.length>1 ? '<div class="seg wide h2hf" role="group" aria-label="Filter">'+[["all","Alle"],...starts.map(s=>[s,s])].map(([v,l])=>'<button data-act="h2hf" data-k="'+p.k+'" data-v="'+v+'" aria-pressed="'+(f===v)+'">'+l+'</button>').join('')+'</div>' : '';
+    const recent=L.slice(0,6).map(h=>{ const ra=h.res.find(r=>r.pid===A), rb=h.res.find(r=>r.pid===B), wa=ra&&ra.extra&&ra.extra.won;
+      return '<div><span>'+dShort(h.at)+' · '+h.match.start+(h.match.doubleIn?' DI':'')+'</span><span class="tab"><b class="'+(wa?'win':'')+'">'+((ra&&ra.extra&&ra.extra.legs)||0)+'</b> – <b class="'+(!wa?'win':'')+'">'+((rb&&rb.extra&&rb.extra.legs)||0)+'</b> · gem. '+fmt(ra?ra.score:0)+' / '+fmt(rb?rb.score:0)+'</span></div>'; }).join('');
+    return '<div class="h2hcard">'
+      +'<div class="h2h"><div class="side"><span class="who2"><i class="dot" style="background:'+pColor(A)+'"></i>'+esc(nm(A))+'</span></div><div class="big tab">'+a.w+' – '+b.w+'</div><div class="side"><span class="who2"><i class="dot" style="background:'+pColor(B)+'"></i>'+esc(nm(B))+'</span></div></div>'
+      +'<p class="muted small c">'+L.length+' wedstrijd'+(L.length===1?'':'en')+' · legs '+a.legs+' – '+b.legs+'</p>'
+      + seg
+      +'<div class="mtable h2ht">'
+      + row("Gewonnen",a.w,b.w,I) + row("Verloren",a.l,b.l,I,true)
+      +'<div class="mtr sub"><span></span><span class="kicker c">Gemiddelden</span><span></span></div>'
+      + row("Gem. 3 pijlen",a.avg,b.avg,F) + row("First 9",a.f9,b.f9,F)
+      +'<div class="mtr sub"><span></span><span class="kicker c">Scoring</span><span></span></div>'
+      + row("180",a.c180,b.c180,I) + row("140+",a.c140,b.c140,I) + row("100+",a.c100,b.c100,I) + row("Hoogste beurt",a.hi,b.hi,I)
+      +'<div class="mtr sub"><span></span><span class="kicker c">Uitgooien</span><span></span></div>'
+      + row("Hoogste finish",a.co,b.co,I) + row("Beste leg (pijlen)",a.best,b.best,I,true)
+      +'</div>'
+      +'<div><div class="kicker" style="margin-bottom:8px">Laatste duels</div><div class="recent">'+recent+'</div></div>'
+      +'</div>';
+  };
+  return '<section><h2>Onderlinge duels</h2>'+Object.values(pairs).sort((x,y)=>y.list.length-x.list.length).map(card).join('')+'</section>';
 }
 function basisHTML(){
   const D=store.data, last=(ex,pid)=>{ let h=null; for(const x of D.history) if(x.ex===ex && x.res.some(r=>r.pid===pid) && (!h || x.at>h.at)) h=x; return h?h.res.find(r=>r.pid===pid):null; };
@@ -1609,7 +1700,7 @@ function undoMatch(){
 }
 function finishMatch(st){
   const res=game.players.map((pid,i)=>{ const S=st.stats[i]; return {pid,name:playerById(pid).name,score:avg3(S),darts:S.darts,
-    extra:{legs:st.legsWon[i],won:st.winner===i,hi:S.hi,c180:S.c180,c140:S.c140,c100:S.c100,co:S.co,bestLeg:S.bestLeg,f9:S.f9d?Math.round(30*S.f9/S.f9d)/10:0}}; });
+    extra:{legs:st.legsWon[i],won:st.winner===i,hi:S.hi,c180:S.c180,c140:S.c140,c100:S.c100,co:S.co,bestLeg:S.bestLeg,f9:S.f9d?Math.round(30*S.f9/S.f9d)/10:0,sc:S.scored,dt:S.darts,f9s:S.f9,f9d:S.f9d}}; });
   const entry={id:uid(),ex:game.ex,name:"Wedstrijd "+game.start,at:Date.now(),max:180,darts:Math.max(...res.map(r=>r.darts)),res,
     match:{start:game.start,bestOf:game.bestOf,doubleIn:game.doubleIn}};
   store.data.history.unshift(entry); store.data.history=store.data.history.slice(0,CAP);
@@ -1683,7 +1774,7 @@ function renderMatch(){
 function matchHelpHTML(){
   return '<ul class="tips">'
    +'<li><b>Spraak per pijl:</b> <q>triple twintig</q>, <q>dubbel zestien</q>, <q>negentien</q>, <q>bull</q>, <q>mis</q>.</li>'
-   +'<li><b>Spraak als totaal:</b> zeg de score van je beurt, bv. <q>honderd</q>, <q>zestig</q>, <q>honderdveertig</q>. Zeg <q>bust</q> als je over je score ging.</li>'
+   +'<li><b>Spraak als totaal:</b> zeg <q>totaal</q> en de score van je beurt, bv. <q>totaal 57</q>, <q>totaal 81</q>, <q>totaal honderdveertig</q>. Zo weet de app zeker dat het geen losse pijl is. Zeg <q>bust</q> als je over je score ging.</li>'
    +'<li><b>Uitgooien met een totaal:</b> de app vraagt met hoeveel pijlen; zeg <q>één</q>, <q>twee</q> of <q>drie</q>.</li>'
    +'<li><b>Klavier:</b> typ <b>T20 T20 20</b> en Enter voor losse pijlen, of <b>100</b> en Enter voor een totaal. Getallen boven 20 zijn altijd een totaal. <b>=</b> ervoor maakt er ook een totaal van (=20). Backspace zonder invoer = laatste wissen.</li>'
    +'<li><b>Tikken:</b> kies <b>Per pijl</b> of <b>Totaal</b> boven het toetsenbord.</li>'
@@ -1752,6 +1843,7 @@ document.addEventListener("click",e=>{
     case "cs-pause": confirmStop=false; speaker.cancel(); screen="home"; render(); releaseAwake(); break;
     case "cs-quit": quit(); break;
     case "snext": nextInSession(); break;
+    case "h2hf": h2hFilter[b.dataset.k]=b.dataset.v; render(); break;
     case "mset": { const c=matchDraft||{}; let v=b.dataset.v; v = v==="true"?true : v==="false"?false : +v; c[b.dataset.k]=v; D.matchCfg=c; store.save(); render(); break; }
     case "mpick": { const c=matchDraft; const id=b.dataset.id; if(c.players.includes(id)){ if(c.players.length>2) c.players=c.players.filter(x=>x!==id); } else { c.players=[...c.players.slice(-1),id]; } c.starter=0; D.matchCfg=c; store.save(); render(); break; }
     case "mstart": voice.autoOn(); startMatch(matchDraft); break;
@@ -1767,7 +1859,13 @@ document.addEventListener("click",e=>{
     case "speak": D.speak = b.dataset.v==="1"; store.save(); render(); break;
     case "vstyle": D.voiceStyle=b.dataset.v; store.save(); render(); if(D.voiceStyle!=="off") speaker.say(D.voiceStyle==="caller" ? scoreCall(180,callLang()) : ["Stem staat aan."],{lang:callLang()}); break;
     case "clang": D.callLang=b.dataset.v; store.save(); render(); speaker.say(CALL.start(callLang(),{},"Tim"),{lang:callLang()}); break;
-    case "vtest": { const L=callLang(); speaker.say([...scoreCall(180,L),{t:CALL.require(L,"Jan",81)}],{lang:L}); break; }
+    case "mds": D.micDuringSpeech=b.dataset.v; store.save(); render(); break;
+    case "vtest": { const L=callLang(); speaker.lastStart=0; speaker.lastError=""; speaker.say([...scoreCall(180,L),{t:CALL.require(L,"Jan",81)}],{lang:L});
+      setTimeout(()=>{ const n=speaker.voices("nl").length, e=speaker.voices("en").length, el=$("#vdiag");
+        const okk=speaker.lastStart>0;
+        if(el) el.innerHTML = okk ? '<span style="color:var(--green)">●</span> De stem werkt. Hoor je niets? Kijk of je iPhone niet op stil staat (schakelaar aan de zijkant) en zet het volume hoger.'
+          : '<span style="color:var(--red)">●</span> De stem start niet'+(speaker.lastError?' ('+esc(speaker.lastError)+')':'')+'. '+n+' Nederlandse en '+e+' Engelse stemmen gevonden. Zet de stille modus uit, open de app via je eigen link in Safari (niet in de Claude-app) en tik nog eens.'; },1500);
+      break; }
     case "goal": D.weekGoal = +b.dataset.v; store.save(); render(); break;
     case "again": { voice.autoOn(); if(isMatch(game)){ const c={players:game.players.slice(),start:game.start,doubleIn:game.doubleIn,bestOf:game.bestOf,starter:(game.starter+1)%game.players.length}; startMatch(c); } else startGame(game.ex, game.players, game.session); break; }
     case "num": addDart({seg:+b.dataset.n, mult:modSel}); modSel=1; if(screen==="play") render(); break;
