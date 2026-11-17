@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Darttrainer voor twee</title>
+<meta name="theme-color" content="#0b0b0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Darttrainer">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+@font-face{font-family:"Bebas Neue";src:url(fonts/bebas-neue-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Barlow";src:url(fonts/barlow-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Barlow";src:url(fonts/barlow-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Barlow";src:url(fonts/barlow-latin-600-normal.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Barlow";src:url(fonts/barlow-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Barlow Condensed";src:url(fonts/barlow-condensed-latin-600-normal.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Barlow Condensed";src:url(fonts/barlow-condensed-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+:root{
+  /* Alleen de kleuren van het bord: zwart, crème (sisal), diep rood, diep groen.
+     Ruimte in stappen van 8px. Telefoon eerst; groter scherm = doel links, toetsen rechts. */
+  --black:#0b0b0b;
+  --cream:#efe3c2;
+  --red:#c8102e;
+  --green:#00843d;
+  --s1:8px; --s2:16px; --s3:24px; --s4:32px; --s5:40px; --s6:48px; --s8:64px;
+  --r1:8px; --r2:16px;
+  /* afgeleid van dezelfde vier kleuren */
+  --surface:#151515; --surface2:#1d1d1d;
+  --line:rgba(239,227,194,.12); --line2:rgba(239,227,194,.22);
+  --text:var(--cream); --muted:rgba(239,227,194,.6);
+  /* namen die de rest van de app gebruikt */
+  --panel:var(--surface); --panel2:var(--surface2); --sisal:var(--cream); --gold:var(--cream);
+  --up:var(--green); --down:var(--red);
+  --p0:var(--red); --p1:var(--green); --p2:var(--cream); --p3:#8f8f8f;
+  --display:"Bebas Neue","Arial Narrow",Impact,sans-serif;
+  --label:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ring:var(--green);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body,#app{margin:0;height:100%}
+body{background:var(--black);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:400}
+h1,h2{font-family:var(--display);letter-spacing:.02em;line-height:1.05}
+h3{font-family:var(--label);font-weight:700;font-size:24px;line-height:1.1}
+p{margin:0}
+.muted{color:var(--muted)} .small{font-size:14px} .tab{font-variant-numeric:tabular-nums}
+.kicker{font-family:var(--label);font-weight:700;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.of{font-family:var(--label);font-size:.45em;color:var(--muted);margin-left:2px;font-weight:600;letter-spacing:.02em}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.who2{display:flex;align-items:center;gap:var(--s1);font-weight:600}
+.wrap{max-width:960px;margin:0 auto;padding:calc(var(--s3) + env(safe-area-inset-top)) var(--s2) calc(var(--s6) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--s4)}
+section{display:flex;flex-direction:column;gap:var(--s2)}
+section>h2{font-size:24px;color:var(--muted)}
+
+/* Kop */
+.hero{display:flex;align-items:center;gap:var(--s2);padding-bottom:var(--s2);position:relative}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--ring);border-radius:1px}
+.hero .board{width:64px;height:64px;flex:none}
+.hero h1{font-size:48px}
+.hero h1 span{color:var(--red)}
+.hero p{font-size:15px}
+.hero.small{display:block}
+.hero.small h1{font-size:48px;margin-top:var(--s1)}
+.hero.small::after{display:none}
+
+/* Navigatie */
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1)}
+.nav3{grid-template-columns:repeat(3,1fr)}
+.nav button{background:var(--surface);border:1px solid var(--line);border-radius:var(--r1);padding:var(--s1) var(--s2);min-height:48px;font:700 16px var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:background .15s,color .15s}
+.nav button[aria-pressed=true]{background:var(--cream);border-color:var(--cream);color:var(--black)}
+
+/* Training-knop en oefeningen */
+.session{display:flex;align-items:center;gap:var(--s2);text-align:left;border:0;border-radius:var(--r2);padding:var(--s3);background:var(--red);color:var(--cream);transition:transform .12s}
+.session:active{transform:scale(.99)}
+.session b{display:block;font:400 32px/1 var(--display);letter-spacing:.02em}
+.session span span{font-size:15px;opacity:.85}
+.play-ic{width:48px;height:48px;border-radius:50%;background:var(--cream);color:var(--red);display:grid;place-items:center;font-size:18px;flex:none;padding-left:4px}
+.cards{display:grid;gap:var(--s2)}
+.card{display:grid;grid-template-columns:48px 1fr 24px;gap:var(--s2);align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3) var(--s2);text-align:left;width:100%;transition:border-color .15s,background .15s}
+.card:hover{border-color:var(--line2);background:var(--surface2)}
+.card:active{transform:scale(.995)}
+.nr{width:48px;height:48px;border-radius:var(--r1);display:grid;place-items:center;font:400 32px/1 var(--display);background:var(--black);border:1px solid var(--line2);color:var(--cream)}
+.lv1 .nr{border-color:var(--green);color:var(--cream)}
+.lv2 .nr{border-color:var(--cream)}
+.lv3 .nr{border-color:var(--red)}
+.card h3{font-size:24px}
+.card p{color:var(--muted);font-size:15px;margin-top:4px}
+.cbody{display:flex;flex-direction:column;gap:0;min-width:0}
+.go{font-size:32px;color:var(--muted);line-height:1;text-align:center}
+.best{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s1)}
+.pill{display:inline-flex;align-items:center;gap:var(--s1);font-size:14px;border-radius:999px;padding:0 var(--s1);min-height:24px;background:var(--black);border:1px solid var(--line)}
+.pill.ok{border-color:var(--green)}
+.resume{display:flex;flex-direction:column;gap:4px;text-align:left;border:1px solid var(--green);border-radius:var(--r2);padding:var(--s2) var(--s3);background:rgba(0,132,61,.16);color:var(--cream)}
+.resume b{font:700 20px var(--label);text-transform:uppercase;letter-spacing:.06em}
+.resume span{font-size:15px;color:var(--muted)}
+
+/* Weekdoel */
+.goals{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s2) var(--s3);display:flex;flex-direction:column;gap:var(--s2)}
+.grow{display:grid;grid-template-columns:repeat(auto-fit,minmax(144px,1fr));gap:var(--s2)}
+.gitem{display:grid;grid-template-columns:1fr auto;gap:var(--s1);align-items:center}
+.gitem .bar{grid-column:1/-1}
+.gitem.done .tab{color:var(--cream);font-weight:700}
+.bar{height:8px;border-radius:4px;background:var(--black);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pc,var(--cream));transition:width .5s}
+
+/* Uitklapbare blokken */
+.secs{display:flex;flex-direction:column;gap:var(--s2)}
+details.sec{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2)}
+details.sec>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:var(--s2);padding:var(--s2) var(--s3);min-height:64px;cursor:pointer}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary>span{display:flex;flex-direction:column;min-width:0}
+details.sec>summary b{font:700 18px var(--label);text-transform:uppercase;letter-spacing:.1em}
+.chev{width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;flex:none;margin-right:var(--s1)}
+details.sec[open] .chev{transform:rotate(-135deg)}
+.secin{padding:0 var(--s3) var(--s3);display:flex;flex-direction:column;gap:var(--s2)}
+.howto{margin:0;padding-left:var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
+.saygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(144px,1fr));gap:var(--s1)}
+.saygrid div{background:var(--black);border:1px solid var(--line);border-radius:var(--r1);padding:var(--s1) var(--s2);display:flex;flex-direction:column}
+.saygrid b{font:400 22px/1.2 var(--display);letter-spacing:.03em}
+.saygrid span{font-size:13px;color:var(--muted)}
+.tips{margin:0;padding-left:var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
+q{quotes:"“" "”"}
+.setrow{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);flex-wrap:wrap;padding:var(--s1) 0 var(--s2);border-bottom:1px solid var(--line)}
+.setrow:last-child{border-bottom:0;padding-bottom:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--black);border:1px solid var(--line);border-radius:var(--r1);padding:4px}
+.seg button{background:transparent;border:0;border-radius:4px;min-height:40px;padding:0 var(--s2);font:600 15px var(--body);color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--cream);color:var(--black)}
+.players{display:flex;flex-direction:column;gap:var(--s1)}
+.prow{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s2);align-items:center;background:var(--black);border:1px solid var(--line);border-radius:var(--r1);padding:var(--s2)}
+.prow input[type=text]{background:transparent;border:0;border-bottom:1px solid var(--line2);color:var(--text);font:700 22px var(--label);padding:4px 0;min-width:0;width:100%}
+.pset{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:var(--s1) var(--s2);align-items:center}
+.favl{display:flex;align-items:center;gap:var(--s1);font-size:14px;color:var(--muted)}
+.favl select{background:var(--surface);color:var(--text);border:1px solid var(--line2);border-radius:var(--r1);min-height:40px;padding:0 var(--s1);font:600 15px var(--body)}
+.iconbtn{background:transparent;border:0;color:var(--muted);font-size:24px;min-width:40px;min-height:40px}
+.ghost{background:transparent;border:1px dashed var(--line2);border-radius:var(--r1);min-height:48px;color:var(--muted)}
+.primary{background:var(--red);color:var(--cream);border:0;border-radius:var(--r1);min-height:56px;padding:0 var(--s3);font:700 18px var(--label);letter-spacing:.1em;text-transform:uppercase}
+.secondary{background:transparent;color:var(--cream);border:1px solid var(--line2);border-radius:var(--r1);min-height:56px;padding:0 var(--s3);font:700 18px var(--label);letter-spacing:.1em;text-transform:uppercase}
+.btnrow{display:flex;flex-wrap:wrap;gap:var(--s1)}
+.btnrow>*{flex:1 1 auto}
+.linkbtn{background:transparent;border:1px solid var(--line2);border-radius:var(--r1);padding:4px var(--s1);color:var(--cream);font-size:14px;margin-left:var(--s1)}
+.syncbox{display:flex;flex-direction:column;gap:var(--s2)}
+.steps summary{cursor:pointer;font-weight:600}
+.steps ol{margin:var(--s1) 0 0;padding-left:var(--s3);display:flex;flex-direction:column;gap:var(--s1);font-size:15px}
+.tokin{background:var(--black);border:1px solid var(--line2);border-radius:var(--r1);color:var(--text);font:16px var(--body);min-height:48px;padding:0 var(--s2)}
+.qrbox{display:flex;flex-direction:column;gap:var(--s2);align-items:flex-start}
+#qr{background:#fff;border-radius:var(--r1);padding:var(--s1);width:224px;max-width:100%}
+#qr svg{display:block;width:100%;height:auto}
+
+/* Spelen — alles schaalt mee met de schermhoogte én -breedte; niets krimpt of wordt afgesneden */
+.play{
+  --big:clamp(48px, min(24vw, 11vh), 128px);
+  --slot:clamp(36px, min(12.5vw, 6vh), 72px);
+  --key:clamp(36px, 6vh, 80px);
+  min-height:100%;display:grid;grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto auto auto auto minmax(calc(var(--key)*6 + 40px),1fr);
+  grid-template-areas:"top" "score" "target" "voice" "pad";
+  gap:var(--s2);max-width:1280px;margin:0 auto;
+  padding:calc(var(--s2) + env(safe-area-inset-top)) var(--s2) calc(var(--s2) + env(safe-area-inset-bottom));
+}
+.pleft{display:contents}
+.top{grid-area:top;display:flex;align-items:center;justify-content:space-between;gap:var(--s2)}
+.scorebar{grid-area:score}
+.target{grid-area:target}
+.voice{grid-area:voice}
+.pad{grid-area:pad}
+.ttl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ttl .kicker{font-size:12px}
+.ttl h2{font-size:clamp(24px,7vw,32px);line-height:1.05;overflow-wrap:anywhere}
+.topbtns{display:flex;gap:var(--s1);align-items:center;flex:none}
+.helpbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:transparent;font:600 17px var(--body);color:var(--cream)}
+.stopbtn{background:transparent;border:1px solid var(--line2);border-radius:var(--r1);min-height:40px;padding:0 var(--s2);font:700 15px var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--cream)}
+.scorebar{display:flex;gap:var(--s1)}
+.sc{flex:1;position:relative;display:flex;justify-content:space-between;align-items:center;gap:var(--s2);min-width:0;min-height:56px;padding:var(--s1) var(--s2);
+  background:linear-gradient(180deg,#181818,#121212);border:1px solid var(--line);border-radius:var(--r1);box-shadow:inset 0 1px 0 rgba(239,227,194,.05)}
+.sc::after{content:"";position:absolute;left:var(--s2);right:var(--s2);bottom:-1px;height:2px;border-radius:2px;background:var(--pc);opacity:0;transition:opacity .2s}
+.sc.on{border-color:var(--line2)}
+.sc.on::after{opacity:1}
+.sc .n{display:flex;align-items:center;gap:var(--s1);min-width:0;font:700 16px var(--label);text-transform:uppercase;letter-spacing:.08em;overflow-wrap:anywhere}
+.sc .s{font:400 32px/1 var(--display);flex:none}
+.target{display:flex;flex-direction:column;gap:var(--s1);padding:var(--s2) var(--s3) var(--s3);
+  background:radial-gradient(120% 140% at 0% 0%,rgba(0,132,61,.10),transparent 55%),linear-gradient(180deg,#191919,#121212);
+  border:1px solid var(--line);border-radius:var(--r2);box-shadow:inset 0 1px 0 rgba(239,227,194,.06),0 16px 32px -24px #000}
+.target .who{display:flex;align-items:center;gap:var(--s1);font:700 13px var(--label);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.trow{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s2);flex-wrap:wrap}
+.target .big{font:400 var(--big)/1 var(--display);letter-spacing:.01em;padding-top:4px}
+.target .big .cur{color:var(--cream)}
+.target .big .dim{color:var(--muted);opacity:.4}
+.target .big .sep{color:var(--muted);opacity:.3;margin:0 .1em}
+.target.stack .trow{flex-direction:column;align-items:flex-start}
+.target.stack .big{font-size:calc(var(--big)*.62)}
+.target .sub{font-size:14px;color:var(--muted)}
+.target .prev{font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:var(--s1);margin-top:4px}
+.target .prev b{color:var(--cream);font-weight:600}
+.slots{display:flex;gap:var(--s1);flex:none}
+.slot{width:var(--slot);height:var(--slot);border-radius:var(--r1);border:1px dashed var(--line2);display:grid;place-items:center;font:400 calc(var(--slot)*.4) var(--display);letter-spacing:.02em;color:var(--muted);background:rgba(0,0,0,.35)}
+.slot.next{border:1px solid var(--cream);color:var(--cream)}
+.slot.hit{border:1px solid var(--green);background:var(--green);color:var(--cream)}
+.slot.miss{border:1px solid var(--line);color:var(--muted)}
+.slot.neutral{border:1px solid var(--line2);background:var(--surface2);color:var(--cream)}
+.slot.fresh{animation:pop .28s ease-out}
+.big.pop{animation:rise .3s ease-out}
+.fx-hit{animation:glowHit .6s ease-out}
+.fx-miss{animation:shake .3s ease-out}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes rise{0%{transform:translateY(8px);opacity:.2}100%{transform:none;opacity:1}}
+@keyframes glowHit{0%{box-shadow:inset 0 0 0 2px var(--green)}100%{box-shadow:inset 0 0 0 2px transparent}}
+@keyframes shake{0%,100%{transform:none}30%{transform:translateX(-4px)}60%{transform:translateX(4px)}}
+.voice{display:flex;align-items:center;gap:var(--s2);min-height:56px;padding:var(--s1) var(--s2) var(--s1) var(--s1);background:linear-gradient(180deg,#171717,#121212);border:1px solid var(--line);border-radius:999px}
+.mic{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:var(--black);display:grid;place-items:center;flex:none;color:var(--cream)}
+.mic svg{width:20px;height:20px}
+.mic.on{background:var(--red);border-color:var(--red);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,16,46,.6)}70%{box-shadow:0 0 0 12px rgba(200,16,46,0)}100%{box-shadow:0 0 0 0 rgba(200,16,46,0)}}
+.vtext{flex:1;min-width:0;font-size:15px;line-height:1.35}
+.vtext .heard{font-weight:700;color:var(--cream)}
+.vtext .partial{color:var(--muted);font-style:italic}
+.pad{display:grid;grid-template-rows:auto 1fr auto;gap:var(--s1);min-height:0}
+.mods{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s1)}
+.mods.two{grid-template-columns:1fr 1fr}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:minmax(var(--key),1fr);gap:var(--s1)}
+.mods .k{min-height:var(--key)}
+.k{background:linear-gradient(180deg,#1a1a1a,#131313);border:1px solid var(--line);border-radius:var(--r1);font:400 clamp(22px,calc(var(--key)*.5),36px)/1 var(--display);letter-spacing:.02em;color:var(--cream);box-shadow:inset 0 1px 0 rgba(239,227,194,.05);transition:transform .06s,background .1s;-webkit-user-select:none;user-select:none}
+.k:active{transform:scale(.96);background:var(--surface2)}
+.k.mod[aria-pressed=true][data-m="1"]{background:var(--cream);border-color:var(--cream);color:var(--black)}
+.k.mod[aria-pressed=true][data-m="2"]{background:var(--green);border-color:var(--green)}
+.k.mod[aria-pressed=true][data-m="3"]{background:var(--red);border-color:var(--red)}
+.k.bull{background:var(--black);border-color:var(--red)} .k.bull.g{border-color:var(--green)}
+.k.miss{font:700 15px var(--label);text-transform:uppercase;letter-spacing:.14em}
+.k.undo svg{width:22px;height:22px}
+
+/* Venster onderaan */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;z-index:8;animation:fade .15s}
+.sheetin{background:var(--black);border:1px solid var(--line2);border-bottom:0;border-radius:var(--r2) var(--r2) 0 0;width:100%;max-width:720px;padding:var(--s3) var(--s3) calc(var(--s3) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--s2);max-height:88%;overflow:auto;animation:up .2s ease-out;position:relative}
+.sheetin::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--ring);border-radius:var(--r2) var(--r2) 0 0}
+.sheetin h2{font-size:32px}
+@keyframes fade{from{opacity:0}} @keyframes up{from{transform:translateY(32px)}}
+.opts{display:flex;flex-direction:column;gap:var(--s1)}
+.opt{display:flex;align-items:center;gap:var(--s2);text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r1);padding:var(--s2);min-height:64px}
+.opt b{font:700 20px var(--label);letter-spacing:.04em}
+.opt.last{border-color:var(--cream)}
+.opt.danger{border-color:var(--red)}
+.opt .dots{display:flex;gap:4px;width:24px;flex:none}
+.pdesc{font-size:15px;color:var(--muted)}
+
+/* Uitslag */
+.result{display:grid;gap:var(--s2)}
+.rcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s2) var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
+.rtop{display:flex;justify-content:space-between;align-items:center;gap:var(--s2)}
+.rtop h3{display:flex;align-items:center;gap:var(--s1)}
+.rcard .big{font:400 64px/1 var(--display)}
+.rcard .sub{color:var(--muted);font-size:14px}
+.badges{display:flex;gap:var(--s1);flex-wrap:wrap}
+.badge{background:var(--cream);color:var(--black);font:700 14px var(--label);letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:0 var(--s2);min-height:24px;display:inline-flex;align-items:center;animation:pop .4s ease-out}
+.nextup{background:var(--surface);border:1px solid var(--line2);border-top:2px solid var(--green);border-radius:var(--r2);padding:var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
+.nextup b{font:400 36px/1 var(--display);letter-spacing:.02em}
+.summary{display:flex;flex-direction:column;margin-top:var(--s1)}
+.srow{display:flex;justify-content:space-between;gap:var(--s1);font-size:15px;border-bottom:1px solid var(--line);padding:var(--s1) 0}
+
+/* Statistieken */
+.week{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));gap:var(--s2)}
+.tile{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s2);display:flex;flex-direction:column;gap:var(--s1)}
+.tile .v{font:400 48px/1 var(--display)}
+.tile>span:not(.v):not(.who2):not(.delta){display:flex;align-items:baseline;gap:var(--s1);flex-wrap:wrap}
+.exstat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3);display:flex;flex-direction:column;gap:var(--s2)}
+.exstat h3{font-size:24px}
+.prs{display:flex;flex-direction:column;gap:var(--s2)}
+.pr{display:grid;grid-template-columns:minmax(72px,1fr) repeat(3,auto);gap:var(--s1) var(--s2);align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:var(--s2)}
+.pr .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.pr .num{font:400 32px var(--display);font-variant-numeric:tabular-nums}
+.delta{display:inline-block;font-size:14px;font-weight:600;color:var(--cream)}
+.delta.up::first-letter{color:var(--green)} .delta.down::first-letter{color:var(--red)} .delta.eq{color:var(--muted)}
+.legend{display:flex;gap:var(--s2);font-size:14px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:var(--s1)}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart .tip{font-size:14px;min-height:24px}
+.prog{display:flex;flex-direction:column;gap:var(--s1);font-size:15px}
+.recent{display:flex;flex-direction:column;font-size:14px}
+.recent div{display:flex;justify-content:space-between;gap:var(--s1);color:var(--muted);padding:4px 0}
+.recent b{color:var(--text);font-weight:600}
+textarea{width:100%;min-height:96px;background:var(--black);border:1px solid var(--line2);border-radius:var(--r1);color:var(--text);font:14px ui-monospace,monospace;padding:var(--s1)}
+.toast{position:fixed;left:50%;bottom:calc(var(--s3) + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--cream);color:var(--black);padding:var(--s1) var(--s2);border-radius:var(--r1);font-weight:600;max-width:90%;z-index:9;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* Brede of liggende schermen: doel links, toetsen rechts; alles op schermhoogte geschaald */
+@media (min-width:768px){
+  .wrap{padding-left:var(--s4);padding-right:var(--s4);gap:var(--s5)}
+  .cards{grid-template-columns:1fr 1fr;gap:var(--s2)}
+  .hero .board{width:80px;height:80px}
+  .hero h1{font-size:64px}
+}
+@media (orientation:landscape) and (min-width:560px){
+  .wrap{padding-left:var(--s4);padding-right:var(--s4);gap:var(--s5)}
+  .cards{grid-template-columns:1fr 1fr;gap:var(--s2)}
+  .hero .board{width:80px;height:80px}
+  .hero h1{font-size:64px}
+  .play{
+    --big:clamp(56px, min(13vw, 22vh), 240px);
+    --slot:clamp(40px, min(6.5vw, 11vh), 96px);
+    --key:clamp(32px, 9vh, 88px);
+    height:100%;min-height:0;
+    grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);
+    grid-template-rows:auto auto minmax(0,1fr) auto;
+    grid-template-areas:"top pad" "score pad" "target pad" "voice pad";
+    gap:var(--s2) var(--s4);
+    padding:calc(var(--s3) + env(safe-area-inset-top)) calc(var(--s4) + env(safe-area-inset-right)) calc(var(--s3) + env(safe-area-inset-bottom)) calc(var(--s4) + env(safe-area-inset-left));
+  }
+  .ttl h2{font-size:clamp(24px,4.5vh,40px)}
+  .target{justify-content:center;padding:clamp(16px,3vh,40px) clamp(24px,3vw,48px);min-height:0}
+  .target .who{font-size:clamp(13px,2vh,18px)}
+  .target .sub,.target .prev{font-size:clamp(14px,2vh,17px)}
+  .sc{min-height:clamp(48px,8vh,72px)}
+  .sc .s{font-size:clamp(28px,5vh,52px)}
+  .pad{grid-template-rows:auto 1fr auto;align-self:center;height:100%;max-height:640px}
+  .nums{grid-auto-rows:minmax(28px,1fr)}
+  .mods .k{min-height:clamp(32px,10vh,88px)}
+  .target.stack .trow{flex-direction:row;align-items:flex-end}
+}
+/* Lage liggende schermen (gsm dwars): compacter, zonder iets weg te knippen */
+@media (orientation:landscape) and (max-height:620px){
+  .play{gap:var(--s1) var(--s3);padding-top:calc(var(--s1) + env(safe-area-inset-top));padding-bottom:calc(var(--s1) + env(safe-area-inset-bottom))}
+  .ttl .kicker{display:none}
+  .target .prev{display:none}
+  .voice{min-height:48px;padding:4px var(--s1)}
+  .mods,.nums,.pad{gap:6px}
+}
+@media (orientation:landscape) and (max-height:440px){
+  .target .sub{display:none}
+  .sc{min-height:44px}
+}
+/* Lage staande schermen */
+@media (orientation:portrait) and (max-height:780px){
+  .play{gap:var(--s1)}
+  .ttl .kicker,.target .prev{display:none}
+  .target{padding:var(--s1) var(--s2) var(--s2)}
+}
+/* Wedstrijd */
+.setcard{background:linear-gradient(180deg,#171717,#121212);border:1px solid var(--line);border-top:2px solid var(--green);border-radius:var(--r2);padding:var(--s3);display:flex;flex-direction:column;gap:var(--s3)}
+.mhead h2{font-size:clamp(32px,9vw,48px);margin-top:4px}
+.mhead .vs{font-family:var(--label);font-size:.45em;letter-spacing:.14em;color:var(--muted);vertical-align:middle;margin:0 .3em}
+.field{display:flex;flex-direction:column;gap:var(--s1)}
+.vpick{display:flex;flex-direction:column;gap:var(--s1);align-items:stretch;min-width:0;flex:1 1 220px}
+.vsel{min-height:44px;background:var(--black);color:var(--cream);border:1px solid var(--line2);border-radius:var(--r1);padding:0 var(--s1);font:500 15px var(--body);max-width:100%}
+.small-btn{min-height:44px;font-size:15px}
+.mpick{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:var(--s2)}
+.mpick .vs{font:700 13px var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.msel{width:100%;min-height:48px;background:var(--black);color:var(--cream);border:1px solid var(--line2);border-radius:var(--r1);padding:0 var(--s2);font:700 18px var(--label);letter-spacing:.04em}
+.flabel{font:700 14px var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.seg.wide{display:flex;flex-wrap:wrap}
+.seg.wide button{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:var(--s1)}
+.play.match{grid-template-rows:auto auto auto auto minmax(calc(var(--key)*6 + 40px),1fr)}
+.mps{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1)}
+.mp{--rem:clamp(48px, min(17vw, 11vh), 128px);position:relative;display:flex;flex-direction:column;gap:4px;min-width:0;padding:var(--s2);
+  background:linear-gradient(180deg,#171717,#111);border:1px solid var(--line);border-radius:var(--r2);opacity:.62;transition:opacity .2s,border-color .2s}
+.mp.on{opacity:1;border-color:var(--line2);box-shadow:inset 0 2px 0 var(--pc),0 16px 32px -24px #000}
+.mphead{display:flex;justify-content:space-between;align-items:center;gap:var(--s1)}
+.mpname{display:flex;align-items:center;gap:var(--s1);font:700 16px var(--label);letter-spacing:.08em;text-transform:uppercase;min-width:0;overflow-wrap:anywhere}
+.thr{color:var(--muted);font-size:10px}
+.legs{display:flex;gap:4px;flex:none}
+.ld{width:8px;height:8px;border-radius:50%;border:1px solid var(--line2)}
+.ld.won{background:var(--pc);border-color:var(--pc)}
+.rem{font:400 var(--rem)/1 var(--display);letter-spacing:.01em;padding-top:4px}
+.mpsub{display:flex;justify-content:space-between;gap:var(--s1);flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.co{font-size:13px;color:var(--muted);min-height:20px}
+.co b{color:var(--cream);font-weight:700;letter-spacing:.02em}
+.turn{padding:var(--s2)}
+.turn .trow{align-items:center}
+.tleft{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prevline{font-size:14px} .prevline b{font-weight:700}
+.modeseg{align-self:stretch}
+.modeseg button{flex:1}
+.play.match .pad{grid-template-rows:auto auto 1fr auto}
+.play.match .pad.tpad{grid-template-rows:auto auto auto 1fr}
+.tdisp{font:400 clamp(36px,7vh,64px)/1.1 var(--display);text-align:center;padding:var(--s1);background:var(--black);border:1px solid var(--line2);border-radius:var(--r1);min-height:calc(var(--key) + 8px);display:grid;place-items:center}
+.tdisp .muted{font:500 15px var(--body)}
+.quick{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
+.k.q{font-size:clamp(16px,calc(var(--key)*.34),24px);min-height:calc(var(--key)*.8)}
+.digits{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(var(--key),1fr);gap:var(--s1)}
+.k.ok{background:var(--green);border-color:var(--green);font-family:var(--label);font-weight:700;font-size:20px;letter-spacing:.12em}
+.k svg{width:24px;height:24px}
+.opts.row{flex-direction:row}
+.opts.row .opt{flex:1;justify-content:center}
+.kb{font:400 22px var(--display);letter-spacing:.04em;color:var(--cream)}
+.caret{display:inline-block;width:2px;height:1em;background:var(--cream);margin-left:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.mtable{display:flex;flex-direction:column}
+.mtr{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:var(--s1);padding:var(--s1) 0;border-bottom:1px solid var(--line);align-items:center}
+.mtr:last-child{border-bottom:0}
+.mtr span:not(:first-child){text-align:right;font:400 24px var(--display)}
+.mth span{font:700 15px var(--label) !important;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:flex-end;align-items:center;gap:6px}
+.h2h{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:var(--s2);background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s2) var(--s3)}
+.h2h .big{font:400 48px/1 var(--display);text-align:center}
+.h2h .side{display:flex;flex-direction:column;gap:4px}
+.h2h .side:last-child{text-align:right;align-items:flex-end}
+@media (orientation:landscape) and (min-width:560px){
+  .play.match{grid-template-rows:auto minmax(0,1fr) auto auto;grid-template-areas:"top pad" "score pad" "target pad" "voice pad"}
+  .mps{align-self:stretch}
+  .play.match .pad{grid-template-rows:auto auto 1fr auto}
+  .play.match .pad.tpad{grid-template-rows:auto auto auto 1fr}
+  .mp{--rem:clamp(48px, min(11vw, 22vh), 220px);justify-content:center;padding:var(--s2) var(--s3)}
+  .mpsub,.co{font-size:clamp(13px,1.8vh,16px)}
+}
+@media (orientation:landscape) and (max-height:440px){ .co{display:none} .mpsub{display:none} }
+@media (prefers-reduced-motion:reduce){ *{animation:none !important;transition:none !important} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+/* ---------- hulpjes ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
+const lab = d => d.skip ? "Overgeslagen" : d.mult===0 ? "Mis" : d.seg===25 ? (d.mult===2 ? "Bull" : "25") : (["","S","D","T"][d.mult] + d.seg);
+
+/* ---------- opslag ---------- */
+const LS_KEY="darttrainer.v1", LS_GAME="darttrainer.game.v2";
+const store = {
+  data:{ players:[{id:uid(),name:"Tim",hand:"R",fav:20},{id:uid(),name:"Jan",hand:"R",fav:20}], phase:1, history:[], customs:[], updated:0 },
+  ref:null, writing:false, pending:false,
+  loadLocal(){ try{ const s=localStorage.getItem(LS_KEY); if(s){ const d=JSON.parse(s); if(d && Array.isArray(d.players)) this.data=Object.assign(this.data,d); } }catch(e){} this.rename(); },
+  rename(){ // oude standaardnamen omzetten naar Tim en Jan
+    const D=this.data; if(D.named) return;
+    const RN={ik:"Tim",neef:"Jan"}, ids={};
+    D.players.forEach(p=>{ const n=RN[String(p.name).trim().toLowerCase()]; if(n){ p.name=n; ids[p.id]=n; } });
+    D.history.forEach(h=>(h.res||[]).forEach(r=>{ if(ids[r.pid]) r.name=ids[r.pid]; }));
+    D.named=true; if(Object.keys(ids).length) this.save();
+  },
+  async connect(){
+    if(!window.claude || typeof window.claude.use!=="function") return;
+    try{
+      const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+      if(!db||!user) return;
+      const id=await user.id(); if(!id) return;
+      this.ref=db.doc("data/users/"+id+"/darttrainer");
+      const snap=await Promise.race([this.ref.get(), new Promise((_,r)=>setTimeout(()=>r("timeout"),10000))]);
+      if(snap && snap.exists){ const d=snap.data(); if(d && (d.updated||0) > (this.data.updated||0)){ this.data=JSON.parse(JSON.stringify(d)); this.rename(); this.saveLocal(); render(); } }
+      else if(this.data.updated){ this.flush(); }
+    }catch(e){ this.ref=null; }
+  },
+  saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(this.data)); }catch(e){} },
+  save(){ this.data.updated=Date.now(); this.saveLocal(); this.flush(); if(typeof sync!=="undefined") sync.schedule(); },
+  async flush(){
+    if(!this.ref) return;
+    if(this.writing){ this.pending=true; return; }
+    this.writing=true;
+    try{ await this.ref.set(JSON.parse(JSON.stringify(this.data))); }catch(e){}
+    this.writing=false;
+    if(this.pending){ this.pending=false; this.flush(); }
+  }
+};
+
+/* ---------- oefeningen ---------- */
+const BOARD=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+const bIdx=n=>BOARD.indexOf(n);
+const bX=n=>Math.cos((90-18*bIdx(n))*Math.PI/180), bY=n=>Math.sin((90-18*bIdx(n))*Math.PI/180);
+const opposite=n=>BOARD[(bIdx(n)+10)%20];
+function sixLR(n){ // zes nummers links en rechts van de dubbel, links eerst zoals je naar het bord kijkt
+  const i=bIdx(n), a=BOARD[(i+14)%20], b=BOARD[(i+6)%20];
+  if(Math.abs(bX(a)-bX(b))<0.01) return bY(a)>=bY(b)?[a,b]:[b,a];
+  return bX(a)<bX(b)?[a,b]:[b,a];
+}
+const val=d=> d.skip||d.mult===0 ? 0 : d.seg===25 ? (d.mult===2?50:25) : d.seg*d.mult;
+const tl=(seg,mult)=> seg===25 ? (mult===2?"Bull":mult===1?"25":"Bull") : ((mult?["","S","D","T"][mult]:"")+seg);
+function match(d,t){ if(d.skip||d.mult===0) return false; return d.seg===t.seg && (t.mult==null || d.mult===t.mult); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+
+function threeSingles(t){ // oefening 3 beginner: deel door 3, één eraf en één erbij
+  const a=Math.floor((t-3)/3), r=t-(3*a+3), n=[a,a+1,a+2];
+  if(r>=1) n[2]++; if(r>=2) n[1]++;
+  return n;
+}
+/* uitgooi-tip: kortste route die op een dubbel eindigt */
+const ALLD=[]; for(let n=1;n<=20;n++){ ALLD.push({seg:n,mult:1},{seg:n,mult:2},{seg:n,mult:3}); } ALLD.push({seg:25,mult:1},{seg:25,mult:2});
+const DPREF={20:0,16:1,8:2,10:3,12:4,18:5,4:6,2:7,14:8,6:9,25:12};
+const setupCost=d=> d.seg===25?(d.mult===2?5:4) : d.mult===1?0 : d.mult===3?2 : 6;
+const finCost=d=> (DPREF[d.seg]!==undefined?DPREF[d.seg]:10);
+const _route={};
+function route(n,maxD){
+  maxD=maxD||3; const key=n+"/"+maxD; if(key in _route) return _route[key];
+  let best=null, bc=1e9;
+  const dbl=ALLD.filter(d=>d.mult===2);
+  const consider=(arr,c)=>{ if(c<bc || (c===bc && best && val(arr[0])>val(best[0]))){ bc=c; best=arr; } };
+  for(const f of dbl) if(val(f)===n) consider([f],100+finCost(f));
+  if(!best && maxD>=2) for(const a of ALLD) for(const f of dbl) if(val(a)+val(f)===n) consider([a,f],200+setupCost(a)+finCost(f));
+  if(!best && maxD>=3) for(const a of ALLD) for(const b of ALLD) for(const f of dbl) if(val(a)+val(b)+val(f)===n) consider([a,b,f],300+setupCost(a)+setupCost(b)+finCost(f));
+  return _route[key] = best ? best.map(d=>tl(d.seg,d.mult)).join(" ") : "";
+}
+
+/* een oefening waarbij elke treffer op het doel telt */
+function series(o){
+  return Object.assign({
+    init:()=>({score:0,tp:0}),
+    step(g,s,d){ const t=this.tgt(g,s,s.turns.length,s.cur.length); const ok=match(d,t); if(ok && t.counts!==false){ s.score++; s.tp++; } return ok; },
+    endTurn(g,s){ const t=s.tp; s.tp=0; return "+"+t; },
+    done(g,s){ return s.turns.length>=this.T(g); },
+    head(g,s){ const ti=s.turns.length, di=s.cur.length, t=[0,1,2].map(i=>this.tgt(g,s,ti,i));
+      const same=t.every(x=>x.label===t[0].label);
+      return same ? {big:t[0].label, sub:this.sub(g,s,ti)} : {seq:t.map(x=>x.label), cur:di, sub:this.sub(g,s,ti)}; },
+    sub:(g,s,ti)=>"Beurt "+(ti+1)
+  },o);
+}
+function blocks(s,size,labels){ return labels.map((l,k)=> l+": "+s.turns.slice(k*size,k*size+size).reduce((a,ds)=>a+ds.filter(x=>x.ok).length,0)).join(" · "); }
+function groepEx(o){ // 11 / bull / 6, telkens 10 beurten
+  return series(Object.assign({
+    T:()=>30, max:()=>90, howLong:"30 beurten",
+    order(p){ return p.hand==="L" ? [6,"B",11] : [11,"B",6]; },
+    tgt(g,s,ti){ const t=this.order(s.p)[Math.floor(ti/10)]; return t==="B" ? {seg:25,mult:this.bullMult,label:this.bullMult===2?"Bull":"Bull"} : {seg:t,mult:this.m,label:tl(t,this.m)}; },
+    sub(g,s,ti){ const t=this.order(s.p)[Math.floor(ti/10)]; return (t==="B"?this.bullTxt:this.numTxt+" "+t)+" · beurt "+(ti%10+1)+" van 10"; },
+    detail(g,s){ return blocks(s,10,this.order(s.p).map(t=>t==="B"?"Bull":tl(t,this.m))); }
+  },o));
+}
+function checkoutEx(o){ // twintig scores uitgooien
+  return Object.assign({
+    howLong:"20 beurten", max:()=>20, checkout:true,
+    setup(g){ g.targets=shuffle(range(this.lo,this.lo+19)); },
+    init:()=>({score:0,rem:null,end:null}),
+    step(g,s,d){ if(s.cur.length===0) s.rem=g.targets[s.turns.length];
+      const nr=s.rem-val(d);
+      if(nr===0 && d.mult===2){ s.score++; s.end="Uitgegooid!"; return true; }
+      if(nr<=1){ s.end="Bust"; return false; }
+      s.rem=nr; return null; },
+    turnEnd:(g,s)=>!!s.end,
+    endTurn(g,s,ds){ const e=s.end||"Niet uit ("+s.rem+" over)"; s.end=null; s.rem=null; return g.targets[s.turns.length]+": "+e; },
+    done(g,s){ return s.turns.length>=20; },
+    head(g,s){ const ti=s.turns.length, rem=s.cur.length?s.rem:g.targets[ti], r=route(rem,3-s.cur.length);
+      return {big:String(rem), sub:"Beurt "+(ti+1)+" van 20 · start "+g.targets[ti]+(r?" · bv. "+r:" · niet uit te gooien met deze pijlen")}; }
+  },o);
+}
+const TRAINS=[[20,10,5],[16,8,4,2,1],[18,9],[12,6,3]];
+const TITEMS=[]; TRAINS.forEach((tr,k)=>{ tr.forEach(n=>TITEMS.push({t:"d",seg:n,k})); TITEMS.push({t:"leg",k}); });
+
+const EX = {
+  /* ---- Beginner ---- */
+  groep: groepEx({ phase:1, name:"Groeperen", m:1, bullMult:null, numTxt:"Alleen single", bullTxt:"Bull, rood en groen tellen",
+    desc:"Tien beurten op single 11, dan op de bull, dan op single 6. Alleen de single telt; bij de bull tellen rood en groen. Linkshandig: 6, bull, 11." }),
+  r201918: series({ phase:1, name:"20-19-18", howLong:"10 beurten",
+    desc:"Pijl 1 naar 20, pijl 2 naar 19, pijl 3 naar 18. Single, dubbel en triple: elke treffer is 1 punt. Tel in je hoofd je ritme: 1… 2… 3.",
+    T:()=>10, max:()=>30, tgt:(g,s,ti,di)=>({seg:[20,19,18][di],mult:null,label:String([20,19,18][di])}),
+    sub:(g,s,ti)=>"Beurt "+(ti+1)+" van 10 · elk deel telt" }),
+  drie: { phase:1, name:"3 darts", howLong:"20 beurten", max:()=>20,
+    desc:"Twintig scores, telkens met drie verschillende singles. Alle drie de pijlen gebruiken, geen getal twee keer. Gelukt is 1 punt. Tip: deel door 3, tel er 1 bij en trek er 1 af.",
+    setup(g){ const pool=shuffle(range(6,57)); g.targets=pool.slice(0,20); },
+    init:()=>({score:0}),
+    step(g,s,d){ return d.mult===1 && d.seg>=1 && d.seg<=20 && !s.cur.some(x=>x.d.mult===1 && x.d.seg===d.seg); },
+    endTurn(g,s,ds){ const t=g.targets[s.turns.length], sum=ds.reduce((a,x)=>a+(x.d.mult===1?x.d.seg:0),0);
+      if(ds.length===3 && ds.every(x=>x.ok) && sum===t){ s.score++; return "Gelukt: "+t; } return "Niet gelukt ("+sum+" van "+t+")"; },
+    done:(g,s)=>s.turns.length>=20,
+    head(g,s){ const ti=s.turns.length, t=g.targets[ti], sum=s.cur.reduce((a,x)=>a+(x.d.mult===1?x.d.seg:0),0);
+      return {big:String(t-sum), sub:"Beurt "+(ti+1)+" van 20 · doel "+t+" · bv. "+threeSingles(t).join(" + ")}; } },
+  single: series({ phase:1, name:"Single", howLong:"20 beurten", pass:40, passTxt:"klaar voor gevorderd",
+    desc:"Drie pijlen op hetzelfde getal, van 1 tot 20. Alleen de single telt, 1 punt per treffer. Met 40 punten ben je klaar voor gevorderd.",
+    T:()=>20, max:()=>60, tgt:(g,s,ti)=>({seg:ti+1,mult:1,label:"S"+(ti+1)}), sub:(g,s,ti)=>"Beurt "+(ti+1)+" van 20 · alleen single" }),
+
+  /* ---- Gevorderd ---- */
+  groepT: groepEx({ phase:2, name:"Groeperen op trippels", m:3, bullMult:null, numTxt:"Alleen trippel", bullTxt:"Bull, rood en groen tellen",
+    desc:"Tien beurten op trippel 11, dan op de bull, dan op trippel 6. Alleen trippels tellen; bij de bull tellen rood en groen. Linkshandig: T6, bull, T11." }),
+  trippels: series({ phase:2, name:"Trippels", howLong:"20 beurten",
+    desc:"Drie pijlen per getal, van 1 tot 20. Elke trippel is 1 punt. Maximaal 60.",
+    T:()=>20, max:()=>60, tgt:(g,s,ti)=>({seg:ti+1,mult:3,label:"T"+(ti+1)}), sub:(g,s,ti)=>"Beurt "+(ti+1)+" van 20 · alleen trippel" }),
+  setup1: series({ phase:2, name:"Dubbel na single", howLong:"20 beurten", fav:true,
+    desc:"Twintig beurten op je favoriete dubbel met je laatste twee pijlen. Je eerste pijl gaat naar de single recht tegenover die dubbel (D20 → S3). Elke dubbel is 1 punt. Maximaal 40.",
+    T:()=>20, max:()=>40,
+    tgt:(g,s,ti,di)=>{ const f=s.p.fav||20; return di===0 ? {seg:opposite(f),mult:1,label:"S"+opposite(f),counts:false} : {seg:f,mult:2,label:"D"+f}; },
+    sub:(g,s,ti)=>"Beurt "+(ti+1)+" van 20 · alleen de dubbel telt" }),
+  out41: checkoutEx({ phase:2, name:"Uitgooien 41-60", lo:41,
+    desc:"Twintig scores tussen 41 en 60. Gooi ze uit met drie pijlen, eindigen op een dubbel. Elke finish is 1 punt." }),
+
+  /* ---- Prof ---- */
+  groepD: groepEx({ phase:3, name:"Groeperen op dubbels", m:2, bullMult:2, numTxt:"Alleen dubbel", bullTxt:"Bull's eye, alleen rood telt",
+    desc:"Tien beurten op dubbel 11, dan op de bull's eye, dan op dubbel 6. Alleen dubbels tellen; bij de bull alleen het rode vak. Linkshandig: D6, bull, D11." }),
+  treintjes: { phase:3, name:"Treintjes", howLong:"13 dubbels + 4 legs", max:()=>78,
+    desc:"Zes pijlen per dubbel in treintjes: 20-10-5, 16-8-4-2-1, 18-9 en 12-6-3. Na elk treintje een leg 301 dubbel in, dubbel uit; de app telt je pijlen. Je score is het aantal geraakte dubbels, maximaal 78.",
+    init:()=>({score:0,i:0,n:0,legs:[],leg:null,over:false,legEnd:false,bust:false,tp:0}),
+    step(g,s,d){
+      const it=TITEMS[s.i];
+      if(it.t==="d"){ if(d.skip) return null; const ok=d.seg===it.seg && d.mult===2; if(ok){ s.score++; s.tp++; } if(++s.n>=6){ s.i++; s.n=0; if(s.i>=TITEMS.length) s.over=true; } return ok; }
+      if(!s.leg) s.leg={rem:301,in:false,darts:0};
+      const L=s.leg;
+      if(s.cur.length===0 || !L.snap) L.snap={rem:L.rem,in:L.in};
+      const next=msg=>{ s.legMsg=msg; s.leg=null; s.i++; s.legEnd=true; if(s.i>=TITEMS.length) s.over=true; };
+      if(d.skip){ s.legs.push(null); next("Leg overgeslagen"); return null; }
+      L.darts++;
+      if(!L.in){ if(d.mult===2){ L.in=true; L.rem-=val(d); return true; } return false; }
+      const nr=L.rem-val(d);
+      if(nr===0 && d.mult===2){ s.legs.push(L.darts); next("Leg uit in "+L.darts+" pijlen"); return true; }
+      if(nr<=1){ L.rem=L.snap.rem; L.in=L.snap.in; s.legEnd=true; s.bust=true; return false; }
+      L.rem=nr; return null;
+    },
+    turnEnd:(g,s)=>s.legEnd,
+    endTurn(g,s){ s.legEnd=false; if(s.leg) s.leg.snap=null;
+      if(s.bust){ s.bust=false; return "Bust, terug naar "+s.leg.rem; }
+      if(s.legMsg){ const m=s.legMsg; s.legMsg=null; return m; }
+      if(s.leg) return "nog "+s.leg.rem;
+      const t=s.tp; s.tp=0; return "+"+t+" dubbel"+(t===1?"":"s"); },
+    done:(g,s)=>s.over,
+    head(g,s){ const it=TITEMS[s.i], tr=TRAINS[it.k].join("-");
+      if(it.t==="d") return {big:"D"+it.seg, sub:"Treintje "+(it.k+1)+" ("+tr+") · pijl "+(s.n+1)+" van 6"};
+      const L=s.leg||{rem:301,in:false,darts:0};
+      return {big:String(L.rem), leg:true, sub: L.in ? "301 dubbel in, dubbel uit · "+L.darts+(L.darts===1?" pijl":" pijlen")+(L.rem<=170 && route(L.rem,3-s.cur.length)?" · bv. "+route(L.rem,3-s.cur.length):"") : "301 dubbel in, dubbel uit · eerst een dubbel om te starten"}; },
+    detail(g,s){ return s.legs.length ? "Legs 301: "+s.legs.map(x=>x==null?"overgeslagen":x+" pijlen").join(", ") : ""; },
+    extra:s=>({legs:s.legs}) },
+  setup2: series({ phase:3, name:"Dubbel na twee singles", howLong:"20 beurten", fav:true,
+    desc:"Twintig beurten op dezelfde dubbel met je laatste pijl. Pijl 1 naar de single zes getallen naar links, pijl 2 zes naar rechts (D20 → S8, S10). Elke dubbel is 1 punt. Maximaal 20.",
+    T:()=>20, max:()=>20,
+    tgt:(g,s,ti,di)=>{ const f=s.p.fav||20, lr=sixLR(f); return di<2 ? {seg:lr[di],mult:1,label:"S"+lr[di],counts:false} : {seg:f,mult:2,label:"D"+f}; },
+    sub:(g,s,ti)=>"Beurt "+(ti+1)+" van 20 · alleen de dubbel telt" }),
+  out61: checkoutEx({ phase:3, name:"Uitgooien 61-80", lo:61,
+    desc:"Twintig outshots tussen 61 en 80. Gooi ze uit met drie pijlen, eindigen op een dubbel. Elke finish is 1 punt." }),
+
+  /* ---- In elk niveau ---- */
+  gem: { phase:0, name:"Basisgemiddelde: scoren", howLong:"10 beurten", max:()=>180, avg:true,
+    desc:"Tien beurten zo hoog mogelijk gooien. Alles opgeteld en gedeeld door tien is je gemiddelde per beurt.",
+    init:()=>({score:0,total:0}),
+    step(g,s,d){ s.total+=val(d); return null; },
+    endTurn(g,s,ds){ return ds.reduce((a,x)=>a+val(x.d),0)+" gegooid"; },
+    scoreOf:(g,s)=>{ const n=s.turns.length>=10 ? 10 : s.turns.length+(s.cur.length?1:0); return n ? Math.round(10*s.total/n)/10 : 0; },
+    done:(g,s)=>s.turns.length>=10,
+    head(g,s){ const ti=s.turns.length, now=s.cur.reduce((a,x)=>a+val(x.d),0); return {big:s.cur.length?String(now):"Scoren", sub:"Beurt "+(ti+1)+" van 10 · totaal "+s.total}; },
+    detail(g,s){ return "Totaal "+s.total+" in 10 beurten"; } },
+  dub: series({ phase:0, name:"Basisgemiddelde: dubbels", howLong:"10 beurten", fav:true,
+    desc:"Tien beurten op je beste dubbel. Elke dubbel is 1 punt. Je eindscore gedeeld door tien geeft je dubbels per beurt.",
+    T:()=>10, max:()=>30, tgt:(g,s)=>({seg:s.p.fav||20,mult:2,label:"D"+(s.p.fav||20)}),
+    sub:(g,s,ti)=>"Beurt "+(ti+1)+" van 10 · je beste dubbel",
+    detail(g,s){ return fmt(s.score/10)+" dubbels per beurt · "+Math.round(100*s.score/30)+"% raak"; } }),
+  focus: { phase:0, name:"Focus", howLong:"tot je mist",
+    desc:"Pijl 1 naar de 1, pijl 2 naar de 2, enzovoort tot en met de bull. Elk deel van het getal telt. Mis je, dan is het voorbij. Je score is het laatste getal dat je raakte (bull = 21).",
+    max:()=>21, init:()=>({score:0,next:1,over:false}),
+    step(g,s,d){ const hit = s.next<=20 ? (d.seg===s.next && d.mult>0) : (d.seg===25 && d.mult>0);
+      if(hit){ s.score=s.next; s.next++; if(s.next>21) s.over=true; } else s.over=true; return hit; },
+    endTurn(g,s){ return s.over ? (s.score===21?"Helemaal rond!":"Gestopt op "+s.score) : "Tot "+s.score; },
+    done:(g,s)=>s.over,
+    head(g,s){ return {big:s.next<=20?String(s.next):"Bull", sub:"Geraakt: "+(s.score?(s.score===21?"bull":s.score):"nog niets")+" · één misser en het is voorbij"}; },
+    detail(g,s){ return s.score===21?"Alle 20 getallen én de bull!":"Gestopt bij "+(s.next<=20?s.next:"de bull"); } }
+};
+const PHASES={1:["groep","r201918","drie","single","gem","dub","focus"],2:["groepT","trippels","setup1","out41","gem","dub","focus"],3:["groepD","treintjes","setup2","out61","gem","dub","focus"]};
+const PHASE_NAME={1:"Beginner",2:"Gevorderd",3:"Prof"};
+
+function parseTargets(txt){
+  const out=[];
+  for(const raw of String(txt).toUpperCase().split(/[\s,;]+/)){
+    if(!raw) continue;
+    if(raw==="B"||raw==="BULL"){ out.push({seg:25,mult:null}); continue; }
+    const m=raw.match(/^([SDT]?)(\d{1,2})$/); if(!m) continue;
+    const n=+m[2];
+    if(n===25){ out.push({seg:25,mult:m[1]==="D"?2:1}); continue; }
+    if(n===50){ out.push({seg:25,mult:2}); continue; }
+    if(n<1||n>20) continue;
+    out.push({seg:n,mult:m[1]?({S:1,D:2,T:3}[m[1]]):null});
+  }
+  return out;
+}
+const ctLab=t=> tl(t.seg,t.mult);
+function customEx(c){
+  const TG=parseTargets(c.targets), R=Math.max(1,c.rounds|0);
+  return series({ phase:-1, custom:true, name:c.name, howLong:TG.length*R+" beurten",
+    desc:"Doelen: "+TG.map(ctLab).join(", ")+" · "+R+" beurten per doel"+(TG.some(t=>t.mult===null)?" · een kaal getal = elk deel telt":""),
+    T:()=>TG.length*R, max:()=>TG.length*R*3,
+    tgt:(g,s,ti)=>{ const t=TG[Math.floor(ti/R)]; return {seg:t.seg,mult:t.mult,label:ctLab(t)}; },
+    sub:(g,s,ti)=>"Beurt "+(ti%R+1)+" van "+R });
+}
+function getEx(id){ if(EX[id]) return EX[id]; const c=store.data.customs.find(x=>x.id===id); return c ? customEx(c) : null; }
+function exPhaseNr(id){ for(const ph of [1,2,3]){ const i=PHASES[ph].indexOf(id); if(i>=0) return {ph,nr:i+1}; } return null; }
+
+/* ---------- spel ---------- */
+let playHelp=false, game=null, pickEx=null, tab="train", tipWeek={}, screen="home", modSel=1, audio=null, wakeLock=null;
+function saveGame(){ try{ if(game) localStorage.setItem(LS_GAME, JSON.stringify(game)); else localStorage.removeItem(LS_GAME); }catch(e){} }
+function loadGame(){ try{ const s=localStorage.getItem(LS_GAME); if(s){ const g=JSON.parse(s); if(g && g.v===2 && getEx(g.ex)) return g; } }catch(e){} return null; }
+function playerById(id){ return store.data.players.find(p=>p.id===id) || {id, name:"Speler", hand:"R", fav:20}; }
+
+/* Speelt alle pijlen opnieuw af: zo klopt de stand altijd, ook na "terug". */
+function derive(g){
+  const ex=getEx(g.ex);
+  const S=g.players.map(pid=>{ const p=playerById(pid); const s=ex.init(g,p); s.p=p; s.turns=[]; s.meta=[]; s.cur=[]; return s; });
+  const P=S.length; let cp=0, last=null, lastTurn=null;
+  const nextP=from=>{ for(let k=1;k<=P;k++){ const i=(from+k)%P; if(!ex.done(g,S[i])) return i; } return -1; };
+  for(const d of g.darts){
+    if(cp<0) break;
+    const s=S[cp], ok=ex.step(g,s,d);
+    s.cur.push({d,ok}); last={pi:cp,ok};
+    if(ex.done(g,s) || s.cur.length>=3 || (ex.turnEnd && ex.turnEnd(g,s))){
+      const ds=s.cur, meta=ex.endTurn ? ex.endTurn(g,s,ds) : null;
+      s.turns.push(ds); s.meta.push(meta); s.cur=[];
+      lastTurn={pi:cp,ds,meta};
+      cp=nextP(cp);
+    }
+  }
+  const scores=S.map(s=> ex.scoreOf ? ex.scoreOf(g,s) : s.score);
+  return {ex,S,P,cp,done:cp<0,scores,max:ex.max(g),last,lastTurn};
+}
+
+function startGame(exId, ids, session){
+  ids=(ids||[]).filter(id=>store.data.players.some(p=>p.id===id));
+  if(!ids.length){ toast("Kies wie er gooit."); return; }
+  stopCountdown(); confirmStop=false; playHelp=false;
+  pickEx=null; store.data.lastPick=ids; store.save();
+  game={v:2, ex:exId, players:ids, darts:[], started:Date.now()};
+  if(session) game.session=session;
+  const ex=getEx(exId); if(ex.setup) ex.setup(game);
+  modSel=1; screen="play"; saveGame(); render(); keepAwake();
+  const st=derive(game);
+  speaker.say((session?"Oefening "+(session.i+1)+": "+ex.name+". ":"")+turnCall(st));
+}
+function startSession(ph, ids){
+  startGame(PHASES[ph][0], ids, {ph, i:0, list:PHASES[ph].slice(), done:[]});
+}
+/* wat de app zegt bij het begin van een beurt */
+function turnCall(st){
+  if(st.done) return "";
+  const s=st.S[st.cp], h=st.ex.head(game,s), name=st.P>1||st.S.length>1 ? s.p.name+", " : "";
+  if(st.ex.checkout) return name+h.big+" uit.";
+  if(game.ex==="gem") return name+"zo hoog mogelijk.";
+  if(game.ex==="focus") return name+(s.score? "verder op "+spk(h.big) : "begin op 1")+".";
+  if(h.leg) return name+"nog "+h.big+".";
+  return name+(h.seq ? h.seq.map(spk).join(", ") : spk(h.big))+".";
+}
+function spk(l){ l=String(l); if(l==="Bull") return "bull"; const m=l.match(/^([SDT])(\d+)$/); return m ? ({S:"single ",D:"dubbel ",T:"triple "}[m[1]])+m[2] : l; }
+function sayMeta(meta){
+  if(!meta) return "";
+  let t=String(meta).replace(/\(.*?\)/g,"").replace(/^\d+:\s*/,"").replace("!","").trim();
+  const m=t.match(/^\+(\d+)/); if(m) return +m[1]===0 ? "Niets raak." : m[1]+" raak.";
+  if(/gegooid$/.test(t)) return t.replace(" gegooid","")+".";
+  return t+".";
+}
+let lastFx=null;
+function addDart(d){
+  if(!game) return;
+  if(isMatch(game)) return addMatchEvent({t:"dart",d});
+  voice.used();
+  if(derive(game).done) return;
+  game.darts.push(d);
+  const st=derive(game);
+  const good = st.last && st.last.ok!==false && (st.last.ok===true || val(d)>0);
+  if(!d.skip){ beep(good); lastFx = st.last && st.last.ok===true ? "hit" : st.last && st.last.ok===false ? "miss" : "neutral"; }
+  saveGame();
+  if(st.done) return finish();
+  const L=st.lastTurn;
+  if(L && L.ds.length && L.ds[L.ds.length-1].d===d){
+    // beurt voorbij: uitslag + wie nu gooit
+    if(game.ex==="gem" && /^180 /.test(L.meta||"")) speaker.say([...scoreCall(180,"nl"),{t:turnCall(st)}]);
+    else speaker.say(sayMeta(L.meta)+" "+turnCall(st));
+  }
+  render();
+}
+function undo(){
+  if(isMatch(game)) return undoMatch();
+  if(!game||!game.darts.length) return;
+  const wasDone=derive(game).done;
+  const d=game.darts.pop();
+  if(wasDone && game.saved){ (store.data.removed ||= []).push(game.saved); store.data.history=store.data.history.filter(h=>h.id!==game.saved); if(game.session) game.session.done=game.session.done.filter(x=>x.id!==game.saved); game.saved=null; store.save(); }
+  stopCountdown(); screen="play"; saveGame(); render(); toast((d.skip?"Overslaan":lab(d))+" weggehaald");
+  speaker.say("Terug. "+lab(d)+" gewist.");
+}
+function weekCount(pid){ const w=weekStart(Date.now()); return store.data.history.filter(h=>h.at>=w && h.res.some(r=>r.pid===pid)).length; }
+function finish(){
+  const st=derive(game), ex=st.ex;
+  const prevBest=game.players.map(pid=>bestFor(game.ex,pid));
+  const prevWeek=game.players.map(pid=>weekCount(pid));
+  const entry={id:uid(), ex:game.ex, name:ex.name, at:Date.now(), max:st.max, darts:0,
+    res:game.players.map((pid,k)=>{ const s=st.S[k], r={pid, name:playerById(pid).name, score:st.scores[k], darts:s.turns.reduce((a,t)=>a+t.filter(x=>!x.d.skip).length,0)}; if(ex.extra) r.extra=ex.extra(s); if(ex.fav) r.fav=s.p.fav||20; return r; })};
+  entry.darts=Math.max(...entry.res.map(r=>r.darts));
+  store.data.history.unshift(entry); store.data.history=store.data.history.slice(0,CAP);
+  game.saved=entry.id;
+  if(game.session) game.session.done.push({ex:game.ex, id:entry.id});
+  store.save(); saveGame();
+  game.records=entry.res.filter((r,k)=>prevBest[k]!==null && r.score>prevBest[k]).map(r=>r.pid);
+  const goal=store.data.weekGoal||0;
+  game.goals = goal ? game.players.filter((pid,k)=>prevWeek[k]<goal && prevWeek[k]+1>=goal) : [];
+  screen="result"; render(); beep(true,true);
+  // uitslag uitspreken
+  let t="Klaar. "+entry.res.map(r=>(st.S.length>1?r.name+" ":"")+sv(ex,r.score)+(ex.avg?" per beurt":" van "+st.max)).join(", ")+".";
+  if(game.records.length) t+=" Nieuw record voor "+game.records.map(pName).join(" en ")+"!";
+  if(game.goals.length) t+=" Weekdoel gehaald door "+game.goals.map(pName).join(" en ")+"!";
+  const S=game.session;
+  if(S && S.i < S.list.length-1){ t+=" Volgende: "+EX[S.list[S.i+1]].name+"."; startCountdown(); }
+  else if(S) t+=" Training klaar. Goed gedaan!";
+  speaker.say(t);
+}
+function nextInSession(){
+  const S=game && game.session; if(!S || S.i>=S.list.length-1) return;
+  const ns=Object.assign({},S,{i:S.i+1});
+  startGame(S.list[ns.i], game.players, ns);
+}
+let cdTimer=null, cdLeft=0;
+const CD_SEC=12;
+function startCountdown(){ stopCountdown(); cdLeft=CD_SEC; cdTimer=setInterval(()=>{ if(speaker.busy()) return; cdLeft--; const el=$("#cd"); if(el) el.textContent=cdLeft; if(cdLeft<=0){ stopCountdown(); nextInSession(); } },1000); }
+function stopCountdown(){ if(cdTimer){ clearInterval(cdTimer); cdTimer=null; } const el=$("#cdwrap"); if(el) el.remove(); }
+function canSkip(){ if(!game || isMatch(game)) return false; const st=derive(game); if(st.done) return false; const h=st.ex.head(game,st.S[st.cp]); return !!h.leg; }
+let confirmStop=false;
+function quit(){ stopCountdown(); speaker.cancel(); game=null; confirmStop=false; saveGame(); screen="home"; render(); releaseAwake(); }
+
+/* ---------- de app spreekt terug ---------- */
+const speaker={
+  speaking:false, _gen:0,
+  style(){ const D=store.data; if(D.voiceStyle) return D.voiceStyle; return D.speak===false ? "off" : "normal"; },
+  ok(){ return this.style()!=="off" && "speechSynthesis" in window; },
+  voices(lang){ try{ return speechSynthesis.getVoices().filter(v=>new RegExp("^"+lang,"i").test(v.lang)); }catch(e){ return []; } },
+  pickVoice(lang){
+    const D=store.data, want = lang==="en" ? D.voiceEn : D.voiceNl, vs=this.voices(lang);
+    if(want){ const v=vs.find(x=>x.name===want); if(v) return v; }
+    const male=/male|man\b|daniel|xander|frank|guy|george|arthur|oliver|james|ryan|thomas|fred|aaron|david|mark|rocko|reed|eddy|grandpa|ralf|willem|bart|maarten|arnaud/i;
+    const pref = lang==="en" ? [/en[-_]GB/i,/en[-_](AU|IE)/i,/en/i] : [/nl[-_]BE/i,/nl/i];
+    for(const re of pref){
+      const inLang=vs.filter(v=>re.test(v.lang));
+      if(this.style()==="caller"){ const m=inLang.find(v=>male.test(v.name)); if(m) return m; }
+      if(inLang.length) return inLang[0];
+    }
+    return null;
+  },
+  unlock(){ if(this._u || !("speechSynthesis" in window)) return; this._u=true; try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; speechSynthesis.speak(u); }catch(e){} },
+  /* say(tekst) of say([{t, rate, pitch, pause}], {lang}) */
+  say(parts, opt){
+    if(!this.ok()) return;
+    opt=opt||{}; const lang=opt.lang||"nl";
+    if(!Array.isArray(parts)) parts=[{t:String(parts||"")}];
+    parts=parts.map(p=>typeof p==="string"?{t:p}:p).filter(p=>p.t && p.t.trim());
+    if(!parts.length) return;
+    const caller=this.style()==="caller", v=this.pickVoice(lang);
+    const baseRate = caller ? 0.9 : 1.08, basePitch = caller ? 0.72 : 1;
+    try{
+      speechSynthesis.cancel();
+      const gen=++this._gen; this.speaking=true; voice.muteUntil=Infinity;
+      const done=()=>{ if(gen!==this._gen) return; this.speaking=false; voice.muteUntil=Date.now()+900; };
+      let total=0;
+      parts.forEach((p,i)=>{
+        const u=new SpeechSynthesisUtterance(p.t.replace(/\s+/g," ").trim());
+        u.lang=(v&&v.lang)||(lang==="en"?"en-GB":"nl-BE"); if(v) u.voice=v;
+        u.rate=Math.max(.4,Math.min(1.6,(p.rate||1)*baseRate)); u.pitch=Math.max(0,Math.min(2,(p.pitch||1)*basePitch));
+        if(i===parts.length-1){ u.onend=done; u.onerror=done; }
+        speechSynthesis.speak(u); total+=p.t.length;
+      });
+      setTimeout(()=>{ if(gen===this._gen && this.speaking && !speechSynthesis.speaking) done(); }, 800+total*140);
+    }catch(e){ this.speaking=false; voice.muteUntil=0; }
+  },
+  busy(){ return this.speaking; },
+  cancel(){ this._gen++; try{ speechSynthesis.cancel(); }catch(e){} this.speaking=false; voice.muteUntil=0; }
+};
+try{ if("speechSynthesis" in window) speechSynthesis.onvoiceschanged=()=>{ if(tab!=="stats" && screen==="home") render(); }; }catch(e){}
+
+/* Caller-zinnen: Nederlands of Engels, met de uitgerekte grote scores */
+const callLang=()=> speaker.style()==="caller" && store.data.callLang==="en" ? "en" : "nl";
+const ORD={nl:["eerste","tweede","derde","vierde","vijfde","zesde","zevende","achtste","negende"],en:["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth"]};
+function scoreCall(n, L){
+  const caller=speaker.style()==="caller";
+  if(n===180) return L==="en" ? [{t:"One hundred",rate:.82,pitch:.9},{t:"and eighty!",rate:.5,pitch:1.15}] : [{t:"Honderd",rate:.8,pitch:.9},{t:"tachtig!",rate:.5,pitch:1.15}];
+  if(caller && n>=100){ const s=String(n); return [{t: L==="en" ? s+"!" : s+"!", rate:.78, pitch:1.05}]; }
+  return [{t:String(n)+"."}];
+}
+const CALL={
+  start:(L,c,name)=> L==="en" ? [{t:"Game on!",rate:.85,pitch:1.1},{t:name+" to throw first."}] : [{t:"Game on!",rate:.85,pitch:1.1},{t:name+" gooit eerst."}],
+  noscore:L=> L==="en" ? "No score." : "Geen score.",
+  bust:L=> L==="en" ? [{t:"Bust!",rate:.8}] : [{t:"Bust!",rate:.8}],
+  require:(L,name,rem)=> L==="en" ? name+", you require "+rem+"." : name+", je hebt "+rem+" nodig.",
+  next:(L,name,rem)=> L==="en" ? name+", "+rem+" left." : name+", nog "+rem+".",
+  firstDouble:(L,name)=> L==="en" ? name+", you need a double to start." : name+", eerst een dubbel.",
+  leg:(L,k,name)=> L==="en" ? [{t:"Game shot,",rate:.8,pitch:1.1},{t:"and the "+(ORD.en[k]||"next")+" leg, "+name+"!",rate:.85}] : [{t:"Game shot,",rate:.8,pitch:1.1},{t:"en de "+(ORD.nl[k]||"volgende")+" leg voor "+name+"!",rate:.85}],
+  match:(L,name)=> L==="en" ? [{t:"Game shot,",rate:.8,pitch:1.1},{t:"and the match, "+name+"!",rate:.75,pitch:1.05}] : [{t:"Game shot,",rate:.8,pitch:1.1},{t:"en de wedstrijd voor "+name+"!",rate:.75,pitch:1.05}],
+  howMany:L=> L==="en" ? "How many darts?" : "Met hoeveel pijlen?",
+  impossible:L=> L==="en" ? "That score is not possible." : "Die score kan niet.",
+  starts:(L,name)=> L==="en" ? name+" to throw first." : name+" begint.",
+  undo:L=> L==="en" ? "Correction." : "Terug."
+};
+
+/* ---------- geluid + scherm aan ---------- */
+function beep(hit,big){
+  if(!store.data.sound && store.data.sound!==undefined) return;
+  try{
+    audio = audio || new (window.AudioContext||window.webkitAudioContext)();
+    const o=audio.createOscillator(), g=audio.createGain();
+    o.frequency.value = big ? 990 : hit ? 760 : 240; o.type = hit ? "triangle" : "sine";
+    g.gain.setValueAtTime(.0001,audio.currentTime); g.gain.exponentialRampToValueAtTime(.18,audio.currentTime+.01); g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+(big?.5:.16));
+    o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+(big?.55:.18));
+  }catch(e){}
+  try{ navigator.vibrate && navigator.vibrate(hit?30:[15,40,15]); }catch(e){}
+}
+async function keepAwake(){ try{ if(navigator.wakeLock) wakeLock=await navigator.wakeLock.request("screen"); }catch(e){} }
+function releaseAwake(){ try{ wakeLock && wakeLock.release(); }catch(e){} wakeLock=null; }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && screen==="play") keepAwake(); });
+
+/* ---------- spraak: woorden naar pijlen ---------- */
+const NUMW={nul:0,een:1,"één":1,"eén":1,eentje:1,twee:2,drie:3,vier:4,vijf:5,zes:6,zeven:7,acht:8,negen:9,tien:10,elf:11,twaalf:12,dertien:13,veertien:14,vijftien:15,zestien:16,zeventien:17,achttien:18,achtien:18,negentien:19,twintig:20,vijfentwintig:25,vijftig:50,
+  one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20};
+const MULTW={triple:3,tripel:3,trippel:3,tripple:3,trible:3,treble:3,trebel:3,triples:3,t:3,tee:3,thee:3,drievoudig:3,
+  dubbel:2,dubbele:2,double:2,dobbel:2,dubble:2,dubbels:2,d:2,dee:2,tweevoudig:2,
+  single:1,singel:1,singles:1,enkel:1,enkele:1,s:1,es:1};
+const BULLW=new Set(["bull","bulls","bullseye","roos","bulletje","bul","bol","boel"]);
+const GREENW=new Set(["groene","groen","outer","buitenste"]), REDW=new Set(["rode","rood","inner","binnenste"]);
+const MISSW=new Set(["mis","miss","misser","naast","out","buiten","niks","niets","missed"]);
+const SKIPW=new Set(["overslaan","skip","oversla"]);
+const UNDOW=new Set(["terug","fout","undo","wis","oeps","correctie","verkeerd","annuleer","weg","oops","back"]);
+const FILLW=new Set(["en","dan","nog","op","pijl","pijltje","pijlen","de","het","ja","ok","oké","oke","okay","eh","euh","uh","um","hm","nummer","number","and","is","was","gegooid","raak","die","dat","nu","keer","een"]);
+const isNum=w=> /^\d+$/.test(w) || NUMW[w]!==undefined || (typeof dutchNum==="function" && dutchNum(w)!==undefined);
+function tokenize(text){
+  let s=String(text).toLowerCase().normalize("NFC");
+  s=s.replace(/bull'?s[\s-]?eye/g,"bullseye");
+  s=s.replace(/([a-zé]+)(\d+)/g,"$1 $2").replace(/(\d+)([a-zé]+)/g,"$1 $2");
+  s=s.replace(/[^a-z0-9éëèï]+/g," ");
+  return s.trim().split(/\s+/).filter(Boolean);
+}
+function dutchNum(w){
+  w=String(w).replace(/ë/g,"e");
+  if(/^\d+$/.test(w)) return parseInt(w,10);
+  if(NUMW[w]!==undefined) return NUMW[w];
+  const U={een:1,"één":1,twee:2,drie:3,vier:4,vijf:5,zes:6,zeven:7,acht:8,negen:9}, T={twintig:20,dertig:30,veertig:40,vijftig:50,zestig:60,zeventig:70,tachtig:80,negentig:90};
+  const sub=r=>{ if(r==="") return 0; if(NUMW[r]!==undefined && NUMW[r]<=20) return NUMW[r]; if(T[r]) return T[r];
+    const m=r.match(/^(een|één|twee|drie|vier|vijf|zes|zeven|acht|negen)en(twintig|dertig|veertig|vijftig|zestig|zeventig|tachtig|negentig)$/); return m ? U[m[1]]+T[m[2]] : undefined; };
+  let m=w.match(/^(?:een|één)?honderd(?:en)?(.*)$/); if(m){ const r=sub(m[1]); return r===undefined?undefined:100+r; }
+  return sub(w);
+}
+function parseSpeech(text, allowTotal){
+  const tk=tokenize(text), out=[]; let mult=null, bullMod=null, known=0, unknown=0;
+  for(let i=0;i<tk.length;i++){
+    const w=tk[i], nx=tk[i+1];
+    if(UNDOW.has(w)){ out.push({undo:true}); mult=null; known++; continue; }
+    if(SKIPW.has(w)){ out.push({skip:true}); mult=null; known++; continue; }
+    if(MULTW[w]!==undefined){ mult=MULTW[w]; known++; continue; }
+    if(GREENW.has(w)){ bullMod=25; known++; continue; }
+    if(REDW.has(w)){ bullMod=50; known++; continue; }
+    if(BULLW.has(w)){ const v=bullMod || (mult===1?25:50); out.push({seg:25,mult:v===25?1:2}); mult=null; bullMod=null; known++; continue; }
+    if(allowTotal && (w==="bust"||w==="buster")){ out.push({total:0}); mult=null; known++; continue; }
+    if(MISSW.has(w)){ out.push({seg:0,mult:0}); mult=null; known++; continue; }
+    if(isNum(w)){
+      let n=dutchNum(w);
+      if(n===100){ let j=i+1; if(tk[j]==="en") j++; const nx2=tk[j]!==undefined?dutchNum(tk[j]):undefined; if(nx2!==undefined && nx2<100){ n+=nx2; i=j; } }
+      if((w==="een"||w==="één"||w==="eén") && nx && (MULTW[nx]!==undefined||BULLW.has(nx)||isNum(nx)||GREENW.has(nx)||REDW.has(nx))) continue; // lidwoord
+      if(nx==="keer" && n>=1 && n<=3){ mult=n; i++; known++; continue; }
+      if(n>=1&&n<=20) out.push({seg:n,mult:mult||1});
+      else if(n===25) out.push({seg:25,mult:mult===2?2:1});
+      else if(n===50) out.push({seg:25,mult:2});
+      else if(n===0) out.push({seg:0,mult:0});
+      else if(allowTotal && n>20 && n<=180 && mult===null) out.push({total:n});
+      else { unknown++; continue; }
+      mult=null; known++; continue;
+    }
+    if(FILLW.has(w)) continue;
+    unknown++;
+  }
+  if(unknown>0 && unknown>=known) return {actions:[], rejected:true};
+  return {actions:out};
+}
+const AGAINW=/\b(opnieuw|nog (een )?keer|nog eens|nogmaals|herbegin|again|revanche)\b/;
+function handleSpeech(text){
+  text=String(text).trim(); if(!text) return;
+  if(Date.now() < (voice.muteUntil||0)) return;   // dat was de app zelf
+  voice.used();
+  const low=text.toLowerCase();
+  if(screen==="result" && /\b(volgende|verder|door)\b/.test(low) && game && game.session){ voice.heard=text; nextInSession(); return; }
+  if(screen==="result" && AGAINW.test(low)){ voice.heard=text; if(isMatch(game)){ startMatch({players:game.players.slice(),start:game.start,doubleIn:game.doubleIn,bestOf:game.bestOf,starter:(game.starter+1)%game.players.length}); } else startGame(game.ex, game.players, game.session); return; }
+  if(screen==="play" && pendingOut){ const m=low.match(/\b(1|2|3|een|één|eentje|twee|drie)\b/); if(m){ const n={1:1,2:2,3:3,een:1,"één":1,eentje:1,twee:2,drie:3}[m[1]]; if(pendingOut.ns.includes(n)){ const p=pendingOut; pendingOut=null; voice.heard=text; addMatchEvent({t:"total",v:p.v,n}); return; } } if(/\b(nee|niet|terug)\b/.test(low)){ pendingOut=null; render(); return; } }
+  if(screen==="play" && confirmStop){ if(/\b(ja|stop|stoppen)\b/.test(low)){ confirmStop=false; screen="home"; render(); return; } if(/\b(nee|verder|doorgaan)\b/.test(low)){ confirmStop=false; render(); return; } }
+  voice.heard=text; voice.partial="";
+  if(screen!=="play" && screen!=="result"){ renderVoice(); return; }
+  const r=parseSpeech(text, isMatch(game));
+  if(!r.actions.length){ voice.note="Niet herkend"; renderVoice(); return; }
+  voice.note="";
+  for(const a of r.actions){
+    if(a.undo) undo();
+    else if(a.skip){ if(screen==="play" && canSkip()) addDart({skip:true}); }
+    else if(a.total!==undefined){ if(screen==="play") addMatchEvent({t:"total",v:a.total}); }
+    else if(screen==="play") addDart({seg:a.seg,mult:a.mult});
+  }
+  renderVoice();
+}
+
+/* ---------- spraak: microfoon ---------- */
+/* Eén tik (of het starten van een oefening) zet de microfoon aan.
+   Daarna blijft hij luisteren tot je hem zelf uitzet: na een stilte, een
+   haperende verbinding of het scherm dat even weg was, start hij vanzelf opnieuw. */
+const IDLE_STOP_MIN=20;   // na zoveel minuten zonder pijlen gaat de microfoon uit (batterij)
+const voice={
+  mode:null, d:null, rec:null, want:false, state:"idle", heard:"", partial:"", note:"", lang:"nl", reason:"",
+  fails:[], lastUse:Date.now(), _timer:null,
+  async init(){
+    if(window.claude && typeof window.claude.use==="function"){
+      try{ this.d=await claude.use("dictation"); }catch(e){ this.d=null; }
+      if(this.d){
+        this.mode="claude";
+        this.d.onPartial(({text})=>{ if(Date.now()<(this.muteUntil||0)) return; this.partial=text; renderVoice(); });
+        this.d.onFinal(({text})=>handleSpeech(text));
+        this.d.onState(({state,reason})=>{
+          this.state=state;
+          if(state==="idle"){
+            this.reason=reason||"";
+            if(reason==="stopped"||reason==="viewer_stopped") { if(reason==="viewer_stopped") this.want=false; this.note=""; }
+            else if(reason==="hidden"||reason==="time_limit") this.note="Spraak gepauzeerd: tik één keer op de microfoon";
+            else if(reason==="not_granted") { this.note="Microfoon niet toegestaan"; this.want=false; this.mode="none"; }
+            else if(reason==="unavailable") this.note= this.lang ? "Nederlands niet beschikbaar: tik nog eens" : "Spraak is hier niet beschikbaar";
+            else if(reason==="rate_limited"||reason==="upstream_error") this.note="Spraakdienst haperde: tik nog eens";
+          } else this.note="";
+          renderVoice();
+        });
+      } else {
+        this.mode="none";
+        this.reason="Spraak werkt niet in de Claude-app · gebruik je eigen app-link";
+      }
+    } else {
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!SR){ this.mode="none"; this.reason="Geen spraak in deze browser · gebruik Chrome of Safari"; return renderVoice(); }
+      this.mode="web";
+      const r=new SR(); r.lang=store.data.lang||"nl-BE"; r.continuous=true; r.interimResults=true; r.maxAlternatives=1;
+      r.onresult=e=>{ let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const res=e.results[i]; if(res.isFinal) handleSpeech(res[0].transcript); else interim+=res[0].transcript; } this.partial=Date.now()<(this.muteUntil||0)?"":interim; this.fails=[]; renderVoice(); };
+      r.onerror=e=>{
+        if(e.error==="not-allowed"||e.error==="service-not-allowed"){ this.want=false; this.note="Microfoon niet toegestaan. Zet hem aan in de instellingen van je browser."; }
+        renderVoice();   // "no-speech", "network", "aborted": gewoon opnieuw starten via onend
+      };
+      r.onstart=()=>{ this.state="listening"; renderVoice(); };
+      r.onend=()=>{ this.state="idle"; this.partial=""; renderVoice(); if(this.want) this.restart(); };
+      this.rec=r;
+    }
+    renderVoice();
+  },
+  restart(){
+    // herstart na een stilte; stopt pas als het in korte tijd heel vaak mislukt
+    const now=Date.now(); this.fails=this.fails.filter(t=>now-t<15000); this.fails.push(now);
+    if(this.fails.length>8){ this.want=false; this.note="De microfoon blijft uitvallen: tik één keer om opnieuw te starten"; renderVoice(); return; }
+    clearTimeout(this._timer);
+    this._timer=setTimeout(()=>{ if(this.want && this.state==="idle" && document.visibilityState==="visible"){ try{ this.rec.start(); }catch(e){} } }, this.fails.length>3?1000:150);
+  },
+  start(){   // altijd rechtstreeks vanuit een tik aanroepen
+    this.lastUse=Date.now();
+    if(this.mode==="claude"){
+      this.want=true;
+      if(this.d.active()) return;
+      const opts=this.lang?{language:this.lang}:undefined;
+      this.d.start(opts).catch(e=>{
+        if(e && e.code==="unavailable" && this.lang){ this.lang=""; this.note="Nederlands niet beschikbaar: tik nog eens"; }
+        else if(e && e.code==="not_granted"){ this.note="Microfoon niet toegestaan"; this.want=false; }
+        else if(e && e.code==="dismissed"){ this.note="Tik op de microfoon om te starten"; this.want=false; }
+        renderVoice();
+      });
+    } else if(this.mode==="web"){
+      this.fails=[]; this.note="";
+      if(!this.want){ this.want=true; }
+      if(this.state==="idle"){ try{ this.rec.start(); }catch(e){} }
+      renderVoice();
+    }
+  },
+  stop(){ this.want=false; clearTimeout(this._timer);
+    if(this.mode==="claude" && this.d && this.d.active()) this.d.stop().catch(()=>{});
+    if(this.mode==="web"){ try{ this.rec.stop(); }catch(e){} }
+    renderVoice(); },
+  toggle(){ if(this.mode==="none") return toast(this.reason||"Spraak is hier niet beschikbaar"); if(this.on()) this.stop(); else this.start(); },
+  autoOn(){ if(store.data.autoVoice!==false && this.mode && this.mode!=="none") this.start(); },
+  used(){ this.lastUse=Date.now(); },
+  on(){ return this.mode==="claude" ? (this.state!=="idle") : this.mode==="web" ? this.want : false; }
+};
+// scherm terug aan: opnieuw luisteren als dat de bedoeling was
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && voice.mode==="web" && voice.want && voice.state==="idle"){ voice.fails=[]; voice.restart(); } });
+// batterij sparen: lang niets gegooid of gezegd? dan uit
+setInterval(()=>{ if(voice.on() && Date.now()-voice.lastUse > IDLE_STOP_MIN*60000){ voice.stop(); voice.note="Microfoon uitgezet na "+IDLE_STOP_MIN+" minuten stilte"; renderVoice(); } },30000);
+const MIC_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+function voiceBar(){
+  const on=voice.on();
+  let txt;
+  if(kbuf && !(isMatch(game) && game.inMode==="total")) txt='<span class="kb">⌨ '+esc(kbuf)+'<i class="caret"></i></span> <span class="muted small">Enter om in te voeren · Esc wist</span>';
+  else if(voice.mode==="none") txt='<span class="muted">'+esc(voice.reason)+'</span>';
+  else if(voice.partial) txt='<span class="partial">'+esc(voice.partial)+'</span>';
+  else if(voice.note) txt='<span>'+esc(voice.note)+'</span>';
+  else if(voice.heard) txt='Gehoord: <span class="heard">'+esc(voice.heard)+'</span>';
+  else txt= on ? '<span class="muted">Luistert · zeg bv. "triple 17"'+(screen==="result"?' of "nog een keer"':'')+'</span>' : '<span class="muted">Microfoon uit · tik om te praten</span>';
+  return '<div class="voice" id="voice"><button class="mic'+(on?' on':'')+'" data-act="mic" aria-label="'+(on?'Stop met luisteren':'Start met luisteren')+'" aria-pressed="'+on+'">'+MIC_SVG+'</button><div class="vtext" aria-live="polite">'+txt+'</div></div>';
+}
+function renderVoice(){ const v=$("#voice"); if(v) v.outerHTML=voiceBar(); }
+
+/* ---------- schermen ---------- */
+const sv=(ex,v)=> ex && ex.avg ? fmt(v) : String(v);
+function bestFor(exId,pid){ let b=null; for(const h of store.data.history){ if(h.ex!==exId) continue; const r=h.res.find(x=>x.pid===pid); if(r && (b===null||r.score>b)) b=r.score; } return b; }
+function exTitle(id){ const ex=getEx(id); if(!ex) return id; const pn=exPhaseNr(id); return (pn ? pn.nr+" · " : "")+ex.name; }
+const openSec={};
+document.addEventListener("toggle",e=>{ const d=e.target; if(d.matches && d.matches("details[data-sec]")){ openSec[d.dataset.sec]=d.open; if(d.dataset.sec==="help" && !d.open && !store.data.seenHelp){ store.data.seenHelp=true; store.save(); } } },true);
+function secHTML(key,title,sub,body,openDefault){
+  const open = key in openSec ? openSec[key] : !!openDefault;
+  return '<details class="sec" data-sec="'+key+'"'+(open?' open':'')+'><summary><span><b>'+esc(title)+'</b>'+(sub?'<span class="muted small">'+esc(sub)+'</span>':'')+'</span><i class="chev" aria-hidden="true"></i></summary><div class="secin">'+body+'</div></details>';
+}
+function helpHTML(){
+  return '<ol class="howto">'
+   +'<li><b>Kies een oefening</b> en daarna wie er gooit: alleen of samen. De microfoon gaat vanzelf aan.</li>'
+   +'<li><b>Gooi en roep je pijl.</b> Je hoeft niets aan te raken. De app telt, wisselt van speler en gaat door naar het volgende doel.</li>'
+   +'<li><b>Klaar?</b> Zeg <q>nog een keer</q> om dezelfde oefening opnieuw te doen. In een <b>volledige training</b> gaat de app na een paar seconden vanzelf door naar de volgende oefening.</li>'
+   +'<li><b>Luister mee.</b> De app zegt wie er gooit, op welk doel, en hoeveel raak was. Je hoeft dus niet naar het scherm te kijken. Uitzetten kan bij Instellingen.</li>'
+   +'</ol>'
+   +'<div class="saygrid">'
+   +'<div><b>triple 17</b><span>T17</span></div><div><b>dubbel 15</b><span>D15</span></div><div><b>achttien</b><span>S18 (geen woord = single)</span></div>'
+   +'<div><b>bull</b><span>rode bull (50)</span></div><div><b>groene bull / 25</b><span>groene bull (25)</span></div><div><b>mis</b><span>naast het doel</span></div>'
+   +'<div><b>terug</b><span>laatste pijl wissen</span></div><div><b>nog een keer</b><span>op het eindscherm</span></div><div><b>overslaan</b><span>301-leg overslaan (Treintjes)</span></div><div><b>volgende</b><span>in een training: meteen door</span></div><div><b>stop</b> / <b>verder</b><span>bij de vraag "Oefening stoppen?"</span></div>'
+   +'</div>'
+   +'<p class="small">Een hele beurt in één zin kan ook: <q>triple twintig, twintig, één</q>. Letters gaan ook: <q>T 17</q>, <q>D 15</q>.</p>'
+   +'<ul class="tips small">'
+   +'<li><b>Microfoon:</b> blijft aan tot je op de rode knop tikt, ook tussen oefeningen door. Na '+IDLE_STOP_MIN+' minuten zonder pijlen gaat hij uit; één tik zet hem weer aan.</li>'
+   +'<li><b>Groen vakje</b> = raak, <b>grijs</b> = telt niet. Verkeerd verstaan? Zeg <q>terug</q> of tik op ↶.</li>'
+   +'<li><b>Liever tikken?</b> Kies eerst S, D of T en dan het getal. Zonder keuze is het een single.</li>'
+   +'<li><b>Beste resultaat:</b> leg je gsm in de buurt van het bord, laat de app openstaan en vergrendel je scherm niet.</li>'
+   +'</ul>';
+}
+function cardHTML(id,ex,nr){
+  const max=ex.max({});
+  const pills=store.data.players.map(p=>{ const b=bestFor(id,p.id); const ok=ex.pass && b!==null && b>=ex.pass; return b===null?'':'<span class="pill tab'+(ok?' ok':'')+'"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+' '+sv(ex,b)+'/'+max+(ok?' ✓':'')+'</span>'; }).join("");
+  const short=ex.desc.split(/(?<=\.)\s/)[0];
+  return '<button class="card" data-act="start" data-ex="'+esc(id)+'"><span class="nr">'+esc(nr)+'</span><span class="cbody"><h3>'+esc(ex.name)+'</h3><p>'+esc(short)+'</p>'+(pills?'<span class="best">'+pills+'</span>':'')+'</span><span class="go" aria-hidden="true">›</span></button>';
+}
+function boardSVG(){
+  // klein dartbord in de echte bordkleuren
+  const C=50, seg=(r1,r2,a1,a2,col)=>{ const p=(r,a)=>[C+r*Math.sin(a*Math.PI/180), C-r*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(2));
+    const [x1,y1]=p(r2,a1),[x2,y2]=p(r2,a2),[x3,y3]=p(r1,a2),[x4,y4]=p(r1,a1);
+    return '<path d="M'+x1+' '+y1+'A'+r2+' '+r2+' 0 0 1 '+x2+' '+y2+'L'+x3+' '+y3+'A'+r1+' '+r1+' 0 0 0 '+x4+' '+y4+'Z" fill="'+col+'"/>'; };
+  let s='<circle cx="50" cy="50" r="50" fill="#0b0b0b"/>';
+  for(let i=0;i<20;i++){ const a1=-9+18*i, a2=a1+18, even=i%2===0;
+    s+=seg(40,46,a1,a2,even?"#c8102e":"#00843d")+seg(28,40,a1,a2,even?"#0b0b0b":"#efe3c2")+seg(24,28,a1,a2,even?"#c8102e":"#00843d")+seg(9,24,a1,a2,even?"#0b0b0b":"#efe3c2"); }
+  s+='<circle cx="50" cy="50" r="9" fill="#00843d"/><circle cx="50" cy="50" r="4" fill="#c8102e"/>';
+  return '<svg class="board" viewBox="0 0 100 100" aria-hidden="true">'+s+'</svg>';
+}
+function voicePickHTML(){
+  const opt=(lang,cur)=>'<option value="">Automatisch</option>'+speaker.voices(lang).map(v=>'<option value="'+esc(v.name)+'"'+(v.name===cur?' selected':'')+'>'+esc(v.name+" ("+v.lang+")")+'</option>').join('');
+  const nl=speaker.voices("nl").length, en=speaker.voices("en").length, showEn=speaker.style()==="caller" && store.data.callLang==="en";
+  return '<div class="setrow"><span>Welke stem<br><span class="muted small">Kies de zwaarste stem die je toestel heeft</span></span><div class="vpick">'
+    +(nl?'<select class="vsel" data-lang="nl" aria-label="Nederlandse stem">'+opt("nl",store.data.voiceNl)+'</select>':'<span class="muted small">Geen Nederlandse stem op dit toestel</span>')
+    +(showEn?(en?'<select class="vsel" data-lang="en" aria-label="Engelse stem">'+opt("en",store.data.voiceEn)+'</select>':'<span class="muted small">Geen Engelse stem op dit toestel</span>'):'')
+    +'<button class="secondary small-btn" data-act="vtest">Test de stem</button></div></div>';
+}
+function goalStrip(){
+  const g=store.data.weekGoal||0; if(!g) return '';
+  return '<div class="goals"><span class="kicker">Weekdoel · '+g+' oefeningen</span><div class="grow">'+store.data.players.map(p=>{ const n=weekCount(p.id), pct=Math.min(100,Math.round(100*n/g));
+    return '<div class="gitem'+(n>=g?' done':'')+'"><span class="who2"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</span><span class="tab">'+n+'/'+g+(n>=g?' ✓':'')+'</span><div class="bar"><i style="width:'+pct+'%;background:'+pColor(p.id)+'"></i></div></div>'; }).join('')+'</div></div>';
+}
+function renderHome(){
+  const P=store.data.players, ph=store.data.phase||1;
+  const resume=game && !gameDone(game) ? '<button class="resume" data-act="resume"><b>Verder met '+esc(getEx(game.ex).name)+'</b><span>Je was nog bezig. Tik om verder te gooien.</span></button>' : '';
+  const favOpts=f=>range(1,20).map(n=>'<option value="'+n+'"'+(n===(f||20)?' selected':'')+'>D'+n+'</option>').join('');
+  const players=P.map(p=>'<div class="prow"><i class="dot" style="background:'+pColor(p.id)+'"></i><input type="text" id="pn-'+p.id+'" data-id="'+p.id+'" value="'+esc(p.name)+'" aria-label="Naam speler" maxlength="16">'+(P.length>1?'<button class="iconbtn" data-act="pdel" data-id="'+p.id+'" aria-label="Verwijder '+esc(p.name)+'">×</button>':'<span></span>')
+    +'<div class="pset"><div class="seg" role="group" aria-label="Werphand van '+esc(p.name)+'"><button data-act="hand" data-id="'+p.id+'" data-h="R" aria-pressed="'+(p.hand!=="L")+'">Rechts</button><button data-act="hand" data-id="'+p.id+'" data-h="L" aria-pressed="'+(p.hand==="L")+'">Links</button></div>'
+    +'<label class="favl" for="fav-'+p.id+'">Favoriete dubbel <select id="fav-'+p.id+'" class="fav" data-id="'+p.id+'">'+favOpts(p.fav)+'</select></label></div></div>').join("")
+    +(P.length<4?'<button class="ghost" data-act="padd">+ Speler toevoegen</button>':'')
+    +'<p class="muted small">Linkshandig verandert de volgorde bij Groeperen. De favoriete dubbel gebruik je bij de dubbeloefeningen.</p>';
+  const cards=PHASES[ph].map((id,i)=>cardHTML(id,EX[id],i+1)).join("");
+  const phNav='<div class="nav nav3" role="group" aria-label="Niveau">'+[1,2,3].map(n=>'<button data-act="phase" data-p="'+n+'" aria-pressed="'+(ph===n)+'">'+PHASE_NAME[n]+'</button>').join('')+'</div>';
+  const goalBtns=[0,3,5,7,10,14].map(n=>'<button data-act="goal" data-v="'+n+'" aria-pressed="'+((store.data.weekGoal||0)===n)+'">'+(n||'Uit')+'</button>').join('');
+  const settings='<div class="setrow"><span>Stem van de app<br><span class="muted small">Zegt wie gooit, het doel en de score</span></span><div class="seg" role="group" aria-label="Stem">'+[["off","Uit"],["normal","Gewoon"],["caller","Caller"]].map(([v,l])=>'<button data-act="vstyle" data-v="'+v+'" aria-pressed="'+(speaker.style()===v)+'">'+l+'</button>').join('')+'</div></div>'
+    +(speaker.style()==="caller"?'<div class="setrow"><span>Caller in wedstrijden<br><span class="muted small">Oefeningen blijven in het Nederlands</span></span><div class="seg" role="group" aria-label="Taal caller"><button data-act="clang" data-v="nl" aria-pressed="'+(store.data.callLang!=="en")+'">Nederlands</button><button data-act="clang" data-v="en" aria-pressed="'+(store.data.callLang==="en")+'">English</button></div></div>':'')
+    +(speaker.style()!=="off"?voicePickHTML():'')
+    +'<div class="setrow"><span>Weekdoel<br><span class="muted small">Aantal oefeningen per speler per week</span></span><div class="seg" role="group" aria-label="Weekdoel">'+goalBtns+'</div></div>'
+    +'<div class="setrow"><span>Microfoon bij start</span><div class="seg" role="group" aria-label="Microfoon bij start"><button data-act="autov" data-v="1" aria-pressed="'+(store.data.autoVoice!==false)+'">Vanzelf aan</button><button data-act="autov" data-v="0" aria-pressed="'+(store.data.autoVoice===false)+'">Zelf aanzetten</button></div></div>'
+    +'<div class="setrow"><span>Geluid bij raak/mis</span><div class="seg" role="group" aria-label="Geluid"><button data-act="sound" data-v="1" aria-pressed="'+(store.data.sound!==false)+'">Aan</button><button data-act="sound" data-v="0" aria-pressed="'+(store.data.sound===false)+'">Uit</button></div></div>'
+    +(voice.mode==="web"?'<div class="setrow"><span>Spraak</span><div class="seg" role="group" aria-label="Taal spraak"><button data-act="lang" data-v="nl-BE" aria-pressed="'+((store.data.lang||"nl-BE")==="nl-BE")+'">Vlaams</button><button data-act="lang" data-v="nl-NL" aria-pressed="'+(store.data.lang==="nl-NL")+'">Nederlands</button></div></div>':'');
+  const linked=sync.on();
+  $("#app").innerHTML='<div class="wrap">'
+   +'<div class="hero">'+boardSVG()+'<div><h1>Dart<span>trainer</span></h1><p class="muted">Oefeningen uit <i>Just Darts</i> van Erik Clarys</p></div></div>'
+   + navHTML()
+   + (voice.on()?voiceBar():'')
+   + resume
+   + goalStrip()
+   +'<section class="lv lv'+ph+'">'+phNav
+   +'<button class="session" data-act="session"><span class="play-ic" aria-hidden="true">▶</span><span><b>Volledige training '+PHASE_NAME[ph]+'</b><span>Alle 7 oefeningen na elkaar, de app gaat vanzelf door</span></span></button>'
+   +'<div class="cards">'+cards+'</div><p class="muted small">Of kies één oefening apart. Oefening 5, 6 en 7 zijn in elk niveau dezelfde.</p></section>'
+   +'<div class="secs">'
+   + secHTML("help","Zo werkt het","Spraak, knoppen en tips",helpHTML(),!store.data.seenHelp)
+   + secHTML("players","Spelers",P.map(p=>p.name).join(", "),'<div class="players">'+players+'</div>')
+   + secHTML("settings","Instellingen","Stem, microfoon, geluid, weekdoel",settings)
+   + secHTML("sync","Toestellen koppelen", sync.available()?(linked?"Gekoppeld":"Scores delen tussen gsm, tablet en laptop"):"", '<div id="sync" class="syncbox">'+syncHTML()+'</div>')
+   +'</div>'
+   + pickerHTML()
+   +'</div>';
+}
+let prevBig="";
+function renderPlay(){
+  if(isMatch(game)) return renderMatch();
+  const st=derive(game), ex=st.ex;
+  if(st.done){ screen="result"; return renderResult(); }
+  const s=st.S[st.cp], p=s.p, di=s.cur.length;
+  const h=ex.head(game,s);
+  const bigTxt = h.seq ? h.seq.join("|")+"#"+h.cur : h.big;
+  const anim = bigTxt.split("#")[0]!==prevBig.split("#")[0] ? " pop" : ""; prevBig=bigTxt;
+  const big = h.seq ? h.seq.map((t,i)=>'<span class="'+(i===h.cur?'cur':'dim')+'">'+esc(t)+'</span>').join('<span class="sep">·</span>') : '<span>'+esc(h.big)+'</span>';
+  const slots=[0,1,2].map(i=>{ const x=s.cur[i]; if(!x) return '<div class="slot'+(i===di?' next':'')+'" aria-label="Pijl '+(i+1)+'">'+(i+1)+'</div>'; return '<div class="slot '+(x.ok===true?'hit':x.ok===false?'miss':'neutral')+(i===di-1?' fresh':'')+'">'+esc(x.d.skip?'–':lab(x.d))+'</div>'; }).join("");
+  let last="";
+  if(di===0 && st.lastTurn){ const L=st.lastTurn, pp=st.S[L.pi].p; last='<span class="muted">Vorige beurt '+esc(pp.name)+':</span> '+L.ds.filter(x=>!x.d.skip).map(x=>esc(lab(x.d))).join(", ")+(L.meta?' <b>→ '+esc(L.meta)+'</b>':''); }
+  const score=st.S.map((x,k)=>'<div class="sc'+(k===st.cp?' on':'')+'" style="--pc:'+pColor(x.p.id)+'"><span class="n">'+esc(x.p.name)+(ex.done(game,x)?' ✓':'')+'</span><span class="s tab">'+sv(ex,st.scores[k])+'<span class="of">/'+st.max+'</span></span></div>').join("");
+  const nums=range(1,20).map(n=>'<button class="k" data-act="num" data-n="'+n+'">'+n+'</button>').join("");
+  const mods=[[1,"S"],[2,"D"],[3,"T"]].map(([m,t])=>'<button class="k mod" data-act="mod" data-m="'+m+'" aria-pressed="'+(modSel===m)+'" aria-label="'+["","Single","Dubbel","Triple"][m]+'">'+t+'</button>').join("");
+  const pn=exPhaseNr(game.ex), S=game.session;
+  const title=(S?'Training '+PHASE_NAME[S.ph]+' · '+(S.i+1)+'/'+S.list.length:(pn&&EX[game.ex].phase?PHASE_NAME[pn.ph]+' '+pn.nr:'Elk niveau'));
+  const fx=lastFx; lastFx=null;
+  const sheets = (playHelp?'<div class="sheet" role="dialog" aria-modal="true" aria-label="Uitleg"><div class="sheetin"><div class="top"><h2>Zo werkt het</h2><button class="iconbtn" data-act="phelp" aria-label="Sluiten">×</button></div><p class="pdesc">'+esc(ex.desc)+'</p>'+helpHTML()+'</div></div>':'')
+    + (confirmStop?'<div class="sheet" role="dialog" aria-modal="true" aria-label="Stoppen?"><div class="sheetin"><h2>Oefening stoppen?</h2><p class="muted">Je hebt al '+(n=>n+(n===1?' pijl':' pijlen'))(game.darts.filter(d=>!d.skip).length)+' gegooid. Zeg "verder" of "stop", of kies hieronder.</p><div class="opts">'
+      +'<button class="opt" data-act="cs-go"><span><b>Verder gooien</b><br><span class="muted small">Terug naar de oefening</span></span></button>'
+      +'<button class="opt" data-act="cs-pause"><span><b>Pauzeren</b><br><span class="muted small">Later verder via "Verder met …" op het startscherm</span></span></button>'
+      +'<button class="opt danger" data-act="cs-quit"><span><b>Stoppen zonder bewaren</b><br><span class="muted small">Deze pijlen tellen niet mee</span></span></button>'
+      +'</div></div></div>':'');
+  $("#app").innerHTML='<div class="play">'
+   +'<div class="pleft">'
+   +'<div class="top"><div class="ttl"><span class="kicker">'+esc(title)+'</span><h2>'+esc(ex.name)+'</h2></div><span class="topbtns"><button class="iconbtn helpbtn" data-act="phelp" aria-label="Uitleg">?</button><button class="stopbtn" data-act="home" aria-label="Stoppen">Stop</button></span></div>'
+   +'<div class="scorebar">'+score+'</div>'
+   +'<div class="target'+(h.seq?' stack':'')+(fx?' fx-'+fx:'')+'" style="--pc:'+pColor(p.id)+'"><div class="who"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+' gooit · pijl '+(di+1)+'</div><div class="trow"><div class="big tab'+anim+'">'+big+'</div><div class="slots">'+slots+'</div></div><div class="sub">'+esc(h.sub)+(h.leg?' <button class="linkbtn" data-act="skip">301 overslaan</button>':'')+'</div>'+(last?'<div class="prev">'+last+'</div>':'')+'</div>'
+   + voiceBar()
+   +'</div>'
+   +'<div class="pad"><div class="mods">'+mods+'<button class="k miss" data-act="miss">Mis</button><button class="k undo" data-act="undo" aria-label="Laatste pijl wissen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button></div>'
+   +'<div class="nums">'+nums+'</div>'
+   +'<div class="mods two"><button class="k bull g" data-act="b25">25</button><button class="k bull" data-act="b50">Bull</button></div></div>'
+   + sheets
+   +'</div>';
+}
+function renderResult(){
+  if(isMatch(game)) return renderMatchResult();
+  const st=derive(game), ex=st.ex, S=game.session;
+  const rows=st.S.map((s,k)=>{ const p=s.p, sc=st.scores[k];
+    const pass=ex.pass ? (sc>=ex.pass?'Klaar voor gevorderd!':'Nog '+(ex.pass-sc)+' punten tot gevorderd') : '';
+    const rec=(game.records||[]).includes(p.id)?'Nieuw record!':'';
+    const goal=(game.goals||[]).includes(p.id)?'Weekdoel gehaald!':'';
+    const det=ex.detail?ex.detail(game,s):'';
+    const pct=Math.max(0,Math.min(100,Math.round(100*sc/st.max)));
+    return '<div class="rcard" style="--pc:'+pColor(p.id)+'"><div class="rtop"><h3><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</h3><div class="big tab">'+sv(ex,sc)+'<span class="of">/'+st.max+'</span></div></div>'
+      +'<div class="bar"><i style="width:'+pct+'%"></i></div>'
+      +(rec||goal?'<div class="badges">'+[rec,goal].filter(Boolean).map(t=>'<span class="badge">'+esc(t)+'</span>').join('')+'</div>':'')
+      +'<div class="sub">'+[det,pass].filter(Boolean).map(esc).join(' · ')+'</div></div>'; }).join("");
+  let sess='', btns;
+  if(S && S.i < S.list.length-1){
+    const nx=EX[S.list[S.i+1]];
+    sess='<div class="nextup"><span class="kicker">Training '+PHASE_NAME[S.ph]+' · '+(S.i+1)+' van '+S.list.length+' klaar</span><b>Volgende: '+esc(nx.name)+'</b>'+(cdTimer?'<span id="cdwrap" class="muted small">Start vanzelf over <span id="cd">'+cdLeft+'</span> s · zeg "volgende" om meteen te beginnen</span>':'')+'</div>';
+    btns='<button class="primary" data-act="snext">Volgende oefening</button><button class="secondary" data-act="again">Deze opnieuw</button><button class="secondary" data-act="home">Training stoppen</button>';
+  } else if(S){
+    const sum=S.list.map((id,i)=>{ const d=S.done.filter(x=>x.ex===id).pop(); const h=d&&store.data.history.find(x=>x.id===d.id); const e=EX[id];
+      return '<div class="srow"><span><span class="muted">'+(i+1)+'</span> '+esc(e.name)+'</span><span class="tab">'+(h?h.res.map(r=>esc(pName(r.pid,r.name))+' <b>'+sv(e,r.score)+'</b>').join(' · '):'–')+'</span></div>'; }).join('');
+    sess='<div class="nextup done"><span class="kicker">Training '+PHASE_NAME[S.ph]+' klaar</span><b>Goed gedaan!</b><div class="summary">'+sum+'</div></div>';
+    btns='<button class="primary" data-act="home">Naar start</button><button class="secondary" data-act="undo">Laatste pijl terug</button>';
+  } else {
+    btns='<button class="primary" data-act="again">Nog een keer</button><button class="secondary" data-act="undo">Laatste pijl terug</button><button class="secondary" data-act="home">Naar start</button>';
+  }
+  $("#app").innerHTML='<div class="wrap"><div class="hero small"><span class="kicker">Klaar</span><h1>'+esc(ex.name)+'</h1><p class="muted">De score is bewaard.'+(ex.avg?' Dit is je gemiddelde per beurt.':'')+'</p></div>'
+   +'<div class="result">'+rows+'</div>'+sess
+   +voiceBar()
+   +'<div class="btnrow">'+btns+'</div></div>';
+}
+function render(){
+  if(screen==="play" && game) renderPlay();
+  else if(screen==="result" && game) renderResult();
+  else { screen="home"; if(tab==="stats") renderStats(); else if(tab==="match") renderMatchHome(); else renderHome(); }
+}
+
+function pickerHTML(){
+  if(!pickEx) return '';
+  const ph=store.data.phase||1;
+  const ex = pickEx==="__session" ? {name:"Training "+PHASE_NAME[ph], howLong:"7 oefeningen na elkaar", desc:"Je speelt de 7 oefeningen van "+PHASE_NAME[ph]+" na elkaar: "+PHASES[ph].map(id=>EX[id].name).join(", ")+". Na elke oefening gaat de app vanzelf door. Elke uitslag wordt apart bewaard.", fav:true} : getEx(pickEx);
+  if(!ex){ pickEx=null; return ''; }
+  const P=store.data.players, last=(store.data.lastPick||[]).join(",");
+  const opt=(ids,title,sub)=>'<button class="opt'+(ids.join(",")===last?' last':'')+'" data-act="go" data-ids="'+ids.join(",")+'"><span class="dots">'+ids.map(id=>'<i class="dot" style="background:'+pColor(id)+'"></i>').join('')+'</span><span><b>'+esc(title)+'</b><br><span class="muted small">'+esc(sub)+'</span></span></button>';
+  const favs=ids=> ex.fav ? ' · '+ids.map(id=>{ const p=playerById(id); return (ids.length>1?p.name+' ':'')+'D'+(p.fav||20); }).join(', ') : '';
+  let opts=P.map(p=>opt([p.id], p.name+' alleen', 'Je eigen tempo, '+ex.howLong+favs([p.id]))).join('');
+  if(P.length>=2){
+    const pairs=[]; for(let i=0;i<P.length;i++) for(let j=0;j<P.length;j++) if(i!==j && (P.length===2 || j>i)) pairs.push([P[i],P[j]]);
+    opts=pairs.map(([a,b])=>opt([a.id,b.id], 'Samen: '+a.name+' + '+b.name, 'Om de beurt drie pijlen, '+a.name+' begint'+favs([a.id,b.id]))).join('')+(P.length>2?opt(P.map(p=>p.id),'Iedereen samen','Om de beurt, in de volgorde van de lijst'):'')+opts;
+  }
+  return '<div class="sheet" role="dialog" aria-modal="true" aria-label="Wie gooit er?"><div class="sheetin"><div class="top"><h2>'+esc(ex.name)+'</h2><button class="iconbtn" data-act="pickclose" aria-label="Sluiten">×</button></div><p class="pdesc">'+esc(ex.desc)+'</p><p class="muted">Wie gooit er?'+(ex.fav?' De favoriete dubbel pas je aan bij Spelers.':'')+'</p><div class="opts">'+opts+'</div></div></div>';
+}
+
+/* ---------- statistieken ---------- */
+function navHTML(){ return '<div class="nav nav3" role="group" aria-label="Onderdeel"><button data-act="tab" data-t="train" aria-pressed="'+(tab==="train")+'">Trainen</button><button data-act="tab" data-t="match" aria-pressed="'+(tab==="match")+'">Wedstrijd</button><button data-act="tab" data-t="stats" aria-pressed="'+(tab==="stats")+'">Statistieken</button></div>'; }
+function renderMatchHome(){
+  const resume=game && !gameDone(game) ? '<button class="resume" data-act="resume"><b>Verder met '+esc(isMatch(game)?'de wedstrijd':getEx(game.ex).name)+'</b><span>Je was nog bezig. Tik om verder te gaan.</span></button>' : '';
+  $("#app").innerHTML='<div class="wrap">'
+   +'<div class="hero">'+boardSVG()+'<div><h1>Wed<span>strijd</span></h1><p class="muted">Tegen elkaar: 170, 301 of 501</p></div></div>'
+   + navHTML() + (voice.on()?voiceBar():'') + resume
+   + matchSetupHTML()
+   +'<div class="secs">'+secHTML("mhelp","Zo werkt een wedstrijd","Spraak, tikken en klavier",matchHelpHTML())+'</div>'
+   +'</div>';
+}
+const DAY=864e5;
+function weekStart(ts){ const d=new Date(ts); d.setHours(0,0,0,0); d.setDate(d.getDate()-((d.getDay()+6)%7)); return d.getTime(); }
+function addWeeks(ws,n){ const d=new Date(ws); d.setDate(d.getDate()+7*n); return d.getTime(); }
+function isoWeek(ts){ const d=new Date(ts); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4); return 1+Math.round(((d-w1)/DAY-3+((w1.getDay()+6)%7))/7); }
+const fmt=n=> (Math.round(n*10)/10).toLocaleString("nl-BE");
+const dShort=ts=> new Date(ts).toLocaleDateString("nl-BE",{day:"numeric",month:"short"});
+function pColor(pid){ const i=store.data.players.findIndex(p=>p.id===pid); return "var(--p"+((i<0?0:i)%4)+")"; }
+function pName(pid,fallback){ const p=store.data.players.find(x=>x.id===pid); return p?p.name:(fallback||"Speler"); }
+function exName(id,fallback){ const e=getEx(id); if(!e) return fallback; const pn=exPhaseNr(id); if(!pn) return e.name; return (e.phase ? PHASE_NAME[pn.ph]+" "+pn.nr : "Elk niveau "+pn.nr)+" · "+e.name; }
+function deltaHTML(d,unit){ if(Math.abs(d)<0.05) return '<span class="delta eq">= gelijk aan gem.</span>'; return '<span class="delta '+(d>0?'up':'down')+'">'+(d>0?'▲ +':'▼ −')+fmt(Math.abs(d))+(unit||'')+(d>0?' boven':' onder')+' gem.</span>'; }
+
+function exStats(exId){
+  const H=store.data.history.filter(h=>h.ex===exId).slice().sort((a,b)=>a.at-b.at);
+  if(!H.length) return null;
+  const max=H[H.length-1].max, pids=[];
+  H.forEach(h=>h.res.forEach(r=>{ if(!pids.includes(r.pid)) pids.push(r.pid); }));
+  pids.sort((a,b)=>store.data.players.findIndex(p=>p.id===a)-store.data.players.findIndex(p=>p.id===b));
+  const thisW=weekStart(Date.now()), weeks=[]; for(let i=7;i>=0;i--) weeks.push(addWeeks(thisW,-i));
+  const per=pids.map(pid=>{
+    const rows=[]; H.forEach(h=>{ const r=h.res.find(x=>x.pid===pid); if(r) rows.push({at:h.at,score:r.score,name:r.name}); });
+    const scores=rows.map(r=>r.score), avg=scores.reduce((a,b)=>a+b,0)/scores.length;
+    const wk=weeks.map(w=>{ const xs=rows.filter(r=>r.at>=w && r.at<addWeeks(w,1)).map(r=>r.score); return xs.length?{avg:xs.reduce((a,b)=>a+b,0)/xs.length,n:xs.length,best:Math.max(...xs)}:null; });
+    return {pid,name:pName(pid,rows[rows.length-1].name),last:rows[rows.length-1],avg,best:Math.max(...scores),n:rows.length,wk};
+  });
+  return {H,max,per,weeks};
+}
+function chartSVG(exId,S){
+  const W=340,Hh=150,L=30,R=12,T=10,B=24, iw=W-L-R, ih=Hh-T-B, n=S.weeks.length;
+  const x=i=>L+iw*(i+.5)/n, y=v=>T+ih*(1-v/S.max);
+  const sel=tipWeek[exId]; let g='';
+  [0,.5,1].forEach(f=>{ const v=Math.round(S.max*f); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(L-6)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="11" fill="var(--muted)">'+v+'</text>'; });
+  S.weeks.forEach((w,i)=>{ g+='<text x="'+x(i)+'" y="'+(Hh-6)+'" text-anchor="middle" font-size="11" fill="'+(i===sel?'var(--sisal)':'var(--muted)')+'">'+(i===n-1?'nu':'wk '+isoWeek(w))+'</text>'; });
+  if(sel!==undefined) g+='<line x1="'+x(sel)+'" x2="'+x(sel)+'" y1="'+T+'" y2="'+(T+ih)+'" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3"/>';
+  S.per.forEach((P,pi)=>{
+    const c=pColor(P.pid), dash=pi%2?' stroke-dasharray="6 4"':'';
+    for(let i=1;i<n;i++){ const a=P.wk[i-1], b=P.wk[i]; if(a&&b) g+='<line x1="'+x(i-1)+'" y1="'+y(a.avg)+'" x2="'+x(i)+'" y2="'+y(b.avg)+'" stroke="'+c+'" stroke-width="2" stroke-linecap="round"'+dash+'/>'; }
+    P.wk.forEach((v,i)=>{ if(v) g+='<circle cx="'+x(i)+'" cy="'+y(v.avg)+'" r="'+(i===sel?5.5:4)+'" fill="'+(pi%2?'var(--black)':c)+'" stroke="'+c+'" stroke-width="2"/>'; });
+    // all-time gemiddelde als stippellijn
+    g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(P.avg)+'" y2="'+y(P.avg)+'" stroke="'+c+'" stroke-width="1" stroke-dasharray="2 4" opacity=".8"/>';
+  });
+  S.weeks.forEach((w,i)=>{ g+='<rect data-act="wk" data-ex="'+esc(exId)+'" data-w="'+i+'" x="'+(L+iw*i/n)+'" y="0" width="'+(iw/n)+'" height="'+Hh+'" fill="transparent" style="cursor:pointer"><title>Week '+isoWeek(w)+'</title></rect>'; });
+  let tip='Tik op een week voor de cijfers. Stippellijn = gemiddelde van altijd.';
+  if(sel!==undefined){ const w=S.weeks[sel]; tip='<b>Week '+isoWeek(w)+'</b> ('+dShort(w)+' – '+dShort(addWeeks(w,1)-DAY)+'): '+S.per.map(P=>{ const v=P.wk[sel]; return esc(P.name)+' '+(v?fmt(v.avg)+' gem., beste '+fmt(v.best)+' ('+v.n+'×)':'niet gespeeld'); }).join(' · '); }
+  const legend=S.per.length>1?'<div class="legend">'+S.per.map(P=>'<span><i class="dot" style="background:'+pColor(P.pid)+'"></i>'+esc(P.name)+'</span>').join('')+'</div>':'';
+  return '<div class="chart">'+legend+'<svg viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Gemiddelde score per week, laatste 8 weken">'+g+'</svg><div class="tip">'+tip+'</div></div>';
+}
+function renderStats(){
+  const D=store.data, now=Date.now(), tw=weekStart(now), lw=addWeeks(tw,-1);
+  const ids=[...PHASES[1],...PHASES[2],...PHASES[3],...D.customs.map(c=>c.id)].filter((x,i,arr)=>arr.indexOf(x)===i);
+  const seen=new Set(D.history.map(h=>h.ex)); D.history.forEach(h=>{ if(!ids.includes(h.ex)) ids.push(h.ex); });
+  // weekoverzicht per speler
+  const tiles=D.players.map(p=>{
+    const mine=w=>D.history.filter(h=>h.at>=w && h.at<addWeeks(w,1) && h.res.some(r=>r.pid===p.id));
+    const a=mine(tw), b=mine(lw), darts=a.reduce((s,h)=>{ const r=h.res.find(x=>x.pid===p.id); return s+((r&&r.darts)||h.darts||0); },0), d=a.length-b.length;
+    return '<div class="tile"><span class="who2"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</span><span class="v tab">'+a.length+((D.weekGoal||0)?'<span class="of">/'+D.weekGoal+'</span>':'')+'</span>'+((D.weekGoal||0)?'<div class="bar"><i style="width:'+Math.min(100,Math.round(100*a.length/D.weekGoal))+'%;background:'+pColor(p.id)+'"></i></div>':'')+'<span class="muted small">oefeningen deze week'+(darts?' · '+darts+' pijlen':'')+'</span><span class="delta '+(d>0?'up':d<0?'down':'eq')+'">'+(d===0?'evenveel als vorige week':(d>0?'▲ ':'▼ ')+Math.abs(d)+(d>0?' meer':' minder')+' dan vorige week')+'</span></div>';
+  }).join("");
+  const blocks=ids.filter(id=>seen.has(id)).map(id=>{
+    const S=exStats(id); if(!S) return '';
+    const ex=getEx(id);
+    const prs=S.per.map(P=>{
+      const pct=Math.round(100*P.last.score/S.max);
+      return '<div class="pr"><span class="who2"><i class="dot" style="background:'+pColor(P.pid)+'"></i>'+esc(P.name)+'</span>'
+        +'<span><span class="lbl">Laatste</span><br><span class="num">'+sv(ex,P.last.score)+'</span><span class="muted small">/'+S.max+' · '+pct+'%</span></span>'
+        +'<span><span class="lbl">Gem. altijd</span><br><span class="num">'+fmt(P.avg)+'</span><span class="muted small"> ('+P.n+'×)</span></span>'
+        +'<span><span class="lbl">Record</span><br><span class="num">'+sv(ex,P.best)+'</span></span>'
+        +'<span style="grid-column:1/-1">'+deltaHTML(P.last.score-P.avg)+' <span class="muted small">· laatste keer '+dShort(P.last.at)+'</span></span></div>';
+    }).join("");
+    const prog=S.per.map(P=>{ const a=P.wk[7], b=P.wk[6];
+      let t='<b>'+esc(P.name)+'</b>: ';
+      if(!a) t+='deze week nog niet gespeeld'+(b?' (vorige week '+fmt(b.avg)+' gem.)':'');
+      else { t+='deze week '+fmt(a.avg)+' gem. ('+a.n+'×)'; if(b){ const d=a.avg-b.avg; t+=' · vorige week '+fmt(b.avg)+' → <span class="delta '+(d>0.05?'up':d<-0.05?'down':'eq')+'">'+(Math.abs(d)<0.05?'gelijk':(d>0?'+':'−')+fmt(Math.abs(d)))+'</span>'; } else t+=' · vorige week niet gespeeld'; }
+      return '<div>'+t+'</div>'; }).join("");
+    const recent=S.H.slice(-5).reverse().map(h=>'<div><span>'+dShort(h.at)+' '+new Date(h.at).toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"})+(h.res.length>1?' · samen':' · alleen')+'</span><span>'+h.res.map(r=>esc(pName(r.pid,r.name))+' <b>'+sv(ex,r.score)+'</b>'+(r.extra&&r.extra.legs&&r.extra.legs.length?' <span class="small">(legs '+r.extra.legs.map(x=>x==null?'–':x).join('/')+')</span>':'')).join(' · ')+'</span></div>').join("");
+    return '<div class="exstat"><h3>'+esc(exName(id,S.H[0].name))+'</h3><div class="prs">'+prs+'</div>'+chartSVG(id,S)+'<div class="prog">'+prog+'</div><div><div class="lbl muted small" style="text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Laatste 5 keer</div><div class="recent">'+recent+'</div></div></div>';
+  }).join("") || '<p class="muted">Nog geen resultaten. Speel een oefening en je ziet hier je cijfers.</p>';
+  $("#app").innerHTML='<div class="wrap">'
+    +'<div class="hero">'+boardSVG()+'<div><h1>Statis<span>tieken</span></h1><p class="muted">Week van '+dShort(tw)+' (week '+isoWeek(tw)+')</p></div></div>'
+    + navHTML()
+    +'<section><h2>Deze week</h2><div class="week">'+tiles+'</div></section>'
+    + h2hHTML()
+    + basisHTML()
+    +'<section><h2>Per oefening</h2>'+blocks+'</section>'
+    +'<section><h2>Twee gsm\'s samenvoegen</h2><p class="muted small">Gooien jullie elk op je eigen gsm? Kopieer de back-up op de ene gsm, stuur hem door (bv. via WhatsApp) en plak hem hier op de andere. Resultaten worden samengevoegd, niets wordt dubbel geteld.</p><textarea id="bk" aria-label="Back-up" placeholder="Plak hier een back-up"></textarea><div class="btnrow"><button class="secondary" data-act="bcopy">Back-up kopiëren</button><button class="primary" data-act="bmerge">Plakken en samenvoegen</button></div></section>'
+    +'</div>';
+}
+function h2hHTML(){
+  const M=store.data.history.filter(h=>h.match && h.res.length===2);
+  if(!M.length) return '';
+  const pairs={};
+  M.forEach(h=>{ const ids=h.res.map(r=>r.pid).sort(), k=ids.join("|"); const p=pairs[k] ||= {ids,w:{[ids[0]]:0,[ids[1]]:0},n:0}; p.n++; const win=h.res.find(r=>r.extra&&r.extra.won); if(win) p.w[win.pid]++; });
+  return '<section><h2>Onderling</h2>'+Object.values(pairs).map(p=>{ const [a,b]=p.ids; return '<div class="h2h"><div class="side"><span class="who2"><i class="dot" style="background:'+pColor(a)+'"></i>'+esc(pName(a))+'</span><span class="muted small">'+p.n+' wedstrijd'+(p.n>1?'en':'')+'</span></div><div class="big tab">'+p.w[a]+' – '+p.w[b]+'</div><div class="side"><span class="who2"><i class="dot" style="background:'+pColor(b)+'"></i>'+esc(pName(b))+'</span></div></div>'; }).join('')+'</section>';
+}
+function basisHTML(){
+  const D=store.data, last=(ex,pid)=>{ let h=null; for(const x of D.history) if(x.ex===ex && x.res.some(r=>r.pid===pid) && (!h || x.at>h.at)) h=x; return h?h.res.find(r=>r.pid===pid):null; };
+  const rows=D.players.map(p=>{ const g=last("gem",p.id), d=last("dub",p.id); if(!g && !d) return '';
+    return '<div class="tile"><span class="who2"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</span>'
+      +'<span><span class="v tab">'+(g?fmt(g.score):'–')+'</span> <span class="muted small">per beurt scoren</span></span>'
+      +'<span><span class="v tab">'+(d?fmt(d.score/10):'–')+'</span> <span class="muted small">dubbels per beurt'+(d?' ('+d.score+'/30 op D'+(d.fav||p.fav||20)+')':'')+'</span></span></div>'; }).join('');
+  if(!rows) return '';
+  return '<section><h2>Basisgemiddelde</h2><p class="muted small">Laatste uitslag van oefening 5 (scoren) en 6 (dubbels). Hoog scoren met weinig dubbels drukt je basisgemiddelde; goed op de dubbels trekt het omhoog.</p><div class="week">'+rows+'</div></section>';
+}
+function mergeBackup(txt){
+  let o; try{ o=JSON.parse(txt); }catch(e){ toast("Dat is geen geldige back-up."); return; }
+  if(!o || !o.darttrainer || !Array.isArray(o.history)){ toast("Dat is geen geldige back-up."); return; }
+  const n0=store.data.history.length, res=mergeData(store.data,o); applyMerged(res); store.save(); render();
+  toast(Math.max(0,store.data.history.length-n0)+" resultaten toegevoegd");
+}
+
+/* ---------- samenvoegen + synchroniseren via GitHub ---------- */
+const CAP = window.claude ? 1200 : 3000;           // aantal bewaarde uitslagen
+const SYNC_KEY="darttrainer.sync", SYNC_FILE="darttrainer.json";
+const normName=n=>({ik:"tim",neef:"jan"}[n]||n);
+function mergeData(base, inc){
+  const out={players:(base.players||[]).map(p=>Object.assign({},p)), history:(base.history||[]).slice(), customs:(base.customs||[]).slice()};
+  const removed=new Set([...(base.removed||[]), ...(inc.removed||[])]), map={};
+  for(const p of (inc.players||[])){
+    if(removed.has(p.id)) continue;
+    const nm=normName(String(p.name).trim().toLowerCase());
+    let m=out.players.find(x=>x.id===p.id) || out.players.find(x=>normName(String(x.name).trim().toLowerCase())===nm);
+    if(m){ map[p.id]=m.id; if((p.upd||0)>(m.upd||0)){ m.name=p.name; m.hand=p.hand; m.fav=p.fav; m.upd=p.upd; } }
+    else { const n=Object.assign({},p); if(n.name && RN_DEFAULT[nm]) n.name=RN_DEFAULT[nm]; out.players.push(n); map[p.id]=p.id; }
+  }
+  out.players=out.players.filter(p=>!removed.has(p.id));
+  const have=new Set(out.history.map(h=>h.id));
+  for(const h of (inc.history||[])) if(!have.has(h.id)) out.history.push(Object.assign({},h,{res:(h.res||[]).map(r=>Object.assign({},r,{pid:map[r.pid]||r.pid}))}));
+  for(const c of (inc.customs||[])) if(!out.customs.some(x=>x.id===c.id)) out.customs.push(c);
+  out.history=out.history.filter(h=>!removed.has(h.id)).sort((a,b)=>b.at-a.at||(a.id<b.id?-1:1)).slice(0,CAP);
+  out.customs=out.customs.filter(c=>!removed.has(c.id));
+  out.removed=[...removed].slice(-3000);
+  return {data:out,map};
+}
+const RN_DEFAULT={tim:"Tim",jan:"Jan"};
+function shareable(d){ return {darttrainer:2, players:d.players||[], history:(d.history||[]).slice().sort((a,b)=>b.at-a.at||(a.id<b.id?-1:1)), customs:d.customs||[], removed:[...new Set(d.removed||[])].sort()}; }
+function applyMerged(res){
+  const D=store.data, before=JSON.stringify(shareable(D));
+  Object.assign(D, res.data);
+  if(game){ game.players=game.players.map(id=>res.map[id]||id); saveGame(); }
+  if(D.lastPick) D.lastPick=D.lastPick.map(id=>res.map[id]||id);
+  store.saveLocal(); store.flush();
+  return before!==JSON.stringify(shareable(D));
+}
+const sync={
+  cfg:null, busy:false, again:false, status:"", last:0, _t:null,
+  available(){ return !window.claude && typeof fetch==="function"; },
+  load(){ try{ this.cfg=JSON.parse(localStorage.getItem(SYNC_KEY)||"null"); }catch(e){ this.cfg=null; } },
+  saveCfg(){ try{ this.cfg ? localStorage.setItem(SYNC_KEY,JSON.stringify(this.cfg)) : localStorage.removeItem(SYNC_KEY); }catch(e){} },
+  on(){ return !!(this.available() && this.cfg && this.cfg.t && this.cfg.g); },
+  api(path,opt){ opt=opt||{}; const h={"Accept":"application/vnd.github+json","Authorization":"Bearer "+this.cfg.t}; if(opt.body) h["Content-Type"]="application/json"; return fetch("https://api.github.com"+path, Object.assign({cache:"no-store"},opt,{headers:h})); },
+  async connect(token){
+    this.cfg={t:token.trim(), g:null}; this.status="Koppelen…"; renderSync();
+    try{
+      // bestaat er al een scorebestand? dan dat gebruiken
+      const l=await this.api("/gists?per_page=100"); if(l.status===401) throw "key"; if(!l.ok) throw "net";
+      const found=(await l.json()).find(g=>g.files && g.files[SYNC_FILE]);
+      if(found) this.cfg.g=found.id;
+      else {
+        const r=await this.api("/gists",{method:"POST",body:JSON.stringify({description:"Darttrainer scores (niet verwijderen)",public:false,files:{[SYNC_FILE]:{content:JSON.stringify(shareable(store.data))}}})});
+        if(r.status===401||r.status===403||r.status===404) throw "key"; if(!r.ok) throw "net";
+        this.cfg.g=(await r.json()).id;
+      }
+      this.saveCfg(); await this.run(true);
+    }catch(e){ this.cfg=null; this.saveCfg(); this.status=e==="key"?"Deze sleutel werkt niet. Kijk of je bij het aanmaken 'gist' hebt aangevinkt.":"Geen verbinding met GitHub. Probeer opnieuw."; renderSync(); }
+  },
+  async run(force){
+    if(!this.on()) return;
+    if(this.busy){ this.again=true; return; }
+    this.busy=true; this.status="Bezig…"; renderSync();
+    try{
+      const r=await this.api("/gists/"+this.cfg.g);
+      if(r.status===401) throw "key"; if(r.status===404) throw "gist"; if(!r.ok) throw "net";
+      const j=await r.json(), f=j.files && j.files[SYNC_FILE];
+      let remote={players:[],history:[],customs:[],removed:[]};
+      if(f){ let c=f.content; if(f.truncated) c=await (await fetch(f.raw_url,{cache:"no-store"})).text(); try{ remote=JSON.parse(c)||remote; }catch(e){} }
+      const res=mergeData(remote, store.data);
+      const changed=applyMerged(res);
+      const out=JSON.stringify(shareable(store.data));
+      if(out!==JSON.stringify(shareable(remote))){
+        const w=await this.api("/gists/"+this.cfg.g,{method:"PATCH",body:JSON.stringify({files:{[SYNC_FILE]:{content:out}}})});
+        if(w.status===401||w.status===403) throw "key"; if(!w.ok) throw "net";
+      }
+      this.last=Date.now(); this.status="ok";
+      if(changed && screen!=="play") render();
+    }catch(e){ this.status = e==="key"?"De sleutel werkt niet meer. Maak een nieuwe en koppel opnieuw." : e==="gist"?"Het scorebestand op GitHub is weg. Ontkoppel en koppel opnieuw." : "Geen internet: je scores blijven bewaard en gaan later mee."; }
+    this.busy=false; renderSync();
+    if(this.again){ this.again=false; this.run(); }
+  },
+  schedule(){ if(!this.on()) return; clearTimeout(this._t); this._t=setTimeout(()=>this.run(),1500); },
+  link(){ return location.origin+location.pathname+"#koppel="+btoa(JSON.stringify({t:this.cfg.t,g:this.cfg.g})).replace(/=+$/,""); },
+  fromHash(){
+    const m=location.hash.match(/^#koppel=([A-Za-z0-9+/_-]+)/); if(!m) return false;
+    try{ const o=JSON.parse(atob(m[1].replace(/-/g,"+").replace(/_/g,"/"))); if(o.t && o.g){ this.cfg={t:o.t,g:o.g}; this.saveCfg(); } }catch(e){}
+    try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){ location.hash=""; }
+    return this.on();
+  }
+};
+let qrShown=false;
+function syncHTML(){
+  if(!sync.available()) return '<p class="muted small">Toestellen koppelen werkt in de versie op GitHub Pages. Hier worden je scores in je Claude-account bewaard.</p>';
+  const st=sync.status, t=sync.last?new Date(sync.last).toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"}):"";
+  if(!sync.on()) return '<p class="muted small">Koppel je toestellen, dan staan de scores van Tim en Jan op elke gsm, tablet en laptop. Dit stel je één keer in; de andere toestellen krijgen daarna een link of QR-code.</p>'
+    +'<details class="steps"><summary>Zo maak je een GitHub-sleutel (2 minuten)</summary><ol><li>Ga op github.com naar <b>Settings → Developer settings → Personal access tokens → Tokens (classic)</b>.</li><li>Kies <b>Generate new token (classic)</b>. Naam: Darttrainer. Vervaldatum: <b>No expiration</b>.</li><li>Vink alleen <b>gist</b> aan en klik onderaan op <b>Generate token</b>.</li><li>Kopieer de sleutel (begint met ghp_) en plak hem hieronder.</li></ol></details>'
+    +'<label class="favl" for="gtok" style="display:grid;gap:4px">GitHub-sleutel<input id="gtok" type="password" autocomplete="off" placeholder="ghp_…" class="tokin"></label>'
+    +'<div class="btnrow"><button class="primary" data-act="sconnect">Koppelen</button></div>'
+    +(st&&st!=="ok"?'<p class="small" style="color:var(--down)">'+esc(st)+'</p>':'');
+  return '<p class="small"><b><span style="color:var(--green)">●</span> Gekoppeld.</b> '+(st==="ok"?'Laatst gesynchroniseerd om '+t+'.':esc(st))+'</p>'
+    +'<div class="btnrow"><button class="primary" data-act="slink">Ander toestel koppelen</button><button class="secondary" data-act="snow">Nu synchroniseren</button><button class="secondary" data-act="soff">Ontkoppelen</button></div>'
+    +(qrShown?'<div class="qrbox"><div id="qr" aria-label="QR-code om te koppelen"></div><p class="small">Scan deze code met de camera van het andere toestel, of stuur de link via een privéchat. Er zit je sleutel in: deel hem alleen met Jan.</p><div class="btnrow"><button class="secondary" data-act="scopy">Link kopiëren</button>'+(navigator.share?'<button class="secondary" data-act="sshare">Delen</button>':'')+'</div></div>':'');
+}
+function renderSync(){ const el=$("#sync"); if(el){ el.innerHTML=syncHTML(); if(qrShown) drawQR(); } }
+function drawQR(){
+  const el=$("#qr"); if(!el || !sync.on()) return;
+  const go=()=>{ try{ const q=qrcode(0,"M"); q.addData(sync.link()); q.make(); el.innerHTML=q.createSvgTag({cellSize:4,margin:4,scalable:true}); }catch(e){ el.textContent="QR-code lukt niet; gebruik de link."; } };
+  if(window.qrcode) return go();
+  const s=document.createElement("script"); s.src="qrcode.js"; s.onload=go; s.onerror=()=>{ el.textContent="QR-code lukt niet; gebruik de link."; }; document.head.appendChild(s);
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") sync.run(); });
+window.addEventListener("online",()=>sync.run());
+window.addEventListener("hashchange",()=>{ if(sync.fromHash()){ render(); sync.run().then(()=>toast("Gekoppeld! Je ziet nu dezelfde scores als op je andere toestellen.")); } });
+
+/* ---------- wedstrijd (X01) ---------- */
+[170,301,501].forEach(s=>{ EX["match"+s]={phase:-2, match:true, name:"Wedstrijd "+s, avg:true, max:()=>180, howLong:"", desc:"Wedstrijd "+s+" tegen elkaar. De score is je gemiddelde per 3 pijlen."}; });
+const IMPOSSIBLE=new Set([163,166,169,172,173,175,176,178,179]);
+let pendingOut=null;   // totaal = uitgooien: met hoeveel pijlen?
+function isMatch(g){ return g && g.type==="match"; }
+function gameDone(g){ return isMatch(g) ? deriveMatch(g).done : derive(g).done; }
+function deriveMatch(g){
+  const P=g.players.length, need=Math.floor(g.bestOf/2)+1;
+  const st={P,need,legsWon:g.players.map(()=>0),legs:[],done:false,winner:null,lastTurn:null,
+    stats:g.players.map(()=>({scored:0,darts:0,f9:0,f9d:0,hi:0,c100:0,c140:0,c180:0,co:0,bestLeg:null,busts:0}))};
+  let leg=null;
+  const newLeg=()=>{ const k=st.legs.length, s=(g.starter+k)%P;
+    leg={k,starter:s,cp:s,rem:g.players.map(()=>g.start),inn:g.players.map(()=>!g.doubleIn),cur:[],turns:[],legDarts:g.players.map(()=>0),winner:null,ts:null};
+    st.legs.push(leg); };
+  newLeg();
+  const finishTurn=(p,scored,darts,bust,out)=>{
+    const t={p,scored,darts,bust,out,list:leg.cur.slice(),remAfter:leg.rem[p],total:leg.cur.length===0};
+    leg.turns.push(t); st.lastTurn=Object.assign({leg:leg.k},t);
+    const S=st.stats[p], nth=leg.turns.filter(x=>x.p===p).length;
+    S.scored+=scored; S.darts+=darts; leg.legDarts[p]+=darts;
+    if(nth<=3){ S.f9+=scored; S.f9d+=darts; }
+    if(bust) S.busts++;
+    S.hi=Math.max(S.hi,scored);
+    if(scored===180) S.c180++; else if(scored>=140) S.c140++; else if(scored>=100) S.c100++;
+    leg.cur=[];
+    if(out){
+      S.co=Math.max(S.co,scored); leg.winner=p; st.legsWon[p]++;
+      S.bestLeg = S.bestLeg===null ? leg.legDarts[p] : Math.min(S.bestLeg, leg.legDarts[p]);
+      if(st.legsWon[p]>=need){ st.done=true; st.winner=p; } else newLeg();
+      return;
+    }
+    leg.cp=(p+1)%P;
+  };
+  for(const ev of g.darts){
+    if(st.done) break;
+    const p=leg.cp;
+    if(leg.cur.length===0) leg.ts={rem:leg.rem[p],inn:leg.inn[p]};
+    if(ev.t==="total"){
+      if(leg.cur.length) continue;
+      const rem=leg.rem[p]; let v=ev.v;
+      if(!leg.inn[p] && v>0) leg.inn[p]=true;
+      const nr=rem-v;
+      if(nr===0){ const n=ev.n||3; if(route(rem,n)){ leg.rem[p]=0; finishTurn(p,v,n,false,true); } else { leg.inn[p]=leg.ts.inn; finishTurn(p,0,3,true,false); } }
+      else if(nr<=1){ leg.inn[p]=leg.ts.inn; finishTurn(p,0,3,true,false); }
+      else { leg.rem[p]=nr; finishTurn(p,v,3,false,false); }
+      continue;
+    }
+    // losse pijl
+    const d=ev.d; let v=val(d), ok=null;
+    if(!leg.inn[p]){ if(d.mult===2){ leg.inn[p]=true; ok=true; } else { v=0; ok=false; } }
+    leg.cur.push({d,ok});
+    if(leg.inn[p] && v>0){
+      const nr=leg.rem[p]-v;
+      if(nr===0 && d.mult===2){ leg.cur[leg.cur.length-1].ok=true; leg.rem[p]=0; finishTurn(p,leg.ts.rem,leg.cur.length,false,true); continue; }
+      if(nr<=1){ leg.cur[leg.cur.length-1].ok=false; leg.rem[p]=leg.ts.rem; leg.inn[p]=leg.ts.inn; finishTurn(p,0,3,true,false); continue; }
+      leg.rem[p]=nr;
+    }
+    if(leg.cur.length>=3) finishTurn(p,leg.ts.rem-leg.rem[p],3,false,false);
+  }
+  st.leg=leg; st.cp=leg.cp;
+  return st;
+}
+const avg3=S=> S.darts ? Math.round(30*S.scored/S.darts)/10 : 0;
+function startMatch(cfg){
+  stopCountdown(); confirmStop=false; playHelp=false; pendingOut=null; kbuf="";
+  game={v:2,type:"match",ex:"match"+cfg.start,players:cfg.players.slice(),start:cfg.start,doubleIn:!!cfg.doubleIn,bestOf:cfg.bestOf,starter:cfg.starter,darts:[],inMode:store.data.inMode||"dart",started:Date.now()};
+  store.data.matchCfg=Object.assign({},cfg); store.save();
+  screen="play"; saveGame(); render(); keepAwake();
+  const st=deriveMatch(game);
+  { const L=callLang(), nm=playerById(game.players[st.cp]).name; speaker.say(speaker.style()==="caller" ? CALL.start(L,cfg,nm) : ["Wedstrijd "+cfg.start+", best of "+cfg.bestOf+(cfg.doubleIn?", double in":"")+". "+nm+" begint. Game on!"], {lang:L}); }
+}
+function callNext(st){
+  if(st.done) return "";
+  const L=callLang(), p=st.cp, rem=st.leg.rem[p], name=playerById(game.players[p]).name;
+  if(!st.leg.inn[p]) return CALL.firstDouble(L,name);
+  if(rem<=170 && route(rem,3)) return CALL.require(L,name,rem);
+  return speaker.style()==="caller" ? "" : CALL.next(L,name,rem);
+}
+function addMatchEvent(ev){
+  if(!game || !isMatch(game)) return;
+  voice.used();
+  const before=deriveMatch(game); if(before.done) return;
+  if(ev.t==="total"){
+    if(before.leg.cur.length){ toast("Gebruik totaal alleen aan het begin van een beurt."); return; }
+    if(!(ev.v>=0 && ev.v<=180) || IMPOSSIBLE.has(ev.v)){ toast(ev.v+" kan niet met drie pijlen."); speaker.say(CALL.impossible(callLang()),{lang:callLang()}); return; }
+    const rem=before.leg.rem[before.cp];
+    if(ev.v===rem && !ev.n && rem>0){
+      const ns=[1,2,3].filter(n=>route(rem,n));
+      if(ns.length){ pendingOut={v:ev.v, ns}; render(); speaker.say(CALL.howMany(callLang()),{lang:callLang()}); return; }
+    }
+  }
+  game.darts.push(ev);
+  const st=deriveMatch(game);
+  if(ev.t==="dart"){ const c=st.lastTurn; beep(!!(c && c.out) || val(ev.d)>0); lastFx = val(ev.d)>0 ? "hit" : "miss"; }
+  saveGame();
+  const turnEnded = countTurns(st)!==countTurns(before) || st.legs.length!==before.legs.length;
+  if(st.done){ return finishMatch(st); }
+  if(st.legs.length>before.legs.length){
+    const w=st.legs[st.legs.length-2].winner, nm=i=>playerById(game.players[i]).name;
+    { const L=callLang(); speaker.say([...CALL.leg(L,st.legs.length-2,nm(w)), {t:game.players.map((id,i)=>nm(i)+" "+st.legsWon[i]).join(", ")+"."}, {t:CALL.starts(L,nm(st.cp))}],{lang:L}); }
+    toast("Leg voor "+nm(w)+"!");
+  } else if(turnEnded){
+    const t=st.lastTurn;
+    { const L=callLang(); speaker.say([...(t.bust?CALL.bust(L):t.scored===0?[{t:CALL.noscore(L)}]:scoreCall(t.scored,L)), {t:callNext(st)}],{lang:L}); }
+  }
+  render();
+}
+function countTurns(st){ return st.legs.reduce((a,l)=>a+l.turns.length,0); }
+function undoMatch(){
+  if(!game || !game.darts.length) return;
+  const wasDone=deriveMatch(game).done;
+  game.darts.pop(); pendingOut=null;
+  if(wasDone && game.saved){ (store.data.removed ||= []).push(game.saved); store.data.history=store.data.history.filter(h=>h.id!==game.saved); game.saved=null; store.save(); }
+  screen="play"; saveGame(); render(); toast("Laatste invoer gewist"); speaker.say(CALL.undo(callLang()),{lang:callLang()});
+}
+function finishMatch(st){
+  const res=game.players.map((pid,i)=>{ const S=st.stats[i]; return {pid,name:playerById(pid).name,score:avg3(S),darts:S.darts,
+    extra:{legs:st.legsWon[i],won:st.winner===i,hi:S.hi,c180:S.c180,c140:S.c140,c100:S.c100,co:S.co,bestLeg:S.bestLeg,f9:S.f9d?Math.round(30*S.f9/S.f9d)/10:0}}; });
+  const entry={id:uid(),ex:game.ex,name:"Wedstrijd "+game.start,at:Date.now(),max:180,darts:Math.max(...res.map(r=>r.darts)),res,
+    match:{start:game.start,bestOf:game.bestOf,doubleIn:game.doubleIn}};
+  store.data.history.unshift(entry); store.data.history=store.data.history.slice(0,CAP);
+  game.saved=entry.id; store.save(); saveGame();
+  screen="result"; render(); beep(true,true);
+  const w=res[st.winner];
+  { const L=callLang(); speaker.say([...CALL.match(L,w.name), {t:res.map(r=>r.name+" "+r.extra.legs).join(", ")+"."}, {t:(L==="en"?"Average ":"Gemiddelde ")+res.map(r=>r.name+" "+(L==="en"?String(r.score):fmt(r.score))).join(", ")+"."}],{lang:L}); }
+}
+
+/* --- schermen wedstrijd --- */
+function matchSetupHTML(){
+  const P=store.data.players, c=Object.assign({start:501,doubleIn:false,bestOf:3,players:P.slice(0,2).map(p=>p.id),starter:0}, store.data.matchCfg||{});
+  c.players=c.players.filter(id=>P.some(p=>p.id===id)); if(c.players.length<2) c.players=P.slice(0,2).map(p=>p.id);
+  matchDraft=c;
+  if(P.length<2) return '<div class="setcard"><p>Voor een wedstrijd heb je twee spelers nodig. Voeg er een toe bij Spelers onderaan.</p></div>';
+  const seg=(key,opts)=>'<div class="seg wide" role="group">'+opts.map(([v,l])=>'<button data-act="mset" data-k="'+key+'" data-v="'+v+'" aria-pressed="'+(String(c[key])===String(v))+'">'+l+'</button>').join('')+'</div>';
+  const who=c.players.map((id,i)=>'<button data-act="mset" data-k="starter" data-v="'+i+'" aria-pressed="'+(c.starter===i)+'"><i class="dot" style="background:'+pColor(id)+'"></i> '+esc(playerById(id).name)+'</button>').join('');
+  const sel=(k)=>'<select class="msel" data-k="'+k+'" id="msel'+k+'" aria-label="Speler '+(k+1)+'">'+P.map(p=>'<option value="'+p.id+'"'+(c.players[k]===p.id?' selected':'')+(c.players[1-k]===p.id?' disabled':'')+'>'+esc(p.name)+'</option>').join('')+'</select>';
+  const pick = P.length>2 ? '<div class="field"><span class="flabel">Wie speelt er?</span><div class="mpick">'+sel(0)+'<span class="vs">tegen</span>'+sel(1)+'</div></div>' : '';
+  return '<div class="setcard">'
+   +'<div class="mhead"><span class="kicker">Wedstrijd</span><h2>'+esc(playerById(c.players[0]).name)+' <span class="vs">tegen</span> '+esc(playerById(c.players[1]).name)+'</h2></div>'
+   + pick
+   +'<div class="field"><span class="flabel">Startscore</span>'+seg("start",[[170,"170"],[301,"301"],[501,"501"]])+'</div>'
+   +'<div class="field"><span class="flabel">Begin</span>'+seg("doubleIn",[[false,"Single in"],[true,"Double in"]])+'<span class="muted small">Uitgooien altijd op een dubbel of de bull.</span></div>'
+   +'<div class="field"><span class="flabel">Aantal legs</span>'+seg("bestOf",[[1,"1"],[3,"Best of 3"],[5,"Best of 5"],[7,"Best of 7"],[9,"Best of 9"]])+'<span class="muted small">'+(c.bestOf>1?'Wie eerst '+(Math.floor(c.bestOf/2)+1)+' legs wint, wint de wedstrijd.':'Eén leg beslist.')+'</span></div>'
+   +'<div class="field"><span class="flabel">Wie begint?</span><div class="seg wide" role="group">'+who+'</div><span class="muted small">Gooi eerst op de bull: wie het dichtst zit, begint. Daarna wisselt de beginner elke leg.</span></div>'
+   +'<button class="session" data-act="mstart"><span class="play-ic" aria-hidden="true">▶</span><span><b>Start wedstrijd</b><span>'+c.start+' · '+(c.bestOf>1?'best of '+c.bestOf:'1 leg')+' · '+(c.doubleIn?'double in':'single in')+'</span></span></button>'
+   +'</div>';
+}
+let matchDraft=null;
+function renderMatch(){
+  const st=deriveMatch(game), leg=st.leg, cp=st.cp;
+  if(st.done){ screen="result"; return renderMatchResult(); }
+  const fx=lastFx; lastFx=null;
+  const panels=game.players.map((id,i)=>{ const p=playerById(id), S=st.stats[i], rem=leg.rem[i], on=i===cp;
+    const dartsLeft = on ? 3-leg.cur.length : 3;
+    const co = leg.inn[i] && rem<=170 ? route(rem,dartsLeft) : "";
+    const dots=Array.from({length:st.need},(_,k)=>'<i class="ld'+(k<st.legsWon[i]?' won':'')+'"></i>').join('');
+    return '<div class="mp'+(on?' on':'')+(on&&fx?' fx-'+fx:'')+'" style="--pc:'+pColor(id)+'"><div class="mphead"><span class="mpname"><i class="dot" style="background:'+pColor(id)+'"></i>'+esc(p.name)+(leg.starter===i?' <span class="thr" title="Begon deze leg">●</span>':'')+'</span><span class="legs" aria-label="'+st.legsWon[i]+' legs">'+dots+'</span></div>'
+      +'<div class="rem tab">'+rem+'</div>'
+      +'<div class="mpsub"><span>Gem. '+fmt(avg3(S))+'</span><span>'+leg.legDarts[i]+' pijlen</span></div>'
+      +'<div class="co">'+(!leg.inn[i]?'Eerst een dubbel':co?'Uit: <b>'+esc(co)+'</b>':'&nbsp;')+'</div></div>'; }).join('');
+  const slots=[0,1,2].map(k=>{ const x=leg.cur[k]; if(!x) return '<div class="slot'+(k===leg.cur.length?' next':'')+'">'+(k+1)+'</div>'; return '<div class="slot '+(x.ok===true?'hit':x.ok===false?'miss':'neutral')+(k===leg.cur.length-1?' fresh':'')+'">'+esc(lab(x.d))+'</div>'; }).join('');
+  const turnScore=leg.cur.length ? leg.ts.rem-leg.rem[cp] : null;
+  const lt=st.lastTurn; const prev = lt ? '<span class="muted">Vorige:</span> '+esc(playerById(game.players[lt.p]).name)+' <b>'+(lt.bust?'Bust':lt.out?'Uit met '+lt.scored:lt.scored)+'</b>' : '<span class="muted">Leg '+(leg.k+1)+' · '+esc(playerById(game.players[leg.starter]).name)+' begint</span>';
+  const tm=game.inMode==="total";
+  const modeSeg='<div class="seg modeseg" role="group" aria-label="Invoer"><button data-act="imode" data-v="dart" aria-pressed="'+!tm+'">Per pijl</button><button data-act="imode" data-v="total" aria-pressed="'+tm+'">Totaal</button></div>';
+  let pad;
+  if(tm){
+    const quick=[26,41,45,60,81,85,100,140,180].map(v=>'<button class="k q" data-act="qt" data-v="'+v+'">'+v+'</button>').join('');
+    const digits=[1,2,3,4,5,6,7,8,9].map(n=>'<button class="k" data-act="td" data-v="'+n+'">'+n+'</button>').join('')+'<button class="k" data-act="tback" aria-label="Wissen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 5H9l-6 7 6 7h12z"/><path d="m16 9-5 6M11 9l5 6"/></svg></button><button class="k" data-act="td" data-v="0">0</button><button class="k ok" data-act="tok">OK</button>';
+    pad='<div class="pad tpad">'+modeSeg+'<div class="tdisp tab" aria-live="polite">'+(kbuf?esc(kbuf):'<span class="muted">Totaal van je beurt</span>')+'</div><div class="quick">'+quick+'</div><div class="digits">'+digits+'</div></div>';
+  } else {
+    const nums=range(1,20).map(n=>'<button class="k" data-act="num" data-n="'+n+'">'+n+'</button>').join("");
+    const mods=[[1,"S"],[2,"D"],[3,"T"]].map(([m,t])=>'<button class="k mod" data-act="mod" data-m="'+m+'" aria-pressed="'+(modSel===m)+'">'+t+'</button>').join("");
+    pad='<div class="pad">'+modeSeg+'<div class="mods">'+mods+'<button class="k miss" data-act="miss">Mis</button><button class="k undo" data-act="undo" aria-label="Laatste invoer wissen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button></div><div class="nums">'+nums+'</div><div class="mods two"><button class="k bull g" data-act="b25">25</button><button class="k bull" data-act="b50">Bull</button></div></div>';
+  }
+  const sheets=(pendingOut?'<div class="sheet" role="dialog" aria-modal="true" aria-label="Uitgegooid"><div class="sheetin"><h2>Uitgegooid!</h2><p class="muted">Met hoeveel pijlen? Zeg of typ 1, 2 of 3.</p><div class="opts row">'+pendingOut.ns.map(n=>'<button class="opt" data-act="outn" data-v="'+n+'"><b>'+n+' pijl'+(n>1?'en':'')+'</b></button>').join('')+'</div><button class="secondary" data-act="outx">Toch niet</button></div></div>':'')
+    +(confirmStop?'<div class="sheet" role="dialog" aria-modal="true" aria-label="Stoppen?"><div class="sheetin"><h2>Wedstrijd stoppen?</h2><p class="muted">Zeg "verder" of "stop", of kies hieronder.</p><div class="opts"><button class="opt" data-act="cs-go"><span><b>Verder spelen</b></span></button><button class="opt" data-act="cs-pause"><span><b>Pauzeren</b><br><span class="muted small">Later verder via het startscherm</span></span></button><button class="opt danger" data-act="cs-quit"><span><b>Stoppen zonder bewaren</b></span></button></div></div></div>':'')
+    +(playHelp?'<div class="sheet" role="dialog" aria-modal="true"><div class="sheetin"><div class="top"><h2>Zo werkt het</h2><button class="iconbtn" data-act="phelp" aria-label="Sluiten">×</button></div>'+matchHelpHTML()+'</div></div>':'');
+  $("#app").innerHTML='<div class="play match">'
+   +'<div class="pleft">'
+   +'<div class="top"><div class="ttl"><span class="kicker">'+game.start+' · '+(game.bestOf>1?'Best of '+game.bestOf:'1 leg')+' · '+(game.doubleIn?'Double in':'Single in')+' · Leg '+(leg.k+1)+'</span><h2>'+game.players.map((id,i)=>esc(playerById(id).name)+' '+st.legsWon[i]).join(' – ')+'</h2></div><span class="topbtns"><button class="iconbtn helpbtn" data-act="phelp" aria-label="Uitleg">?</button><button class="stopbtn" data-act="home">Stop</button></span></div>'
+   +'<div class="scorebar mps">'+panels+'</div>'
+   +'<div class="target turn"><div class="trow"><div class="tleft"><div class="who"><i class="dot" style="background:'+pColor(game.players[cp])+'"></i>'+esc(playerById(game.players[cp]).name)+' gooit · '+(leg.cur.length? 'deze beurt '+turnScore : 'pijl 1')+'</div><div class="prevline">'+prev+'</div></div><div class="slots">'+slots+'</div></div></div>'
+   + voiceBar()
+   +'</div>'
+   + pad + sheets
+   +'</div>';
+}
+function matchHelpHTML(){
+  return '<ul class="tips">'
+   +'<li><b>Spraak per pijl:</b> <q>triple twintig</q>, <q>dubbel zestien</q>, <q>negentien</q>, <q>bull</q>, <q>mis</q>.</li>'
+   +'<li><b>Spraak als totaal:</b> zeg de score van je beurt, bv. <q>honderd</q>, <q>zestig</q>, <q>honderdveertig</q>. Zeg <q>bust</q> als je over je score ging.</li>'
+   +'<li><b>Uitgooien met een totaal:</b> de app vraagt met hoeveel pijlen; zeg <q>één</q>, <q>twee</q> of <q>drie</q>.</li>'
+   +'<li><b>Klavier:</b> typ <b>T20 T20 20</b> en Enter voor losse pijlen, of <b>100</b> en Enter voor een totaal. Getallen boven 20 zijn altijd een totaal. <b>=</b> ervoor maakt er ook een totaal van (=20). Backspace zonder invoer = laatste wissen.</li>'
+   +'<li><b>Tikken:</b> kies <b>Per pijl</b> of <b>Totaal</b> boven het toetsenbord.</li>'
+   +'<li>Een <b>bust</b> (meer dan je rest, op 1 eindigen of eindigen zonder dubbel) telt als 0 en je score springt terug.</li>'
+   +'</ul>';
+}
+function renderMatchResult(){
+  const st=deriveMatch(game), nm=i=>playerById(game.players[i]).name, W=st.winner;
+  const rows=[["Legs",i=>st.legsWon[i]],["Gem. (3 pijlen)",i=>fmt(avg3(st.stats[i]))],["Eerste 9 gem.",i=>st.stats[i].f9d?fmt(Math.round(30*st.stats[i].f9/st.stats[i].f9d)/10):"–"],["Hoogste beurt",i=>st.stats[i].hi],["180",i=>st.stats[i].c180],["140+",i=>st.stats[i].c140],["100+",i=>st.stats[i].c100],["Hoogste finish",i=>st.stats[i].co||"–"],["Beste leg (pijlen)",i=>st.stats[i].bestLeg||"–"],["Pijlen",i=>st.stats[i].darts]];
+  const table='<div class="mtable" role="table"><div class="mtr mth" role="row"><span></span>'+game.players.map((id,i)=>'<span role="columnheader"><i class="dot" style="background:'+pColor(id)+'"></i> '+esc(nm(i))+'</span>').join('')+'</div>'
+    +rows.map(([l,f])=>'<div class="mtr" role="row"><span class="muted">'+l+'</span>'+game.players.map((id,i)=>'<span class="tab">'+f(i)+'</span>').join('')+'</div>').join('')+'</div>';
+  $("#app").innerHTML='<div class="wrap"><div class="hero small"><span class="kicker">Game shot</span><h1>'+esc(nm(W))+' wint</h1><p class="muted">'+game.players.map((id,i)=>esc(nm(i))+' '+st.legsWon[i]).join(' – ')+' · '+game.start+(game.doubleIn?' double in':'')+'</p></div>'
+   +'<div class="rcard" style="--pc:'+pColor(game.players[W])+'">'+table+'</div>'
+   + voiceBar()
+   +'<div class="btnrow"><button class="primary" data-act="rematch">Revanche</button><button class="secondary" data-act="undo">Laatste invoer terug</button><button class="secondary" data-act="home">Naar start</button></div></div>';
+}
+
+/* --- klavier: losse pijlen of een totaal --- */
+let kbuf="";
+function parseKeys(s, allowTotal){
+  s=String(s).trim().toLowerCase(); if(!s) return null;
+  const forceTotal = s.startsWith("=") || (allowTotal && game && game.inMode==="total");
+  const clean=s.replace(/^=/,"");
+  if(allowTotal && /^\d{1,3}$/.test(clean)){ const n=+clean; if(forceTotal || (n>20 && n!==25 && n!==50)) return {total:n}; }
+  const out=[];
+  for(const tok of clean.split(/[\s,;+]+/).filter(Boolean)){
+    let m;
+    if(/^(m|x|mis|0)$/.test(tok)) out.push({seg:0,mult:0});
+    else if(/^(b|bull|bul|50|db)$/.test(tok)) out.push({seg:25,mult:2});
+    else if(/^(sb|25|s25)$/.test(tok)) out.push({seg:25,mult:1});
+    else if(tok==="d25") out.push({seg:25,mult:2});
+    else if((m=tok.match(/^([sdt]?)(\d{1,2})$/)) && +m[2]>=1 && +m[2]<=20) out.push({seg:+m[2],mult:({s:1,d:2,t:3}[m[1]]||1)});
+    else return {error:tok};
+  }
+  return {darts:out};
+}
+function commitKbuf(){
+  const r=parseKeys(kbuf, isMatch(game)); const raw=kbuf; kbuf="";
+  if(!r){ render(); return; }
+  if(r.error){ toast("Niet begrepen: "+raw); render(); return; }
+  if(r.total!==undefined) return addMatchEvent({t:"total",v:r.total});
+  for(const d of r.darts) addDart(d);
+  render();
+}
+
+/* ---------- klikken ---------- */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const a=b.dataset.act, D=store.data;
+  speaker.unlock();
+  if(audio && audio.state==="suspended") audio.resume();
+  switch(a){
+    case "mic": voice.toggle(); break;
+    case "tab": tab=b.dataset.t; render(); window.scrollTo(0,0); break;
+    case "wk": tipWeek[b.dataset.ex]=+b.dataset.w; render(); break;
+    case "bcopy": { const txt=JSON.stringify(shareable(D)); try{ navigator.clipboard.writeText(txt).then(()=>toast("Back-up gekopieerd. Plak hem op de andere gsm."),()=>{ $("#bk").value=txt; toast("Kopiëren lukte niet: selecteer de tekst in het vak."); }); }catch(err){ $("#bk").value=txt; } break; }
+    case "bmerge": mergeBackup($("#bk").value); break;
+    case "start": if(store.data.players.length===1){ voice.autoOn(); startGame(b.dataset.ex,[store.data.players[0].id]); } else { pickEx=b.dataset.ex; render(); } break;
+    case "resume": voice.autoOn(); screen="play"; render(); keepAwake(); break;
+    case "home":
+      if(screen==="result"){ quit(); }
+      else if(screen==="play" && game && game.darts.some(d=>!d.skip) && !gameDone(game)){ confirmStop=true; render(); }
+      else if(screen==="play"){ quit(); }
+      else { screen="home"; render(); } break;
+    case "cs-go": confirmStop=false; render(); break;
+    case "cs-pause": confirmStop=false; speaker.cancel(); screen="home"; render(); releaseAwake(); break;
+    case "cs-quit": quit(); break;
+    case "snext": nextInSession(); break;
+    case "mset": { const c=matchDraft||{}; let v=b.dataset.v; v = v==="true"?true : v==="false"?false : +v; c[b.dataset.k]=v; D.matchCfg=c; store.save(); render(); break; }
+    case "mpick": { const c=matchDraft; const id=b.dataset.id; if(c.players.includes(id)){ if(c.players.length>2) c.players=c.players.filter(x=>x!==id); } else { c.players=[...c.players.slice(-1),id]; } c.starter=0; D.matchCfg=c; store.save(); render(); break; }
+    case "mstart": voice.autoOn(); startMatch(matchDraft); break;
+    case "rematch": { voice.autoOn(); const c=Object.assign({},D.matchCfg||{}, {players:game.players.slice(), start:game.start, doubleIn:game.doubleIn, bestOf:game.bestOf, starter:(game.starter+1)%game.players.length}); startMatch(c); break; }
+    case "imode": game.inMode=b.dataset.v; D.inMode=b.dataset.v; store.save(); kbuf=""; saveGame(); render(); break;
+    case "qt": addMatchEvent({t:"total",v:+b.dataset.v}); break;
+    case "td": if(kbuf.length<3){ kbuf+=b.dataset.v; } render(); break;
+    case "tback": if(kbuf) kbuf=kbuf.slice(0,-1); else undo(); render(); break;
+    case "tok": if(kbuf){ const v=+kbuf; kbuf=""; addMatchEvent({t:"total",v}); } break;
+    case "outn": { const p=pendingOut; pendingOut=null; if(p) addMatchEvent({t:"total",v:p.v,n:+b.dataset.v}); break; }
+    case "outx": pendingOut=null; render(); break;
+    case "session": pickEx="__session"; render(); break;
+    case "speak": D.speak = b.dataset.v==="1"; store.save(); render(); break;
+    case "vstyle": D.voiceStyle=b.dataset.v; store.save(); render(); if(D.voiceStyle!=="off") speaker.say(D.voiceStyle==="caller" ? scoreCall(180,callLang()) : ["Stem staat aan."],{lang:callLang()}); break;
+    case "clang": D.callLang=b.dataset.v; store.save(); render(); speaker.say(CALL.start(callLang(),{},"Tim"),{lang:callLang()}); break;
+    case "vtest": { const L=callLang(); speaker.say([...scoreCall(180,L),{t:CALL.require(L,"Jan",81)}],{lang:L}); break; }
+    case "goal": D.weekGoal = +b.dataset.v; store.save(); render(); break;
+    case "again": { voice.autoOn(); if(isMatch(game)){ const c={players:game.players.slice(),start:game.start,doubleIn:game.doubleIn,bestOf:game.bestOf,starter:(game.starter+1)%game.players.length}; startMatch(c); } else startGame(game.ex, game.players, game.session); break; }
+    case "num": addDart({seg:+b.dataset.n, mult:modSel}); modSel=1; if(screen==="play") render(); break;
+    case "mod": modSel = (modSel===+b.dataset.m && modSel!==1) ? 1 : +b.dataset.m; render(); break;
+    case "miss": addDart({seg:0,mult:0}); modSel=1; if(screen==="play") render(); break;
+    case "b25": addDart({seg:25,mult:modSel===2?2:1}); modSel=1; if(screen==="play") render(); break;
+    case "b50": addDart({seg:25,mult:2}); modSel=1; if(screen==="play") render(); break;
+    case "undo": undo(); break;
+    case "skip": if(canSkip()) addDart({skip:true}); break;
+    case "phase": D.phase=+b.dataset.p; store.save(); render(); break;
+    case "sconnect": { const v=($("#gtok")||{}).value||""; if(v.trim().length<20){ toast("Plak eerst je GitHub-sleutel."); break; } sync.connect(v); break; }
+    case "snow": sync.run(true); break;
+    case "soff": sync.cfg=null; sync.saveCfg(); qrShown=false; sync.status=""; renderSync(); toast("Ontkoppeld. Je scores blijven op dit toestel."); break;
+    case "slink": qrShown=!qrShown; renderSync(); break;
+    case "scopy": { const l=sync.link(); try{ navigator.clipboard.writeText(l).then(()=>toast("Link gekopieerd"),()=>toast("Kopiëren lukte niet")); }catch(err){ toast("Kopiëren lukte niet"); } break; }
+    case "sshare": try{ navigator.share({title:"Darttrainer koppelen",text:"Open deze link om de Darttrainer te koppelen:",url:sync.link()}).catch(()=>{}); }catch(err){} break;
+    case "go": voice.autoOn(); if(pickEx==="__session") startSession(store.data.phase||1, b.dataset.ids.split(",")); else startGame(pickEx, b.dataset.ids.split(",")); break;
+    case "pickclose": pickEx=null; render(); break;
+    case "hand": { const p=D.players.find(x=>x.id===b.dataset.id); p.hand=b.dataset.h; p.upd=Date.now(); store.save(); render(); break; }
+    case "pdel": if(D.players.length>1){ (D.removed ||= []).push(b.dataset.id); D.players=D.players.filter(x=>x.id!==b.dataset.id); store.save(); render(); } else toast("Er moet minstens één speler blijven."); break;
+    case "padd": D.players.push({id:uid(),name:"Speler "+(D.players.length+1),hand:"R",fav:20,upd:Date.now()}); store.save(); render(); break;
+    case "cdel": (D.removed ||= []).push(b.dataset.id); D.customs=D.customs.filter(c=>c.id!==b.dataset.id); store.save(); render(); break;
+    case "phelp": playHelp=!playHelp; render(); break;
+    case "autov": D.autoVoice = b.dataset.v==="1"; store.save(); render(); break;
+    case "sound": D.sound = b.dataset.v==="1"; store.save(); render(); break;
+    case "lang": D.lang=b.dataset.v; store.save(); if(voice.rec) voice.rec.lang=D.lang; render(); break;
+  }
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.matches('select.vsel')){ if(t.dataset.lang==="en") store.data.voiceEn=t.value; else store.data.voiceNl=t.value; store.save(); const L=t.dataset.lang; speaker.say([...scoreCall(180,L)],{lang:L}); return; }
+  if(t.matches('select.msel')){ const c=matchDraft, k=+t.dataset.k; c.players[k]=t.value; c.starter=0; store.data.matchCfg=c; store.save(); render(); return; }
+  if(t.matches('select.fav')){ const p=store.data.players.find(x=>x.id===t.dataset.id); if(p){ p.fav=+t.value; p.upd=Date.now(); store.save(); render(); } return; }
+  if(t.matches('.prow input[type=text]')){ const p=store.data.players.find(x=>x.id===t.dataset.id); if(p){ p.name=t.value.trim()||p.name; p.upd=Date.now(); store.save(); render(); } }
+});
+document.addEventListener("keydown",e=>{
+  if(e.target.matches && e.target.matches("input,textarea,select")) return;
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(screen==="result" && e.key==="Enter" && !kbuf){ const p=document.querySelector(".btnrow .primary"); if(p){ e.preventDefault(); p.click(); } return; }
+  if(screen!=="play" || !game) return;
+  if(pendingOut && /^[123]$/.test(e.key)){ e.preventDefault(); const p=pendingOut; pendingOut=null; return addMatchEvent({t:"total",v:p.v,n:+e.key}); }
+  if(confirmStop){ if(e.key==="Escape"){ confirmStop=false; render(); } return; }
+  const k=e.key;
+  if(k==="Enter"){ e.preventDefault(); if(kbuf) commitKbuf(); return; }
+  if(k==="Backspace"){ e.preventDefault(); if(kbuf){ kbuf=kbuf.slice(0,-1); render(); } else undo(); return; }
+  if(k==="Escape"){ kbuf=""; render(); return; }
+  if(k.length===1 && /[0-9a-zA-Z=,+ ]/.test(k)){ if(k===" " && !kbuf) return; e.preventDefault(); if(kbuf.length<40){ kbuf+=k; render(); } }
+});
+
+/* ---------- start ---------- */
+store.loadLocal();
+game=loadGame();
+sync.load();
+const justLinked=sync.fromHash();
+if(!window.claude && location.protocol==="https:" && "serviceWorker" in navigator){ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} }
+render();
+voice.init();
+store.connect();
+if(sync.on()) sync.run().then(()=>{ if(justLinked) toast("Gekoppeld! Je ziet nu dezelfde scores als op je andere toestellen."); });
+</script>
+</body>
+</html>
