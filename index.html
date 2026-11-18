@@ -1083,7 +1083,7 @@ const voice={
     this._timer=setTimeout(()=>{ if(this.want && !this.held && this.state==="idle" && document.visibilityState==="visible"){ try{ this.auto=true; this.rec.start(); }catch(e){} } }, this.fails.length>3?1000:150);
   },
   start(){   // altijd rechtstreeks vanuit een tik aanroepen
-    this.lastUse=Date.now();
+    this.lastUse=Date.now(); if(this.mode==="web") this.used_=true;
     if(this.mode==="claude"){
       this.want=true;
       if(this.d.active()) return;
@@ -1112,13 +1112,21 @@ const voice={
     if(this.mode==="web"){ try{ this.rec.stop(); }catch(e){} }
     try{ if(audio && IS_WEBKIT){ audio.close(); audio=null; } }catch(e){}
     renderVoice(); },
-  toggle(){ if(this.mode==="none") return toast(this.reason||"Spraak is hier niet beschikbaar"); if(this.on()) this.stop(); else this.start(); },
+  toggle(){ if(this.mode==="none") return toast(this.reason||"Spraak is hier niet beschikbaar");
+    if(this.on()){ this.stop(); if(IS_IOS && this.mode==="web") setTimeout(()=>hardRelease(false),350); } else this.start(); },
   autoOn(){ if(store.data.autoVoice!==false && this.mode && this.mode!=="none") this.start(); },
   used(){ this.lastUse=Date.now(); },
   on(){ return this.mode==="claude" ? (this.state!=="idle") : this.mode==="web" ? this.want : false; }
 };
 // scherm terug aan: opnieuw luisteren als dat de bedoeling was
 const IS_WEBKIT = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|Edg/.test(navigator.userAgent) || /iP(hone|ad|od)/.test(navigator.userAgent);
+/* iPhone: Safari laat de microfoon soms niet los. De pagina even opnieuw laden geeft hem
+   gegarandeerd vrij; je spel en je scherm worden bewaard en meteen teruggezet. */
+function hardRelease(fromBackground){
+  if(!(IS_IOS && voice.mode==="web" && voice.used_)) return;
+  try{ saveGame(); store.saveLocal(); sessionStorage.setItem("dt.resume", JSON.stringify({screen, tab, statsView, bg:!!fromBackground})); }catch(e){}
+  try{ location.reload(); }catch(e){}
+}
 /* App naar de achtergrond of gesloten: microfoon en stem echt uitzetten. Terug in de app: opnieuw aan. */
 function micOffForBackground(){
   try{ speechSynthesis.cancel(); }catch(e){}
@@ -1131,6 +1139,7 @@ function micOffForBackground(){
   // ook de geluidjes uitzetten: een open audio-sessie houdt het microfoonlampje van de iPhone aan
   try{ if(audio){ audio.close(); audio=null; } }catch(e){}
   releaseAwake();
+  if(IS_IOS && voice.mode==="web" && voice.used_) setTimeout(()=>hardRelease(true),80);
 }
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState==="hidden"){ micOffForBackground(); return; }
@@ -2032,6 +2041,8 @@ document.addEventListener("keydown",e=>{
 /* ---------- start ---------- */
 store.loadLocal();
 game=loadGame();
+try{ const r=JSON.parse(sessionStorage.getItem("dt.resume")||"null"); sessionStorage.removeItem("dt.resume");
+  if(r){ tab=r.tab||tab; statsView=r.statsView||statsView; if((r.screen==="play"||r.screen==="result") && game) screen=r.screen; voice.note = r.bg ? "Tik op de microfoon om verder te luisteren" : "Microfoon uit · tik om te praten"; } }catch(e){}
 sync.load();
 const justLinked=sync.fromHash();
 if(!window.claude && location.protocol==="https:" && "serviceWorker" in navigator){ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} }
