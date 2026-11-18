@@ -346,6 +346,17 @@ textarea{width:100%;min-height:96px;background:var(--black);border:1px solid var
 .mhead h2{font-size:clamp(32px,9vw,48px);margin-top:4px}
 .mhead .vs{font-family:var(--label);font-size:.45em;letter-spacing:.14em;color:var(--muted);vertical-align:middle;margin:0 .3em}
 .field{display:flex;flex-direction:column;gap:var(--s1)}
+.rseg{align-self:flex-start;margin-bottom:var(--s1)}
+.rseg button{min-height:36px;font-size:14px}
+.journey{display:flex;flex-direction:column;gap:var(--s1);background:var(--black);border:1px solid var(--line);border-radius:var(--r1);padding:var(--s2)}
+.jrow{display:grid;grid-template-columns:auto auto auto auto 1fr;align-items:end;gap:4px var(--s2)}
+.jrow .who2{grid-column:1/-1}
+.jstep{display:flex;flex-direction:column}
+.jstep .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.jstep b{font:400 28px/1 var(--display)}
+.jarrow{color:var(--muted);font-size:20px;padding-bottom:2px}
+.jrow .delta{justify-self:end;align-self:center}
+.jn{grid-column:1/-1}
 .mini{display:grid;grid-template-columns:1fr 1fr;gap:4px var(--s2);font-size:14px;color:var(--muted);margin-top:4px}
 .mini b{color:var(--cream);font-weight:700}
 .mlist{display:flex;flex-direction:column}
@@ -447,12 +458,30 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
 const lab = d => d.skip ? "Overgeslagen" : d.mult===0 ? "Mis" : d.seg===25 ? (d.mult===2 ? "Bull" : "25") : (["","S","D","T"][d.mult] + d.seg);
 
+/* Compacte opslag: alle uitslagen blijven bewaard, maar met korte veldnamen (ongeveer de helft kleiner). */
+function packEntry(h){
+  if(!h || h.i) return h;                      // al compact
+  if(h.match) return h;                        // wedstrijden: alles bewaren zoals het is
+  const o={i:h.id,e:h.ex,t:h.at,m:h.max,r:h.res.map(r=>{ const a=[r.pid,r.score,r.darts||0]; if(r.fav||r.extra) a.push(r.fav||0); if(r.extra) a.push(r.extra); return a; })};
+  if(h.session) o.s=h.session;
+  if(!EX[h.ex]) o.n=h.name;
+  return o;
+}
+function unpackEntry(o){
+  if(!o || !o.i) return o;
+  const res=(o.r||[]).map(a=>{ const r={pid:a[0],name:pName(a[0]),score:a[1],darts:a[2]||0}; if(a[3]) r.fav=a[3]; if(a[4]) r.extra=a[4]; return r; });
+  const h={id:o.i,ex:o.e,name:(EX[o.e]&&EX[o.e].name)||o.n||o.e,at:o.t,max:o.m,darts:Math.max(0,...res.map(r=>r.darts||0)),res};
+  if(o.s) h.session=o.s;
+  return h;
+}
+function packData(d){ return Object.assign({},d,{history:(d.history||[]).map(packEntry)}); }
+
 /* ---------- opslag ---------- */
 const LS_KEY="darttrainer.v1", LS_GAME="darttrainer.game.v2";
 const store = {
   data:{ players:[{id:uid(),name:"Tim",hand:"R",fav:20},{id:uid(),name:"Jan",hand:"R",fav:20}], phase:1, history:[], customs:[], updated:0 },
   ref:null, writing:false, pending:false,
-  loadLocal(){ try{ const s=localStorage.getItem(LS_KEY); if(s){ const d=JSON.parse(s); if(d && Array.isArray(d.players)) this.data=Object.assign(this.data,d); } }catch(e){} this.rename(); },
+  loadLocal(){ try{ const s=localStorage.getItem(LS_KEY); if(s){ const d=JSON.parse(s); if(d && Array.isArray(d.players)){ this.data.players=d.players; d.history=(d.history||[]).map(unpackEntry); this.data=Object.assign(this.data,d); } } }catch(e){} this.rename(); },
   rename(){ // oude standaardnamen omzetten naar Tim en Jan
     const D=this.data; if(D.named) return;
     const RN={ik:"Tim",neef:"Jan"}, ids={};
@@ -468,17 +497,17 @@ const store = {
       const id=await user.id(); if(!id) return;
       this.ref=db.doc("data/users/"+id+"/darttrainer");
       const snap=await Promise.race([this.ref.get(), new Promise((_,r)=>setTimeout(()=>r("timeout"),10000))]);
-      if(snap && snap.exists){ const d=snap.data(); if(d && (d.updated||0) > (this.data.updated||0)){ this.data=JSON.parse(JSON.stringify(d)); this.rename(); this.saveLocal(); render(); } }
+      if(snap && snap.exists){ const d=snap.data(); if(d && (d.updated||0) > (this.data.updated||0)){ this.data=JSON.parse(JSON.stringify(d)); this.data.history=(this.data.history||[]).map(unpackEntry); this.rename(); this.saveLocal(); render(); } }
       else if(this.data.updated){ this.flush(); }
     }catch(e){ this.ref=null; }
   },
-  saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(this.data)); }catch(e){} },
+  saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(packData(this.data))); this.full=false; }catch(e){ if(!this.full){ this.full=true; toast("Het geheugen van deze browser is vol. Koppel je toestellen of maak een back-up: je gegevens staan dan veilig op GitHub."); } } },
   save(){ this.data.updated=Date.now(); this.saveLocal(); this.flush(); if(typeof sync!=="undefined") sync.schedule(); },
   async flush(){
     if(!this.ref) return;
     if(this.writing){ this.pending=true; return; }
     this.writing=true;
-    try{ await this.ref.set(JSON.parse(JSON.stringify(this.data))); }catch(e){}
+    try{ await this.ref.set(JSON.parse(JSON.stringify(packData(this.data)))); }catch(e){}
     this.writing=false;
     if(this.pending){ this.pending=false; this.flush(); }
   }
@@ -1379,6 +1408,10 @@ function pName(pid,fallback){ const p=store.data.players.find(x=>x.id===pid); re
 function exName(id,fallback){ const e=getEx(id); if(!e) return fallback; const pn=exPhaseNr(id); if(!pn) return e.name; return (e.phase ? PHASE_NAME[pn.ph]+" "+pn.nr : "Elk niveau "+pn.nr)+" · "+e.name; }
 function deltaHTML(d,unit){ if(Math.abs(d)<0.05) return '<span class="delta eq">= gelijk aan gem.</span>'; return '<span class="delta '+(d>0?'up':'down')+'">'+(d>0?'▲ +':'▼ −')+fmt(Math.abs(d))+(unit||'')+(d>0?' boven':' onder')+' gem.</span>'; }
 
+let rangeSel={};
+const MONTHS=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+function monthStart(ts){ const d=new Date(ts); return new Date(d.getFullYear(),d.getMonth(),1).getTime(); }
+function addMonths(ms,n){ const d=new Date(ms); return new Date(d.getFullYear(),d.getMonth()+n,1).getTime(); }
 function exStats(exId){
   const H=store.data.history.filter(h=>h.ex===exId).slice().sort((a,b)=>a.at-b.at);
   if(!H.length) return null;
@@ -1386,33 +1419,59 @@ function exStats(exId){
   H.forEach(h=>h.res.forEach(r=>{ if(!pids.includes(r.pid)) pids.push(r.pid); }));
   pids.sort((a,b)=>store.data.players.findIndex(p=>p.id===a)-store.data.players.findIndex(p=>p.id===b));
   const thisW=weekStart(Date.now()), weeks=[]; for(let i=7;i>=0;i--) weeks.push(addWeeks(thisW,-i));
+  // grafiek: laatste 8 weken, of alles per maand sinds de eerste keer
+  const range=rangeSel[exId]||"8w", buckets=[];
+  if(range==="all"){ const m0=monthStart(H[0].at), mNow=monthStart(Date.now()); for(let m=m0; m<=mNow; m=addMonths(m,1)){ const d=new Date(m); buckets.push({s:m,e:addMonths(m,1),label:MONTHS[d.getMonth()]+(d.getMonth()===0||m===m0?" '"+String(d.getFullYear()).slice(2):""),title:MONTHS[d.getMonth()]+" "+d.getFullYear()}); } }
+  else weeks.forEach((w,i)=>buckets.push({s:w,e:addWeeks(w,1),label:i===7?"nu":"wk "+isoWeek(w),title:"Week "+isoWeek(w)+" ("+dShort(w)+" – "+dShort(addWeeks(w,1)-DAY)+")"}));
+  const agg=(rows,s,e)=>{ const xs=rows.filter(r=>r.at>=s && r.at<e).map(r=>r.score); return xs.length?{avg:xs.reduce((a,b)=>a+b,0)/xs.length,n:xs.length,best:Math.max(...xs)}:null; };
   const per=pids.map(pid=>{
     const rows=[]; H.forEach(h=>{ const r=h.res.find(x=>x.pid===pid); if(r) rows.push({at:h.at,score:r.score,name:r.name}); });
     const scores=rows.map(r=>r.score), avg=scores.reduce((a,b)=>a+b,0)/scores.length;
-    const wk=weeks.map(w=>{ const xs=rows.filter(r=>r.at>=w && r.at<addWeeks(w,1)).map(r=>r.score); return xs.length?{avg:xs.reduce((a,b)=>a+b,0)/xs.length,n:xs.length,best:Math.max(...xs)}:null; });
-    return {pid,name:pName(pid,rows[rows.length-1].name),last:rows[rows.length-1],avg,best:Math.max(...scores),n:rows.length,wk};
+    const wk=weeks.map(w=>agg(rows,w,addWeeks(w,1)));
+    const ser=buckets.map(b=>agg(rows,b.s,b.e));
+    const k=Math.min(5,rows.length), first=rows.slice(0,k), lastk=rows.slice(-k);
+    const mean=a=>a.reduce((s,r)=>s+r.score,0)/a.length;
+    return {pid,name:pName(pid,rows[rows.length-1].name),last:rows[rows.length-1],avg,best:Math.max(...scores),n:rows.length,wk,ser,
+      start:{at:rows[0].at,avg:mean(first),k}, now:{avg:mean(lastk),k}};
   });
-  return {H,max,per,weeks};
+  return {H,max,per,weeks,buckets,range};
 }
 function chartSVG(exId,S){
-  const W=340,Hh=150,L=30,R=12,T=10,B=24, iw=W-L-R, ih=Hh-T-B, n=S.weeks.length;
-  const x=i=>L+iw*(i+.5)/n, y=v=>T+ih*(1-v/S.max);
-  const sel=tipWeek[exId]; let g='';
+  const W=340,Hh=150,L=30,R=12,T=10,B=24, iw=W-L-R, ih=Hh-T-B, n=S.buckets.length;
+  const x=i=>L+iw*(n===1?.5:(i+.5)/n), y=v=>T+ih*(1-v/S.max);
+  const sel=tipWeek[exId]!==undefined && tipWeek[exId]<n ? tipWeek[exId] : undefined; let g='';
+  const every=Math.ceil(n/8);
   [0,.5,1].forEach(f=>{ const v=Math.round(S.max*f); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(L-6)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="11" fill="var(--muted)">'+v+'</text>'; });
-  S.weeks.forEach((w,i)=>{ g+='<text x="'+x(i)+'" y="'+(Hh-6)+'" text-anchor="middle" font-size="11" fill="'+(i===sel?'var(--sisal)':'var(--muted)')+'">'+(i===n-1?'nu':'wk '+isoWeek(w))+'</text>'; });
+  S.buckets.forEach((b,i)=>{ if(i%every===0 || i===n-1) g+='<text x="'+x(i)+'" y="'+(Hh-6)+'" text-anchor="middle" font-size="11" fill="'+(i===sel?'var(--sisal)':'var(--muted)')+'">'+esc(b.label)+'</text>'; });
   if(sel!==undefined) g+='<line x1="'+x(sel)+'" x2="'+x(sel)+'" y1="'+T+'" y2="'+(T+ih)+'" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3"/>';
+  const r = n>20 ? 3 : 4;
   S.per.forEach((P,pi)=>{
     const c=pColor(P.pid), dash=pi%2?' stroke-dasharray="6 4"':'';
-    for(let i=1;i<n;i++){ const a=P.wk[i-1], b=P.wk[i]; if(a&&b) g+='<line x1="'+x(i-1)+'" y1="'+y(a.avg)+'" x2="'+x(i)+'" y2="'+y(b.avg)+'" stroke="'+c+'" stroke-width="2" stroke-linecap="round"'+dash+'/>'; }
-    P.wk.forEach((v,i)=>{ if(v) g+='<circle cx="'+x(i)+'" cy="'+y(v.avg)+'" r="'+(i===sel?5.5:4)+'" fill="'+(pi%2?'var(--black)':c)+'" stroke="'+c+'" stroke-width="2"/>'; });
-    // all-time gemiddelde als stippellijn
+    let prev=null;
+    P.ser.forEach((v,i)=>{ if(v){ if(prev) g+='<line x1="'+x(prev.i)+'" y1="'+y(prev.v.avg)+'" x2="'+x(i)+'" y2="'+y(v.avg)+'" stroke="'+c+'" stroke-width="2" stroke-linecap="round"'+dash+(S.range==="all"?'':(prev.i===i-1?'':' opacity=".35"'))+'/>'; prev={i,v}; } else if(S.range!=="all") prev=null; });
+    P.ser.forEach((v,i)=>{ if(v) g+='<circle cx="'+x(i)+'" cy="'+y(v.avg)+'" r="'+(i===sel?r+1.5:r)+'" fill="'+(pi%2?'var(--black)':c)+'" stroke="'+c+'" stroke-width="2"/>'; });
     g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(P.avg)+'" y2="'+y(P.avg)+'" stroke="'+c+'" stroke-width="1" stroke-dasharray="2 4" opacity=".8"/>';
   });
-  S.weeks.forEach((w,i)=>{ g+='<rect data-act="wk" data-ex="'+esc(exId)+'" data-w="'+i+'" x="'+(L+iw*i/n)+'" y="0" width="'+(iw/n)+'" height="'+Hh+'" fill="transparent" style="cursor:pointer"><title>Week '+isoWeek(w)+'</title></rect>'; });
-  let tip='Tik op een week voor de cijfers. Stippellijn = gemiddelde van altijd.';
-  if(sel!==undefined){ const w=S.weeks[sel]; tip='<b>Week '+isoWeek(w)+'</b> ('+dShort(w)+' – '+dShort(addWeeks(w,1)-DAY)+'): '+S.per.map(P=>{ const v=P.wk[sel]; return esc(P.name)+' '+(v?fmt(v.avg)+' gem., beste '+fmt(v.best)+' ('+v.n+'×)':'niet gespeeld'); }).join(' · '); }
+  S.buckets.forEach((b,i)=>{ g+='<rect data-act="wk" data-ex="'+esc(exId)+'" data-w="'+i+'" x="'+(L+iw*i/n)+'" y="0" width="'+(iw/n)+'" height="'+Hh+'" fill="transparent" style="cursor:pointer"><title>'+esc(b.title)+'</title></rect>'; });
+  let tip='Tik op een '+(S.range==="all"?'maand':'week')+' voor de cijfers. Stippellijn = gemiddelde van altijd.';
+  if(sel!==undefined){ const b=S.buckets[sel]; tip='<b>'+esc(b.title)+'</b>: '+S.per.map(P=>{ const v=P.ser[sel]; return esc(P.name)+' '+(v?fmt(v.avg)+' gem., beste '+fmt(v.best)+' ('+v.n+'×)':'niet gespeeld'); }).join(' · '); }
   const legend=S.per.length>1?'<div class="legend">'+S.per.map(P=>'<span><i class="dot" style="background:'+pColor(P.pid)+'"></i>'+esc(P.name)+'</span>').join('')+'</div>':'';
-  return '<div class="chart">'+legend+'<svg viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Gemiddelde score per week, laatste 8 weken">'+g+'</svg><div class="tip">'+tip+'</div></div>';
+  const seg='<div class="seg rseg" role="group" aria-label="Periode"><button data-act="range" data-ex="'+esc(exId)+'" data-v="8w" aria-pressed="'+(S.range!=="all")+'">8 weken</button><button data-act="range" data-ex="'+esc(exId)+'" data-v="all" aria-pressed="'+(S.range==="all")+'">Sinds de start</button></div>';
+  return '<div class="chart">'+seg+legend+'<svg viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Gemiddelde score per '+(S.range==="all"?'maand sinds de start':'week, laatste 8 weken')+'">'+g+'</svg><div class="tip">'+tip+'</div></div>';
+}
+function journeyHTML(S){
+  // waar je gestart bent en waar je nu staat
+  const fullDate=ts=>new Date(ts).toLocaleDateString("nl-BE",{day:"numeric",month:"numeric",year:"2-digit"});
+  return '<div class="journey">'+S.per.map(P=>{
+    if(P.n<2) return '<div><b>'+esc(P.name)+'</b>: 1 keer gespeeld ('+fullDate(P.start.at)+')</div>';
+    const d=P.now.avg-P.start.avg;
+    return '<div class="jrow"><span class="who2"><i class="dot" style="background:'+pColor(P.pid)+'"></i>'+esc(P.name)+'</span>'
+      +'<span class="jstep"><span class="lbl">Start · '+fullDate(P.start.at)+'</span><b class="tab">'+fmt(P.start.avg)+'</b></span>'
+      +'<span class="jarrow" aria-hidden="true">→</span>'
+      +'<span class="jstep"><span class="lbl">Nu</span><b class="tab">'+fmt(P.now.avg)+'</b></span>'
+      +'<span class="delta '+(d>0.05?'up':d<-0.05?'down':'eq')+'">'+(Math.abs(d)<0.05?'= gelijk':(d>0?'▲ +':'▼ −')+fmt(Math.abs(d)))+'</span>'
+      +'<span class="muted small jn">'+P.n+' keer gespeeld · gem. van je eerste en laatste '+P.start.k+' keer</span></div>';
+  }).join('')+'</div>';
 }
 function renderStats(){
   const D=store.data, now=Date.now(), tw=weekStart(now), lw=addWeeks(tw,-1);
@@ -1441,7 +1500,7 @@ function renderStats(){
       else { t+='deze week '+fmt(a.avg)+' gem. ('+a.n+'×)'; if(b){ const d=a.avg-b.avg; t+=' · vorige week '+fmt(b.avg)+' → <span class="delta '+(d>0.05?'up':d<-0.05?'down':'eq')+'">'+(Math.abs(d)<0.05?'gelijk':(d>0?'+':'−')+fmt(Math.abs(d)))+'</span>'; } else t+=' · vorige week niet gespeeld'; }
       return '<div>'+t+'</div>'; }).join("");
     const recent=S.H.slice(-5).reverse().map(h=>'<div><span>'+dShort(h.at)+' '+new Date(h.at).toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"})+(h.res.length>1?' · samen':' · alleen')+'</span><span>'+h.res.map(r=>esc(pName(r.pid,r.name))+' <b>'+sv(ex,r.score)+'</b>'+(r.extra&&r.extra.legs&&r.extra.legs.length?' <span class="small">(legs '+r.extra.legs.map(x=>x==null?'–':x).join('/')+')</span>':'')).join(' · ')+'</span></div>').join("");
-    return '<div class="exstat"><h3>'+esc(exName(id,S.H[0].name))+'</h3><div class="prs">'+prs+'</div>'+chartSVG(id,S)+'<div class="prog">'+prog+'</div><div><div class="lbl muted small" style="text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Laatste 5 keer</div><div class="recent">'+recent+'</div></div></div>';
+    return '<div class="exstat"><h3>'+esc(exName(id,S.H[0].name))+'</h3><div class="prs">'+prs+'</div>'+journeyHTML(S)+chartSVG(id,S)+'<div class="prog">'+prog+'</div><div><div class="lbl muted small" style="text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Laatste 5 keer</div><div class="recent">'+recent+'</div></div></div>';
   };
   const blocks=ids.filter(id=>seen.has(id) && !(EX[id]&&EX[id].match)).map(blockFor).join("") || '<p class="muted">Nog geen resultaten. Speel een oefening en je ziet hier je cijfers.</p>';
   const mblocks=["match501","match301","match170"].filter(id=>seen.has(id)).map(blockFor).join("");
@@ -1545,12 +1604,13 @@ function basisHTML(){
 function mergeBackup(txt){
   let o; try{ o=JSON.parse(txt); }catch(e){ toast("Dat is geen geldige back-up."); return; }
   if(!o || !o.darttrainer || !Array.isArray(o.history)){ toast("Dat is geen geldige back-up."); return; }
+  o.history=o.history.map(unpackEntry);
   const n0=store.data.history.length, res=mergeData(store.data,o); applyMerged(res); store.save(); render();
   toast(Math.max(0,store.data.history.length-n0)+" resultaten toegevoegd");
 }
 
 /* ---------- samenvoegen + synchroniseren via GitHub ---------- */
-const CAP = window.claude ? 1200 : 3000;           // aantal bewaarde uitslagen
+const CAP = window.claude ? 1200 : Infinity;       // GitHub-versie: niets weggooien; Claude-link: max 1200 (opslaglimiet)
 const SYNC_KEY="darttrainer.sync", SYNC_FILE="darttrainer.json";
 const normName=n=>({ik:"tim",neef:"jan"}[n]||n);
 function mergeData(base, inc){
@@ -1573,7 +1633,7 @@ function mergeData(base, inc){
   return {data:out,map};
 }
 const RN_DEFAULT={tim:"Tim",jan:"Jan"};
-function shareable(d){ return {darttrainer:2, players:d.players||[], history:(d.history||[]).slice().sort((a,b)=>b.at-a.at||(a.id<b.id?-1:1)), customs:d.customs||[], removed:[...new Set(d.removed||[])].sort()}; }
+function shareable(d){ return {darttrainer:3, players:d.players||[], history:(d.history||[]).map(unpackEntry).sort((a,b)=>b.at-a.at||(a.id<b.id?-1:1)).map(packEntry), customs:d.customs||[], removed:[...new Set(d.removed||[])].sort()}; }
 function applyMerged(res){
   const D=store.data, before=JSON.stringify(shareable(D));
   Object.assign(D, res.data);
@@ -1613,7 +1673,7 @@ const sync={
       if(r.status===401) throw "key"; if(r.status===404) throw "gist"; if(!r.ok) throw "net";
       const j=await r.json(), f=j.files && j.files[SYNC_FILE];
       let remote={players:[],history:[],customs:[],removed:[]};
-      if(f){ let c=f.content; if(f.truncated) c=await (await fetch(f.raw_url,{cache:"no-store"})).text(); try{ remote=JSON.parse(c)||remote; }catch(e){} }
+      if(f){ let c=f.content; if(f.truncated) c=await (await fetch(f.raw_url,{cache:"no-store"})).text(); try{ remote=JSON.parse(c)||remote; }catch(e){} remote.history=(remote.history||[]).map(unpackEntry); }
       const res=mergeData(remote, store.data);
       const changed=applyMerged(res);
       const out=JSON.stringify(shareable(store.data));
@@ -1961,6 +2021,7 @@ document.addEventListener("click",e=>{
     case "cs-quit": quit(); break;
     case "snext": nextInSession(); break;
     case "sview": statsView=b.dataset.v; manageLimit=25; render(); window.scrollTo(0,0); break;
+    case "range": rangeSel[b.dataset.ex]=b.dataset.v; delete tipWeek[b.dataset.ex]; render(); break;
     case "h2hf": h2hFilter[b.dataset.k]=b.dataset.v; render(); break;
     case "mfilter": manageFilter=b.dataset.v; manageLimit=25; render(); break;
     case "mmore": manageLimit+=25; render(); break;
