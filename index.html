@@ -1110,6 +1110,7 @@ const voice={
   stop(){ this.want=false; clearTimeout(this._timer);
     if(this.mode==="claude" && this.d && this.d.active()) this.d.stop().catch(()=>{});
     if(this.mode==="web"){ try{ this.rec.stop(); }catch(e){} }
+    try{ if(audio && IS_WEBKIT){ audio.close(); audio=null; } }catch(e){}
     renderVoice(); },
   toggle(){ if(this.mode==="none") return toast(this.reason||"Spraak is hier niet beschikbaar"); if(this.on()) this.stop(); else this.start(); },
   autoOn(){ if(store.data.autoVoice!==false && this.mode && this.mode!=="none") this.start(); },
@@ -1117,7 +1118,30 @@ const voice={
   on(){ return this.mode==="claude" ? (this.state!=="idle") : this.mode==="web" ? this.want : false; }
 };
 // scherm terug aan: opnieuw luisteren als dat de bedoeling was
-document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && voice.mode==="web" && voice.want && voice.state==="idle"){ voice.fails=[]; voice.restart(); } });
+const IS_WEBKIT = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|Edg/.test(navigator.userAgent) || /iP(hone|ad|od)/.test(navigator.userAgent);
+/* App naar de achtergrond of gesloten: microfoon en stem echt uitzetten. Terug in de app: opnieuw aan. */
+function micOffForBackground(){
+  try{ speechSynthesis.cancel(); }catch(e){}
+  if(voice.mode==="web"){
+    if(voice.want) voice.resumeOnShow=true;
+    voice.want=false; clearTimeout(voice._timer);
+    // Safari (iPhone) geeft de microfoon alleen echt vrij met stop(), niet met abort()
+    try{ voice.rec.stop(); }catch(e){ try{ voice.rec.abort(); }catch(e2){} }
+  } else if(voice.mode==="claude" && voice.d && voice.d.active()){ voice.resumeOnShow=true; voice.d.stop().catch(()=>{}); }
+  // ook de geluidjes uitzetten: een open audio-sessie houdt het microfoonlampje van de iPhone aan
+  try{ if(audio){ audio.close(); audio=null; } }catch(e){}
+  releaseAwake();
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden"){ micOffForBackground(); return; }
+  if(voice.resumeOnShow){
+    voice.resumeOnShow=false;
+    if(voice.mode==="web"){ voice.want=true; voice.fails=[]; voice.note=""; try{ voice.rec.start(); }catch(e){} setTimeout(()=>{ if(!voice.on() || voice.state==="idle"){ voice.note="Tik op de microfoon om verder te luisteren"; renderVoice(); } },1200); renderVoice(); }
+    else { voice.note="Tik op de microfoon om verder te luisteren"; renderVoice(); }
+  }
+});
+window.addEventListener("pagehide", micOffForBackground);
+document.addEventListener("freeze", micOffForBackground);
 // batterij sparen: lang niets gegooid of gezegd? dan uit
 setInterval(()=>{ if(voice.on() && Date.now()-voice.lastUse > IDLE_STOP_MIN*60000){ voice.stop(); voice.note="Microfoon uitgezet na "+IDLE_STOP_MIN+" minuten stilte"; renderVoice(); } },30000);
 const MIC_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
