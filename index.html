@@ -346,6 +346,17 @@ textarea{width:100%;min-height:96px;background:var(--black);border:1px solid var
 .mhead h2{font-size:clamp(32px,9vw,48px);margin-top:4px}
 .mhead .vs{font-family:var(--label);font-size:.45em;letter-spacing:.14em;color:var(--muted);vertical-align:middle;margin:0 .3em}
 .field{display:flex;flex-direction:column;gap:var(--s1)}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:4px var(--s2);font-size:14px;color:var(--muted);margin-top:4px}
+.mini b{color:var(--cream);font-weight:700}
+.mlist{display:flex;flex-direction:column}
+.mrow{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);padding:var(--s2) 0;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.minfo{display:flex;flex-direction:column;gap:2px;min-width:0}
+.minfo .kicker{font-size:12px}
+.minfo b{font:700 18px var(--label);letter-spacing:.02em}
+.delbtn{flex:none;width:44px;height:44px;border-radius:var(--r1);border:1px solid var(--line2);background:transparent;color:var(--muted);display:grid;place-items:center}
+.delbtn:hover,.delbtn:focus-visible{border-color:var(--red);color:var(--cream)}
+.delbtn svg{width:20px;height:20px}
 .vpick{display:flex;flex-direction:column;gap:var(--s1);align-items:stretch;min-width:0;flex:1 1 220px}
 .vsel{min-height:44px;background:var(--black);color:var(--cream);border:1px solid var(--line2);border-radius:var(--r1);padding:0 var(--s1);font:500 15px var(--body);max-width:100%}
 .small-btn{min-height:44px;font-size:15px}
@@ -726,7 +737,7 @@ function startGame(exId, ids, session){
   speaker.say((session?"Oefening "+(session.i+1)+": "+ex.name+". ":"")+turnCall(st));
 }
 function startSession(ph, ids){
-  startGame(PHASES[ph][0], ids, {ph, i:0, list:PHASES[ph].slice(), done:[]});
+  startGame(PHASES[ph][0], ids, {ph, i:0, list:PHASES[ph].slice(), done:[], sid:uid()});
 }
 /* wat de app zegt bij het begin van een beurt */
 function turnCall(st){
@@ -775,7 +786,7 @@ function undo(){
   stopCountdown(); screen="play"; saveGame(); render(); toast((d.skip?"Overslaan":lab(d))+" weggehaald");
   speaker.say("Terug. "+lab(d)+" gewist.");
 }
-function weekCount(pid){ const w=weekStart(Date.now()); return store.data.history.filter(h=>h.at>=w && h.res.some(r=>r.pid===pid)).length; }
+function weekCount(pid){ const w=weekStart(Date.now()); return store.data.history.filter(h=>!h.match && h.at>=w && h.res.some(r=>r.pid===pid)).length; }
 function finish(){
   const st=derive(game), ex=st.ex;
   const prevBest=game.players.map(pid=>bestFor(game.ex,pid));
@@ -785,7 +796,7 @@ function finish(){
   entry.darts=Math.max(...entry.res.map(r=>r.darts));
   store.data.history.unshift(entry); store.data.history=store.data.history.slice(0,CAP);
   game.saved=entry.id;
-  if(game.session) game.session.done.push({ex:game.ex, id:entry.id});
+  if(game.session){ game.session.done.push({ex:game.ex, id:entry.id}); entry.session={sid:game.session.sid||"s"+game.started, ph:game.session.ph}; }
   store.save(); saveGame();
   game.records=entry.res.filter((r,k)=>prevBest[k]!==null && r.score>prevBest[k]).map(r=>r.pid);
   const goal=store.data.weekGoal||0;
@@ -1376,11 +1387,11 @@ function renderStats(){
   const seen=new Set(D.history.map(h=>h.ex)); D.history.forEach(h=>{ if(!ids.includes(h.ex)) ids.push(h.ex); });
   // weekoverzicht per speler
   const tiles=D.players.map(p=>{
-    const mine=w=>D.history.filter(h=>h.at>=w && h.at<addWeeks(w,1) && h.res.some(r=>r.pid===p.id));
+    const mine=w=>D.history.filter(h=>!h.match && h.at>=w && h.at<addWeeks(w,1) && h.res.some(r=>r.pid===p.id));
     const a=mine(tw), b=mine(lw), darts=a.reduce((s,h)=>{ const r=h.res.find(x=>x.pid===p.id); return s+((r&&r.darts)||h.darts||0); },0), d=a.length-b.length;
     return '<div class="tile"><span class="who2"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</span><span class="v tab">'+a.length+((D.weekGoal||0)?'<span class="of">/'+D.weekGoal+'</span>':'')+'</span>'+((D.weekGoal||0)?'<div class="bar"><i style="width:'+Math.min(100,Math.round(100*a.length/D.weekGoal))+'%;background:'+pColor(p.id)+'"></i></div>':'')+'<span class="muted small">oefeningen deze week'+(darts?' · '+darts+' pijlen':'')+'</span><span class="delta '+(d>0?'up':d<0?'down':'eq')+'">'+(d===0?'evenveel als vorige week':(d>0?'▲ ':'▼ ')+Math.abs(d)+(d>0?' meer':' minder')+' dan vorige week')+'</span></div>';
   }).join("");
-  const blocks=ids.filter(id=>seen.has(id)).map(id=>{
+  const blockFor=id=>{
     const S=exStats(id); if(!S) return '';
     const ex=getEx(id);
     const prs=S.per.map(P=>{
@@ -1398,18 +1409,51 @@ function renderStats(){
       return '<div>'+t+'</div>'; }).join("");
     const recent=S.H.slice(-5).reverse().map(h=>'<div><span>'+dShort(h.at)+' '+new Date(h.at).toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"})+(h.res.length>1?' · samen':' · alleen')+'</span><span>'+h.res.map(r=>esc(pName(r.pid,r.name))+' <b>'+sv(ex,r.score)+'</b>'+(r.extra&&r.extra.legs&&r.extra.legs.length?' <span class="small">(legs '+r.extra.legs.map(x=>x==null?'–':x).join('/')+')</span>':'')).join(' · ')+'</span></div>').join("");
     return '<div class="exstat"><h3>'+esc(exName(id,S.H[0].name))+'</h3><div class="prs">'+prs+'</div>'+chartSVG(id,S)+'<div class="prog">'+prog+'</div><div><div class="lbl muted small" style="text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Laatste 5 keer</div><div class="recent">'+recent+'</div></div></div>';
-  }).join("") || '<p class="muted">Nog geen resultaten. Speel een oefening en je ziet hier je cijfers.</p>';
+  };
+  const blocks=ids.filter(id=>seen.has(id) && !(EX[id]&&EX[id].match)).map(blockFor).join("") || '<p class="muted">Nog geen resultaten. Speel een oefening en je ziet hier je cijfers.</p>';
+  const mblocks=["match501","match301","match170"].filter(id=>seen.has(id)).map(blockFor).join("");
+  const sub='<div class="nav" role="group" aria-label="Soort statistieken"><button data-act="sview" data-v="oef" aria-pressed="'+(statsView==="oef")+'">Oefeningen</button><button data-act="sview" data-v="match" aria-pressed="'+(statsView==="match")+'">Wedstrijden</button></div>';
+  const backup='<section><h2>Twee gsm\'s samenvoegen</h2><p class="muted small">Gooien jullie elk op je eigen gsm? Kopieer de back-up op de ene gsm, stuur hem door (bv. via WhatsApp) en plak hem hier op de andere. Resultaten worden samengevoegd, niets wordt dubbel geteld.</p><textarea id="bk" aria-label="Back-up" placeholder="Plak hier een back-up"></textarea><div class="btnrow"><button class="secondary" data-act="bcopy">Back-up kopiëren</button><button class="primary" data-act="bmerge">Plakken en samenvoegen</button></div></section>';
+  if(statsView==="match"){
+    $("#app").innerHTML='<div class="wrap">'
+      +'<div class="hero">'+boardSVG()+'<div><h1>Statis<span>tieken</span></h1><p class="muted">Wedstrijden tegen elkaar</p></div></div>'
+      + navHTML() + sub
+      + matchSummaryHTML()
+      + h2hHTML()
+      +(mblocks?'<section><h2>Per spelvorm</h2><p class="muted small">Je gemiddelde over 3 pijlen per wedstrijd.</p>'+mblocks+'</section>':'')
+      +'<div class="secs">'+secHTML("manage","Wedstrijden verwijderen","Haal een wedstrijd uit de statistieken",manageHTML("match"))+'</div>'
+      + deleteSheetHTML() + backup + '</div>';
+    return;
+  }
   $("#app").innerHTML='<div class="wrap">'
     +'<div class="hero">'+boardSVG()+'<div><h1>Statis<span>tieken</span></h1><p class="muted">Week van '+dShort(tw)+' (week '+isoWeek(tw)+')</p></div></div>'
-    + navHTML()
+    + navHTML() + sub
     +'<section><h2>Deze week</h2><div class="week">'+tiles+'</div></section>'
-    + h2hHTML()
     + basisHTML()
     +'<section><h2>Per oefening</h2>'+blocks+'</section>'
-    +'<section><h2>Twee gsm\'s samenvoegen</h2><p class="muted small">Gooien jullie elk op je eigen gsm? Kopieer de back-up op de ene gsm, stuur hem door (bv. via WhatsApp) en plak hem hier op de andere. Resultaten worden samengevoegd, niets wordt dubbel geteld.</p><textarea id="bk" aria-label="Back-up" placeholder="Plak hier een back-up"></textarea><div class="btnrow"><button class="secondary" data-act="bcopy">Back-up kopiëren</button><button class="primary" data-act="bmerge">Plakken en samenvoegen</button></div></section>'
+    +'<div class="secs">'+secHTML("manage","Resultaten verwijderen","Oefeningen en trainingen",manageHTML("oef"))+'</div>'
+    + deleteSheetHTML()
+    + backup
     +'</div>';
 }
-let h2hFilter={};
+let h2hFilter={}, statsView="oef";
+function matchSummaryHTML(){
+  const D=store.data, M=D.history.filter(h=>h.match), tw=weekStart(Date.now());
+  if(!M.length) return '<section><p class="muted">Nog geen wedstrijden gespeeld. Start er een via het tabblad Wedstrijd.</p></section>';
+  const tiles=D.players.map(p=>{
+    const mine=M.filter(h=>h.res.some(r=>r.pid===p.id)); if(!mine.length) return '';
+    let w=0,l=0,sc=0,dt=0,f9s=0,f9d=0,c180=0,co=0; const old=[];
+    mine.forEach(h=>{ const r=h.res.find(x=>x.pid===p.id), e=r.extra||{}; e.won?w++:l++; c180+=e.c180||0; co=Math.max(co,e.co||0);
+      if(e.dt){ sc+=e.sc; dt+=e.dt; } else old.push(r.score); if(e.f9d){ f9s+=e.f9s; f9d+=e.f9d; } });
+    const a3 = (dt||old.length) ? ((dt?3*sc:0)+old.reduce((s,v)=>s+v*30,0))/(dt+old.length*30) : 0;
+    const wk=mine.filter(h=>h.at>=tw).length;
+    return '<div class="tile"><span class="who2"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</span>'
+      +'<span class="v tab">'+w+'<span class="of"> W</span> '+l+'<span class="of"> V</span></span>'
+      +'<span class="muted small">'+mine.length+' wedstrijd'+(mine.length===1?'':'en')+(wk?' · '+wk+' deze week':'')+'</span>'
+      +'<div class="mini"><span>Gem. <b>'+fmt(Math.round(a3*10)/10)+'</b></span><span>First 9 <b>'+(f9d?fmt(Math.round(30*f9s/f9d)/10):'–')+'</b></span><span>180 <b>'+c180+'</b></span><span>Finish <b>'+(co||'–')+'</b></span></div></div>';
+  }).join('');
+  return '<section><h2>Overzicht</h2><div class="week">'+tiles+'</div></section>';
+}
 function h2hHTML(){
   const M=store.data.history.filter(h=>h.match && h.res.length===2).sort((a,b)=>b.at-a.at);
   if(!M.length) return '';
@@ -1820,6 +1864,46 @@ function commitKbuf(){
   render();
 }
 
+/* ---------- resultaten beheren (verwijderen) ---------- */
+let manageFilter="all", manageLimit=25, pendingDel=null;
+function entryKind(h){ return h.match ? "match" : h.session ? "training" : "oef"; }
+function manageRows(scope){
+  const H=store.data.history.slice().sort((a,b)=>b.at-a.at), rows=[], seen=new Set();
+  for(const h of H){
+    const k=entryKind(h);
+    if(k==="training"){
+      const sid=h.session.sid; if(seen.has(sid)) continue; seen.add(sid);
+      const items=H.filter(x=>x.session && x.session.sid===sid);
+      rows.push({kind:"training", at:Math.max(...items.map(x=>x.at)), ids:items.map(x=>x.id), items,
+        title:"Training "+(PHASE_NAME[h.session.ph]||""), sub:items.length+" van 7 oefeningen", who:[...new Set(items.flatMap(x=>x.res.map(r=>r.pid)))]});
+    } else rows.push({kind:k, at:h.at, ids:[h.id], items:[h], title:(getEx(h.ex)||{}).name||h.name,
+      sub: k==="match" ? h.res.map(r=>esc(pName(r.pid,r.name))+' '+((r.extra&&r.extra.legs)||0)).join(' – ')+' legs' : h.res.map(r=>esc(pName(r.pid,r.name))+' '+sv(getEx(h.ex),r.score)).join(' · '),
+      who:h.res.map(r=>r.pid)});
+  }
+  return rows.filter(r=> scope==="match" ? r.kind==="match" : r.kind!=="match" && (manageFilter==="all" || r.kind===manageFilter));
+}
+function manageHTML(scope){
+  const all=manageRows(scope), rows=all.slice(0,manageLimit);
+  const label={oef:"Oefening",training:"Training",match:"Wedstrijd"};
+  const seg= scope==="match" ? '' : '<div class="seg wide" role="group" aria-label="Soort">'+[["all","Alles"],["oef","Oefeningen"],["training","Trainingen"]].map(([v,l])=>'<button data-act="mfilter" data-v="'+v+'" aria-pressed="'+(manageFilter===v)+'">'+l+'</button>').join('')+'</div>';
+  const list = rows.length ? rows.map(r=>'<div class="mrow"><div class="minfo"><span class="kicker">'+label[r.kind]+' · '+dShort(r.at)+' '+new Date(r.at).toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"})+'</span><b>'+esc(r.title)+'</b><span class="muted small">'+r.sub+'</span></div>'
+      +'<button class="delbtn" data-act="mdel" data-ids="'+r.ids.join(",")+'" data-label="'+esc(label[r.kind]+': '+r.title+' ('+dShort(r.at)+')')+'" aria-label="Verwijder '+esc(r.title)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg></button></div>').join('')
+    : '<p class="muted">Niets gevonden.</p>';
+  const more = all.length>manageLimit ? '<button class="secondary" data-act="mmore">Toon meer ('+(all.length-manageLimit)+')</button>' : '';
+  return '<p class="muted small">'+(scope==="match"?'Verwijder een wedstrijd.':'Verwijder een oefening of een volledige training.')+' Hij verdwijnt uit alle statistieken, ook op gekoppelde toestellen.</p>'+seg+'<div class="mlist">'+list+'</div>'+more;
+}
+function deleteSheetHTML(){
+  if(!pendingDel) return '';
+  return '<div class="sheet" role="dialog" aria-modal="true" aria-label="Verwijderen?"><div class="sheetin"><h2>Verwijderen?</h2><p>'+esc(pendingDel.label)+'</p><p class="muted small">'+(pendingDel.ids.length>1?pendingDel.ids.length+' resultaten worden':'Dit resultaat wordt')+' uit alle statistieken gehaald. Dit kan niet ongedaan worden.</p><div class="btnrow"><button class="primary" data-act="mdelok">Verwijderen</button><button class="secondary" data-act="mdelx">Annuleren</button></div></div></div>';
+}
+function deleteEntries(ids){
+  const set=new Set(ids), D=store.data;
+  (D.removed ||= []).push(...ids);
+  D.history=D.history.filter(h=>!set.has(h.id));
+  if(game && game.saved && set.has(game.saved)) game.saved=null;
+  store.save(); toast(ids.length>1?ids.length+" resultaten verwijderd":"Resultaat verwijderd");
+}
+
 /* ---------- klikken ---------- */
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b) return;
@@ -1843,7 +1927,13 @@ document.addEventListener("click",e=>{
     case "cs-pause": confirmStop=false; speaker.cancel(); screen="home"; render(); releaseAwake(); break;
     case "cs-quit": quit(); break;
     case "snext": nextInSession(); break;
+    case "sview": statsView=b.dataset.v; manageLimit=25; render(); window.scrollTo(0,0); break;
     case "h2hf": h2hFilter[b.dataset.k]=b.dataset.v; render(); break;
+    case "mfilter": manageFilter=b.dataset.v; manageLimit=25; render(); break;
+    case "mmore": manageLimit+=25; render(); break;
+    case "mdel": pendingDel={ids:b.dataset.ids.split(","), label:b.dataset.label}; render(); break;
+    case "mdelx": pendingDel=null; render(); break;
+    case "mdelok": { const ids=pendingDel?pendingDel.ids:[]; pendingDel=null; if(ids.length) deleteEntries(ids); render(); break; }
     case "mset": { const c=matchDraft||{}; let v=b.dataset.v; v = v==="true"?true : v==="false"?false : +v; c[b.dataset.k]=v; D.matchCfg=c; store.save(); render(); break; }
     case "mpick": { const c=matchDraft; const id=b.dataset.id; if(c.players.includes(id)){ if(c.players.length>2) c.players=c.players.filter(x=>x!==id); } else { c.players=[...c.players.slice(-1),id]; } c.starter=0; D.matchCfg=c; store.save(); render(); break; }
     case "mstart": voice.autoOn(); startMatch(matchDraft); break;
