@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Darttrainer voor twee</title>
+<title>Darttrainer</title>
 <meta name="theme-color" content="#0b0b0b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -236,6 +236,53 @@ q{quotes:"“" "”"}
 .k.miss{font:700 15px var(--label);text-transform:uppercase;letter-spacing:.14em}
 .k.undo svg{width:22px;height:22px}
 
+/* ---- Vandaag: route naar Q-School ---- */
+.nav4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.nav4 button{font-size:14px;letter-spacing:.05em;padding:var(--s1) 2px}
+.who-pick{display:flex;gap:var(--s1);flex-wrap:wrap}
+.who-pick button{min-height:44px;padding:0 var(--s2);border-radius:999px;border:1px solid var(--line2);background:var(--surface);font:700 15px var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.who-pick button[aria-pressed=true]{background:var(--cream);color:var(--black);border-color:var(--cream)}
+.qroute{display:grid;grid-template-columns:136px minmax(0,1fr);gap:var(--s3);align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3)}
+.qroute svg{width:136px;height:136px}
+.ladder{display:flex;flex-direction:column;gap:4px}
+.rung{display:grid;grid-template-columns:40px minmax(0,1fr);gap:var(--s1);align-items:center;font-size:14px;color:var(--muted)}
+.rung b{font:400 24px/1 var(--display);font-weight:400}
+.rung.done b{color:var(--green)}.rung.done span::after{content:" ✓";color:var(--green)}
+.rung.next{color:var(--cream)}.rung.next b{color:var(--red)}
+.today{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--red);border-radius:var(--r2);padding:var(--s3) var(--s2);display:flex;flex-direction:column;gap:var(--s2)}
+.today h2{font-size:36px}
+.why{font-size:15px;color:var(--muted)}
+.plan{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.plan li{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:var(--s2);align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.plan .pn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font:400 18px var(--display)}
+.plan li.ok .pn{background:var(--green);border-color:var(--green);color:var(--cream)}
+.plan li.ok .pt{color:var(--muted)}
+.plan .pt{font-weight:600}
+.plan .ph{font-size:13px;color:var(--muted)}
+.plan .pgo{min-height:44px;min-width:64px;border-radius:var(--r1);border:1px solid var(--line2);background:transparent;font:700 13px var(--label);letter-spacing:.08em;text-transform:uppercase}
+.areas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s1)}
+.area{background:var(--surface);border:1px solid var(--line);border-radius:var(--r1);padding:var(--s1) 10px;display:flex;flex-direction:column;gap:2px}
+.area.weak{border-color:var(--red)}
+.area .v{font:400 28px/1.1 var(--display)}
+.area .muted{font-size:13px}
+.coachbox{white-space:pre-wrap;font-size:15px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:var(--r1);padding:var(--s2)}
+.minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s1)}
+.minis div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r1);padding:var(--s1) 10px;display:flex;flex-direction:column}
+.minis b{font:400 30px/1.1 var(--display);font-weight:400}
+.qrow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:var(--s1)}
+.k.qk{min-height:calc(var(--key)*1.15)}
+.k.qk.t{border-color:var(--red)}.k.qk.d{border-color:var(--green)}
+.nchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.nchips button{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);background:transparent;font:700 14px var(--label)}
+.nchips button[aria-pressed=true]{background:var(--cream);color:var(--black)}
+.clog{display:flex;flex-direction:column;gap:var(--s1)}
+.cq{align-self:flex-end;max-width:85%;background:var(--surface2);border:1px solid var(--line);border-radius:var(--r2) var(--r2) 4px var(--r2);padding:var(--s1) var(--s2)}
+.cq p{margin:2px 0 0}
+.clog .coachbox{max-width:95%}
+#cq{width:100%;min-height:72px;font:inherit;font-size:16px;color:var(--cream);background:var(--surface);border:1px solid var(--line2);border-radius:var(--r1);padding:var(--s1) var(--s2)}
+.qcards .nr{font-size:22px;border-color:var(--red)}
+@media(max-width:420px){.qroute{grid-template-columns:104px minmax(0,1fr);gap:var(--s2);padding:var(--s2)}.qroute svg{width:104px;height:104px}.today h2{font-size:30px}}
+
 /* Venster onderaan */
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;z-index:8;animation:fade .15s}
 .sheetin{background:var(--black);border:1px solid var(--line2);border-bottom:0;border-radius:var(--r2) var(--r2) 0 0;width:100%;max-width:720px;padding:var(--s3) var(--s3) calc(var(--s3) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--s2);max-height:88%;overflow:auto;animation:up .2s ease-out;position:relative}
@@ -456,7 +503,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const uid = () => Math.random().toString(36).slice(2, 9);
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
-const lab = d => d.skip ? "Overgeslagen" : d.mult===0 ? "Mis" : d.seg===25 ? (d.mult===2 ? "Bull" : "25") : (["","S","D","T"][d.mult] + d.seg);
+const lab = d => d.v!=null ? String(d.v) : d.skip ? "Overgeslagen" : d.mult===0 ? "Mis" : d.seg===25 ? (d.mult===2 ? "Bull" : "25") : (["","S","D","T"][d.mult] + d.seg);
 
 /* Compacte opslag: alle uitslagen blijven bewaard, maar met korte veldnamen (ongeveer de helft kleiner). */
 function packEntry(h){
@@ -523,7 +570,7 @@ function sixLR(n){ // zes nummers links en rechts van de dubbel, links eerst zoa
   if(Math.abs(bX(a)-bX(b))<0.01) return bY(a)>=bY(b)?[a,b]:[b,a];
   return bX(a)<bX(b)?[a,b]:[b,a];
 }
-const val=d=> d.skip||d.mult===0 ? 0 : d.seg===25 ? (d.mult===2?50:25) : d.seg*d.mult;
+const val=d=> d.v!=null ? d.v : d.skip||d.mult===0 ? 0 : d.seg===25 ? (d.mult===2?50:25) : d.seg*d.mult;
 const tl=(seg,mult)=> seg===25 ? (mult===2?"Bull":mult===1?"25":"Bull") : ((mult?["","S","D","T"][mult]:"")+seg);
 function match(d,t){ if(d.skip||d.mult===0) return false; return d.seg===t.seg && (t.mult==null || d.mult===t.mult); }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -697,8 +744,61 @@ const EX = {
     head(g,s){ return {big:s.next<=20?String(s.next):"Bull", sub:"Geraakt: "+(s.score?(s.score===21?"bull":s.score):"nog niets")+" · één misser en het is voorbij"}; },
     detail(g,s){ return s.score===21?"Alle 20 getallen én de bull!":"Gestopt bij "+(s.next<=20?s.next:"de bull"); } }
 };
+/* ---- Q-School-oefeningen (meten waar je staat) ---- */
+const BOBT=range(1,20).concat(25);
+const dLab=t=> t===25?"Bull":"D"+t;
+Object.assign(EX,{
+  s20:{ phase:0, name:"Scoren op de 20", howLong:"100 pijlen (tot 1000)", max:()=>4000, visits:true, nomax:true,
+    desc:"Gooi 100 pijlen op de 20; wil je langer, kies dan 200 tot 1000. Alles telt. Je score is het aantal punten per 100 pijlen: × 0,03 is ongeveer je scoring-gemiddelde, dus 2000 = 60 gemiddeld.",
+    setup(g){ g.n=g.n||store.data.s20n||100; },
+    init:()=>({score:0,total:0,darts:0}),
+    step(g,s,d){ s.total+=val(d); s.darts+=d.vis?3:1; return d.vis?null:(d.seg===20); },
+    scoreOf:(g,s)=> s.darts>=(g.n||100)?Math.round(100*s.total/s.darts):s.total,
+    done:(g,s)=>s.darts>=(g.n||100),
+    head(g,s){ const a=s.darts?3*s.total/s.darts:0, N=g.n||100;
+      return {big:"T20", sub:"Pijl "+Math.min(N,s.darts+1)+" van "+N+" · "+s.total+" punten · gem. "+fmt(a),
+        html: s.darts||s.cur.length ? '' : '<div class="nchips" role="group" aria-label="Aantal pijlen">'+[100,200,300,500,1000].map(n=>'<button data-act="s20n" data-v="'+n+'" aria-pressed="'+(N===n)+'">'+n+' pijlen</button>').join('')+'</div>'}; },
+    quick:()=>[[20,3],[20,2],[20,1],[1,1],[5,1],[0,0]],
+    say:()=>"twintig",
+    detail(g,s){ return s.total+" punten in "+s.darts+" pijlen · ≈ "+fmt(s.darts?3*s.total/s.darts:0)+" gemiddeld"; } },
+  atc:{ phase:0, name:"Rond de klok op dubbels", howLong:"21 dubbels", max:()=>100,
+    desc:"Gooi D1, D2, … tot D20 en sluit af met de bull. Pas als je raakt ga je verder. Je score is je trefpercentage op de dubbels.",
+    init:()=>({score:0,i:0,darts:0,over:false}),
+    step(g,s,d){ s.darts++; const t=BOBT[s.i], ok=d.seg===t && d.mult===2; if(ok){ s.i++; if(s.i>=21) s.over=true; } return ok; },
+    scoreOf:(g,s)=> s.darts?Math.round(100*s.i/s.darts):0,
+    done:(g,s)=>s.over,
+    head(g,s){ return {big:dLab(BOBT[s.i]), sub:"Dubbel "+(s.i+1)+" van 21 · "+s.darts+" pijlen · "+(s.darts?Math.round(100*s.i/s.darts):0)+"% raak"}; },
+    quick:(g,s)=>[[BOBT[s.i],2],[0,0]],
+    detail(g,s){ return "Rond in "+s.darts+" pijlen · "+Math.round(100*21/Math.max(1,s.darts))+"% raak"; } },
+  bob:{ phase:0, name:"Bob's 27", howLong:"21 dubbels", max:()=>1437, nomax:true,
+    desc:"Je start met 27 punten. Per dubbel (D1 tot D20, dan bull) gooi je drie pijlen. Elke treffer telt de waarde van de dubbel erbij; geen enkele treffer kost die waarde. Onder nul is het voorbij. Boven 100 is clubniveau, boven 200 sterk.",
+    init:()=>({score:27,i:0,h:0,over:false}),
+    step(g,s,d){ const t=BOBT[s.i], ok=d.seg===t && d.mult===2; if(ok) s.h++; return ok; },
+    endTurn(g,s){ const t=BOBT[s.i], v=t===25?50:2*t, dl=s.h?s.h*v:-v; s.score+=dl; s.h=0; s.i++; if(s.i>=21||s.score<0) s.over=true; return "Stand "+s.score+" ("+(dl>0?"+":"−")+Math.abs(dl)+")"; },
+    done:(g,s)=>s.over,
+    head(g,s){ return {big:dLab(BOBT[s.i]), sub:"Dubbel "+(s.i+1)+" van 21 · stand "+s.score}; },
+    quick:(g,s)=>[[BOBT[s.i],2],[0,0]],
+    detail(g,s){ return s.score<0?"Gestopt bij "+dLab(BOBT[s.i-1]):"Alle 21 dubbels gehaald"; } },
+  g501:{ phase:0, name:"501 solo", howLong:"3 legs", max:()=>120, avg:true, visits:true, nomax:true,
+    desc:"Drie legs 501, dubbel uit, alsof het een wedstrijd is. Tik per pijl of geef het totaal van je beurt in. De app toont je finish-route. Je score is je gemiddelde per 3 pijlen.",
+    init:()=>({score:0,rem:501,legs:[],sc:0,da:0,ld:0,snap:501,end:null}),
+    step(g,s,d){ if(s.cur.length===0) s.snap=s.rem;
+      const n=d.vis?(d.n||3):1; s.da+=n; s.ld+=n; const v=val(d), nr=s.rem-v;
+      if(nr===0 && (d.vis || d.mult===2)){ s.sc+=v; s.legs.push(s.ld); s.ld=0; s.rem=501; s.end="Leg uit in "+s.legs[s.legs.length-1]+" pijlen"; return true; }
+      if(nr<=1){ s.sc-=(s.snap-s.rem); s.rem=s.snap; s.end="Bust, terug naar "+s.snap; return false; }
+      s.rem=nr; s.sc+=v; return null; },
+    turnEnd:(g,s)=>!!s.end,
+    endTurn(g,s,ds){ const e=s.end; s.end=null; if(e) return e; return ds.reduce((a,x)=>a+val(x.d),0)+" gegooid, nog "+s.rem; },
+    scoreOf:(g,s)=> s.da?Math.round(30*s.sc/s.da)/10:0,
+    done:(g,s)=>s.legs.length>=3,
+    head(g,s){ const r=s.rem<=170?route(s.rem,3-s.cur.length):""; return {big:String(s.rem), sub:"Leg "+(s.legs.length+1)+" van 3 · gem. "+fmt(s.da?3*s.sc/s.da:0)+(r?" · uit: "+r:"")}; },
+    say:(g,s,h)=>"nog "+h.big,
+    detail(g,s){ return "Legs in "+s.legs.join(", ")+" pijlen"; },
+    extra:s=>({legs:s.legs}) }
+});
+const MIN={groep:8,groepT:8,groepD:8,r201918:4,drie:8,single:8,trippels:8,setup1:8,setup2:8,out41:10,out61:10,treintjes:20,gem:4,dub:4,focus:3,s20:10,atc:8,bob:8,g501:12};
 const PHASES={1:["groep","r201918","drie","single","gem","dub","focus"],2:["groepT","trippels","setup1","out41","gem","dub","focus"],3:["groepD","treintjes","setup2","out61","gem","dub","focus"]};
-const PHASE_NAME={1:"Beginner",2:"Gevorderd",3:"Prof"};
+const PHASE_NAME={1:"Beginner",2:"Gevorderd",3:"Prof",dag:"van vandaag"};
 
 function parseTargets(txt){
   const out=[];
@@ -727,7 +827,7 @@ function getEx(id){ if(EX[id]) return EX[id]; const c=store.data.customs.find(x=
 function exPhaseNr(id){ for(const ph of [1,2,3]){ const i=PHASES[ph].indexOf(id); if(i>=0) return {ph,nr:i+1}; } return null; }
 
 /* ---------- spel ---------- */
-let playHelp=false, game=null, pickEx=null, tab="train", tipWeek={}, screen="home", modSel=1, audio=null, wakeLock=null;
+let pendingVis=null; let playHelp=false, game=null, pickEx=null, tab="today", tipWeek={}, screen="home", modSel=1, audio=null, wakeLock=null;
 function saveGame(){ try{ if(game) localStorage.setItem(LS_GAME, JSON.stringify(game)); else localStorage.removeItem(LS_GAME); }catch(e){} }
 function loadGame(){ try{ const s=localStorage.getItem(LS_GAME); if(s){ const g=JSON.parse(s); if(g && g.v===2 && getEx(g.ex)) return g; } }catch(e){} return null; }
 function playerById(id){ return store.data.players.find(p=>p.id===id) || {id, name:"Speler", hand:"R", fav:20}; }
@@ -742,7 +842,7 @@ function derive(g){
     if(cp<0) break;
     const s=S[cp], ok=ex.step(g,s,d);
     s.cur.push({d,ok}); last={pi:cp,ok};
-    if(ex.done(g,s) || s.cur.length>=3 || (ex.turnEnd && ex.turnEnd(g,s))){
+    if(ex.done(g,s) || s.cur.length>=3 || d.vis || (ex.turnEnd && ex.turnEnd(g,s))){
       const ds=s.cur, meta=ex.endTurn ? ex.endTurn(g,s,ds) : null;
       s.turns.push(ds); s.meta.push(meta); s.cur=[];
       lastTurn={pi:cp,ds,meta};
@@ -760,7 +860,7 @@ function startGame(exId, ids, session){
   pickEx=null; store.data.lastPick=ids; store.save();
   game={v:2, ex:exId, players:ids, darts:[], started:Date.now()};
   if(session) game.session=session;
-  const ex=getEx(exId); if(ex.setup) ex.setup(game);
+  const ex=getEx(exId); if(ex.setup) ex.setup(game); pendingVis=null; if(ex.visits) game.inMode=store.data.exInMode||"dart";
   modSel=1; screen="play"; saveGame(); render(); keepAwake();
   const st=derive(game);
   speaker.say((session?"Oefening "+(session.i+1)+": "+ex.name+". ":"")+turnCall(st));
@@ -772,6 +872,7 @@ function startSession(ph, ids){
 function turnCall(st){
   if(st.done) return "";
   const s=st.S[st.cp], h=st.ex.head(game,s), name=st.P>1||st.S.length>1 ? s.p.name+", " : "";
+  if(st.ex.say) return name+st.ex.say(game,s,h)+".";
   if(st.ex.checkout) return name+h.big+" uit.";
   if(game.ex==="gem") return name+"zo hoog mogelijk.";
   if(game.ex==="focus") return name+(s.score? "verder op "+spk(h.big) : "begin op 1")+".";
@@ -807,6 +908,7 @@ function addDart(d){
   render();
 }
 function undo(){
+  pendingVis=null;
   if(isMatch(game)) return undoMatch();
   if(!game||!game.darts.length) return;
   const wasDone=derive(game).done;
@@ -821,11 +923,11 @@ function finish(){
   const prevBest=game.players.map(pid=>bestFor(game.ex,pid));
   const prevWeek=game.players.map(pid=>weekCount(pid));
   const entry={id:uid(), ex:game.ex, name:ex.name, at:Date.now(), max:st.max, darts:0,
-    res:game.players.map((pid,k)=>{ const s=st.S[k], r={pid, name:playerById(pid).name, score:st.scores[k], darts:s.turns.reduce((a,t)=>a+t.filter(x=>!x.d.skip).length,0)}; if(ex.extra) r.extra=ex.extra(s); if(ex.fav) r.fav=s.p.fav||20; return r; })};
+    res:game.players.map((pid,k)=>{ const s=st.S[k], r={pid, name:playerById(pid).name, score:st.scores[k], darts:s.turns.reduce((a,t)=>a+t.reduce((b,x)=>b+(x.d.skip?0:x.d.vis?(x.d.n||3):1),0),0)}; if(ex.extra) r.extra=ex.extra(s); if(ex.fav) r.fav=s.p.fav||20; return r; })};
   entry.darts=Math.max(...entry.res.map(r=>r.darts));
   store.data.history.unshift(entry); store.data.history=store.data.history.slice(0,CAP);
   game.saved=entry.id;
-  if(game.session){ game.session.done.push({ex:game.ex, id:entry.id}); entry.session={sid:game.session.sid||"s"+game.started, ph:game.session.ph}; }
+  if(game.session){ game.session.done.push({ex:game.ex, id:entry.id}); entry.session={sid:game.session.sid||"s"+game.started, ph:game.session.ph, f:game.session.f}; }
   store.save(); saveGame();
   game.records=entry.res.filter((r,k)=>prevBest[k]!==null && r.score>prevBest[k]).map(r=>r.pid);
   const goal=store.data.weekGoal||0;
@@ -1228,9 +1330,9 @@ function helpHTML(){
 }
 function cardHTML(id,ex,nr){
   const max=ex.max({});
-  const pills=store.data.players.map(p=>{ const b=bestFor(id,p.id); const ok=ex.pass && b!==null && b>=ex.pass; return b===null?'':'<span class="pill tab'+(ok?' ok':'')+'"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+' '+sv(ex,b)+'/'+max+(ok?' ✓':'')+'</span>'; }).join("");
+  const pills=store.data.players.map(p=>{ const b=bestFor(id,p.id); const ok=ex.pass && b!==null && b>=ex.pass; return b===null?'':'<span class="pill tab'+(ok?' ok':'')+'"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+' '+sv(ex,b)+(ex.nomax?'':'/'+max)+(ok?' ✓':'')+'</span>'; }).join("");
   const short=ex.desc.split(/(?<=\.)\s/)[0];
-  return '<button class="card" data-act="start" data-ex="'+esc(id)+'"><span class="nr">'+esc(nr)+'</span><span class="cbody"><h3>'+esc(ex.name)+'</h3><p>'+esc(short)+'</p>'+(pills?'<span class="best">'+pills+'</span>':'')+'</span><span class="go" aria-hidden="true">›</span></button>';
+  return '<button class="card" data-act="start" data-ex="'+esc(id)+'"><span class="nr">'+esc(nr)+'</span><span class="cbody">'+areaTag(id)+'<h3>'+esc(ex.name)+'</h3><p>'+esc(short)+'</p>'+(pills?'<span class="best">'+pills+'</span>':'')+'</span><span class="go" aria-hidden="true">›</span></button>';
 }
 function boardSVG(){
   // klein dartbord in de echte bordkleuren
@@ -1256,7 +1358,7 @@ function goalStrip(){
   return '<div class="goals"><span class="kicker">Weekdoel · '+g+' oefeningen</span><div class="grow">'+store.data.players.map(p=>{ const n=weekCount(p.id), pct=Math.min(100,Math.round(100*n/g));
     return '<div class="gitem'+(n>=g?' done':'')+'"><span class="who2"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</span><span class="tab">'+n+'/'+g+(n>=g?' ✓':'')+'</span><div class="bar"><i style="width:'+pct+'%;background:'+pColor(p.id)+'"></i></div></div>'; }).join('')+'</div></div>';
 }
-function renderHome(){
+function renderHome(onlySecs){
   const P=store.data.players, ph=store.data.phase||1;
   const resume=game && !gameDone(game) ? '<button class="resume" data-act="resume"><b>Verder met '+esc(getEx(game.ex).name)+'</b><span>Je was nog bezig. Tik om verder te gooien.</span></button>' : '';
   const favOpts=f=>range(1,20).map(n=>'<option value="'+n+'"'+(n===(f||20)?' selected':'')+'>D'+n+'</option>').join('');
@@ -1277,21 +1379,23 @@ function renderHome(){
     +'<div class="setrow"><span>Geluid bij raak/mis</span><div class="seg" role="group" aria-label="Geluid"><button data-act="sound" data-v="1" aria-pressed="'+(store.data.sound!==false)+'">Aan</button><button data-act="sound" data-v="0" aria-pressed="'+(store.data.sound===false)+'">Uit</button></div></div>'
     +(voice.mode==="web"?'<div class="setrow"><span>Spraak</span><div class="seg" role="group" aria-label="Taal spraak"><button data-act="lang" data-v="nl-BE" aria-pressed="'+((store.data.lang||"nl-BE")==="nl-BE")+'">Vlaams</button><button data-act="lang" data-v="nl-NL" aria-pressed="'+(store.data.lang==="nl-NL")+'">Nederlands</button></div></div>':'');
   const linked=sync.on();
-  $("#app").innerHTML='<div class="wrap">'
-   +'<div class="hero">'+boardSVG()+'<div><h1>Dart<span>trainer</span></h1><p class="muted">Oefeningen uit <i>Just Darts</i> van Erik Clarys</p></div></div>'
-   + navHTML()
-   + (voice.on()?voiceBar():'')
-   + resume
-   + goalStrip()
-   +'<section class="lv lv'+ph+'">'+phNav
-   +'<button class="session" data-act="session"><span class="play-ic" aria-hidden="true">▶</span><span><b>Volledige training '+PHASE_NAME[ph]+'</b><span>Alle 7 oefeningen na elkaar, de app gaat vanzelf door</span></span></button>'
-   +'<div class="cards">'+cards+'</div><p class="muted small">Of kies één oefening apart. Oefening 5, 6 en 7 zijn in elk niveau dezelfde.</p></section>'
-   +'<div class="secs">'
-   + secHTML("help","Zo werkt het","Spraak, knoppen en tips",helpHTML(),!store.data.seenHelp)
+  const secsH='<div class="secs">'
+   + secHTML("help","Zo werkt het","Spraak, knoppen en tips",helpHTML())
    + secHTML("players","Spelers",P.map(p=>p.name).join(", "),'<div class="players">'+players+'</div>')
    + secHTML("settings","Instellingen","Stem, microfoon, geluid, weekdoel",settings)
    + secHTML("sync","Toestellen koppelen", sync.available()?(linked?"Gekoppeld":"Scores delen tussen gsm, tablet en laptop"):"", '<div id="sync" class="syncbox">'+syncHTML()+'</div>')
-   +'</div>'
+   +'</div>';
+  if(onlySecs) return secsH;
+  const qcards=QIDS.map((id,i)=>cardHTML(id,EX[id],"Q"+(i+1))).join("");
+  $("#app").innerHTML='<div class="wrap">'
+   +'<div class="hero">'+boardSVG()+'<div><h1>Oefe<span>nen</span></h1><p class="muted">Q-School-metingen en <i>Just Darts</i> van Erik Clarys</p></div></div>'
+   + navHTML()
+   + (voice.on()?voiceBar():'')
+   + resume
+   +'<section><h2>Q-School-metingen</h2><p class="muted small">Hiermee meet de app je niveau op scoren, dubbels en uitgooien.</p><div class="cards qcards">'+qcards+'</div></section>'
+   +'<section class="lv lv'+ph+'"><h2>Just Darts</h2>'+phNav
+   +'<button class="session" data-act="session"><span class="play-ic" aria-hidden="true">▶</span><span><b>Volledige training '+PHASE_NAME[ph]+'</b><span>Alle 7 oefeningen na elkaar, de app gaat vanzelf door</span></span></button>'
+   +'<div class="cards">'+cards+'</div><p class="muted small">Of kies één oefening apart. Oefening 5, 6 en 7 zijn in elk niveau dezelfde.</p></section>'
    + pickerHTML()
    +'</div>';
 }
@@ -1308,7 +1412,7 @@ function renderPlay(){
   const slots=[0,1,2].map(i=>{ const x=s.cur[i]; if(!x) return '<div class="slot'+(i===di?' next':'')+'" aria-label="Pijl '+(i+1)+'">'+(i+1)+'</div>'; return '<div class="slot '+(x.ok===true?'hit':x.ok===false?'miss':'neutral')+(i===di-1?' fresh':'')+'">'+esc(x.d.skip?'–':lab(x.d))+'</div>'; }).join("");
   let last="";
   if(di===0 && st.lastTurn){ const L=st.lastTurn, pp=st.S[L.pi].p; last='<span class="muted">Vorige beurt '+esc(pp.name)+':</span> '+L.ds.filter(x=>!x.d.skip).map(x=>esc(lab(x.d))).join(", ")+(L.meta?' <b>→ '+esc(L.meta)+'</b>':''); }
-  const score=st.S.map((x,k)=>'<div class="sc'+(k===st.cp?' on':'')+'" style="--pc:'+pColor(x.p.id)+'"><span class="n">'+esc(x.p.name)+(ex.done(game,x)?' ✓':'')+'</span><span class="s tab">'+sv(ex,st.scores[k])+'<span class="of">/'+st.max+'</span></span></div>').join("");
+  const score=st.S.map((x,k)=>'<div class="sc'+(k===st.cp?' on':'')+'" style="--pc:'+pColor(x.p.id)+'"><span class="n">'+esc(x.p.name)+(ex.done(game,x)?' ✓':'')+'</span><span class="s tab">'+sv(ex,st.scores[k])+(ex.nomax?'':'<span class="of">/'+st.max+'</span>')+'</span></div>').join("");
   const nums=range(1,20).map(n=>'<button class="k" data-act="num" data-n="'+n+'">'+n+'</button>').join("");
   const mods=[[1,"S"],[2,"D"],[3,"T"]].map(([m,t])=>'<button class="k mod" data-act="mod" data-m="'+m+'" aria-pressed="'+(modSel===m)+'" aria-label="'+["","Single","Dubbel","Triple"][m]+'">'+t+'</button>').join("");
   const pn=exPhaseNr(game.ex), S=game.session;
@@ -1324,12 +1428,10 @@ function renderPlay(){
    +'<div class="pleft">'
    +'<div class="top"><div class="ttl"><span class="kicker">'+esc(title)+'</span><h2>'+esc(ex.name)+'</h2></div><span class="topbtns"><button class="iconbtn helpbtn" data-act="phelp" aria-label="Uitleg">?</button><button class="stopbtn" data-act="home" aria-label="Stoppen">Stop</button></span></div>'
    +'<div class="scorebar">'+score+'</div>'
-   +'<div class="target'+(h.seq?' stack':'')+(fx?' fx-'+fx:'')+'" style="--pc:'+pColor(p.id)+'"><div class="who"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+' gooit · pijl '+(di+1)+'</div><div class="trow"><div class="big tab'+anim+'">'+big+'</div><div class="slots">'+slots+'</div></div><div class="sub">'+esc(h.sub)+(h.leg?' <button class="linkbtn" data-act="skip">301 overslaan</button>':'')+'</div>'+(last?'<div class="prev">'+last+'</div>':'')+'</div>'
+   +'<div class="target'+(h.seq?' stack':'')+(fx?' fx-'+fx:'')+'" style="--pc:'+pColor(p.id)+'"><div class="who"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+' gooit · pijl '+(di+1)+'</div><div class="trow"><div class="big tab'+anim+'">'+big+'</div><div class="slots">'+slots+'</div></div><div class="sub">'+esc(h.sub)+(h.html||'')+(h.leg?' <button class="linkbtn" data-act="skip">301 overslaan</button>':'')+'</div>'+(last?'<div class="prev">'+last+'</div>':'')+'</div>'
    + voiceBar()
    +'</div>'
-   +'<div class="pad"><div class="mods">'+mods+'<button class="k miss" data-act="miss">Mis</button><button class="k undo" data-act="undo" aria-label="Laatste pijl wissen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button></div>'
-   +'<div class="nums">'+nums+'</div>'
-   +'<div class="mods two"><button class="k bull g" data-act="b25">25</button><button class="k bull" data-act="b50">Bull</button></div></div>'
+   +exPad(ex,s,mods,nums)
    + sheets
    +'</div>';
 }
@@ -1342,7 +1444,7 @@ function renderResult(){
     const goal=(game.goals||[]).includes(p.id)?'Weekdoel gehaald!':'';
     const det=ex.detail?ex.detail(game,s):'';
     const pct=Math.max(0,Math.min(100,Math.round(100*sc/st.max)));
-    return '<div class="rcard" style="--pc:'+pColor(p.id)+'"><div class="rtop"><h3><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</h3><div class="big tab">'+sv(ex,sc)+'<span class="of">/'+st.max+'</span></div></div>'
+    return '<div class="rcard" style="--pc:'+pColor(p.id)+'"><div class="rtop"><h3><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</h3><div class="big tab">'+sv(ex,sc)+(ex.nomax?'':'<span class="of">/'+st.max+'</span>')+'</div></div>'
       +'<div class="bar"><i style="width:'+pct+'%"></i></div>'
       +(rec||goal?'<div class="badges">'+[rec,goal].filter(Boolean).map(t=>'<span class="badge">'+esc(t)+'</span>').join('')+'</div>':'')
       +'<div class="sub">'+[det,pass].filter(Boolean).map(esc).join(' · ')+'</div></div>'; }).join("");
@@ -1367,7 +1469,7 @@ function renderResult(){
 function render(){
   if(screen==="play" && game) renderPlay();
   else if(screen==="result" && game) renderResult();
-  else { screen="home"; if(tab==="stats") renderStats(); else if(tab==="match") renderMatchHome(); else renderHome(); }
+  else { screen="home"; if(tab==="stats") renderStats(); else if(tab==="match") renderMatchHome(); else if(tab==="train") renderHome(); else renderToday(); }
 }
 
 function pickerHTML(){
@@ -1386,8 +1488,391 @@ function pickerHTML(){
   return '<div class="sheet" role="dialog" aria-modal="true" aria-label="Wie gooit er?"><div class="sheetin"><div class="top"><h2>'+esc(ex.name)+'</h2><button class="iconbtn" data-act="pickclose" aria-label="Sluiten">×</button></div><p class="pdesc">'+esc(ex.desc)+'</p><p class="muted">Wie gooit er?'+(ex.fav?' De favoriete dubbel pas je aan bij Spelers.':'')+'</p><div class="opts">'+opts+'</div></div></div>';
 }
 
+/* ---------- Vandaag: route naar Q-School ---------- */
+const QIDS=["s20","atc","bob","g501"];
+const MILES=[[60,"Clubspeler"],[70,"Sterke competitiespeler"],[80,"Regionale top · Challenge Tour"],[90,"Q-School-niveau"]];
+let coachBusy=false;
+const meanOf=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const dayKey=ts=>new Date(ts).toLocaleDateString("sv-SE");
+function lastScores(exId,pid,n){
+  return store.data.history.filter(h=>h.ex===exId).map(h=>({at:h.at,r:h.res.find(r=>r.pid===pid)})).filter(x=>x.r)
+    .sort((a,b)=>b.at-a.at).slice(0,n||5).map(x=>x.r.score);
+}
+function levelOf(pid){
+  const parts=[["gem",1],["s20",.03],["g501",1],["match501",1]].map(([id,f])=>{ const m=meanOf(lastScores(id,pid)); return m==null?null:m*f; }).filter(v=>v!=null);
+  return parts.length?meanOf(parts):null;
+}
+function nextMile(L){ return (MILES.find(([a])=>a>(L||0))||MILES[MILES.length-1])[0]; }
+function areasOf(pid){
+  const L=levelOf(pid), G=nextMile(L), hi=(L||0)>=75;
+  const dbl=meanOf([...lastScores("atc",pid), ...lastScores("dub",pid).map(v=>v/30*100)]);
+  const fin=meanOf(lastScores(hi?"out61":"out41",pid).map(v=>v/20*100));
+  const pct=v=>Math.round(v)+"%";
+  const A={
+    scoring:{n:"Scoren",v:L,t:G,fmt:v=>fmt(v)},
+    doubles:{n:"Dubbels",v:dbl,t:(G-20)/2,fmt:pct},
+    finishing:{n:hi?"Uit 61-80":"Uit 41-60",v:fin,t:hi?(G-55)*1.5:(G-45)*1.5,fmt:pct}
+  };
+  Object.values(A).forEach(a=>a.r=a.v==null?null:a.v/a.t);
+  return {L,G,A,hi};
+}
+function todayEntries(pid){ const k=dayKey(Date.now()); return store.data.history.filter(h=>!h.match && h.session && h.session.ph==="dag" && dayKey(h.at)===k && h.res.some(r=>r.pid===pid)); }
+function recentFoci(pid){
+  const days={}, tk=dayKey(Date.now());
+  store.data.history.forEach(h=>{ if(h.session && h.session.ph==="dag" && h.session.f && h.res.some(r=>r.pid===pid)){ const k=dayKey(h.at); if(k!==tk) days[k]=h.session.f; } });
+  return Object.keys(days).sort().reverse().slice(0,2).map(k=>days[k]);
+}
+const FOCUS_TXT={
+  base:["Nulmeting","Vandaag meet je één keer alles: scoren, dubbels en uitgooien. Daarna kiest de app elke dag je zwakste punt."],
+  scoring:["Scoren","Je scoring ligt het verst achter op je volgende mijlpaal. Zelfde grip, zelfde ritme, kijk naar één punt in de triple."],
+  doubles:["Dubbels","Op de dubbels laat je nu de meeste punten liggen. Gooi met dezelfde snelheid als op de 20 en richt op het midden van het vak."],
+  finishing:["Uitgooien","Je finishes lopen achter. Ken je routes en zeg ze hardop voor je gooit."],
+  light:["Lichte dag","Zondag: korter en technischer, zodat je fris aan de week begint."]
+};
+function weakOrder(A){ const missing=Object.keys(A).filter(k=>A[k].r==null), ks=Object.keys(A).filter(k=>A[k].r!=null).sort((a,b)=>A[a].r-A[b].r); return missing.concat(ks); }
+/* Eén oefencatalogus: Just Darts (Erik Clarys) en de Q-School-metingen samen.
+   a = onderdelen, lv = niveau (gemiddelde) waarvoor de oefening past, r = rol in een sessie. */
+const CAT={
+  groep:{a:["scoring"],lv:[0,62],r:"warm",why:"strak groeperen op single 11, bull en 6"},
+  groepT:{a:["scoring"],lv:[55,99],r:"warm",why:"groeperen op trippels"},
+  groepD:{a:["doubles"],lv:[70,99],r:"warm",why:"groeperen op dubbels"},
+  r201918:{a:["scoring"],lv:[0,66],r:"train",why:"ritme en wisselen tussen 20, 19 en 18"},
+  single:{a:["scoring"],lv:[0,62],r:"train",why:"precisie op elk getal"},
+  trippels:{a:["scoring"],lv:[55,99],r:"train",why:"trippels op elk getal"},
+  drie:{a:["finishing"],lv:[0,64],r:"train",why:"rekenen en drie singles combineren"},
+  setup1:{a:["doubles","finishing"],lv:[48,84],r:"train",why:"je dubbel raken na een setup-pijl"},
+  setup2:{a:["doubles","finishing"],lv:[68,99],r:"train",why:"je dubbel raken na twee setup-pijlen"},
+  treintjes:{a:["doubles","finishing"],lv:[72,99],r:"train",why:"dubbelreeksen en 301-legs"},
+  out41:{a:["finishing"],lv:[0,76],r:"measure"},
+  out61:{a:["finishing"],lv:[74,99],r:"measure"},
+  gem:{a:["scoring"],lv:[0,99],r:"measure"},
+  dub:{a:["doubles"],lv:[0,99],r:"measure"},
+  focus:{a:["pressure"],lv:[0,99],r:"pressure",why:"concentratie: één misser en het is voorbij"},
+  s20:{a:["scoring"],lv:[0,99],r:"measure"},
+  atc:{a:["doubles"],lv:[0,99],r:"measure"},
+  bob:{a:["doubles","pressure"],lv:[0,99],r:"pressure"},
+  g501:{a:["finishing","scoring","pressure"],lv:[0,99],r:"pressure"}
+};
+const ANAME={scoring:"Scoren",doubles:"Dubbels",finishing:"Uitgooien",pressure:"Druk"};
+const isJD=id=>!!exPhaseNr(id);
+const fits=(id,L)=>{ const c=CAT[id], lv=L||0; return !!c && lv>=c.lv[0] && lv<=c.lv[1]; };
+function pool(area,role,L){ return Object.keys(CAT).filter(id=>CAT[id].a.includes(area) && (!role||CAT[id].r===role) && fits(id,L)); }
+function pickRot(arr,seed,excl){ const a=arr.filter(x=>!(excl||[]).includes(x)); return a.length?a[((seed%a.length)+a.length)%a.length]:null; }
+const dayNum=ahead=>Math.round(new Date(dayKey(Date.now()+(ahead||0)*864e5)).getTime()/864e5);
+function warmFor(L,focus){ const lv=L||0; if(focus==="doubles" && lv>=70) return "groepD"; return lv<60?"groep":"groepT"; }
+function areaTag(id){ const c=CAT[id]; return c?'<span class="kicker" style="font-size:11px;letter-spacing:.08em">'+c.a.map(a=>ANAME[a]).join(' · ')+(isJD(id)?'':' · meting')+'</span>':''; }
+function jdLine(ids){ const j=ids.filter(id=>isJD(id) && CAT[id] && CAT[id].why); return j.length?"Uit Just Darts: "+j.map(id=>EX[id].name+" ("+CAT[id].why+")").join(", ")+".":""; }
+function listFor(focus,L,seed){
+  seed=seed||0; const lv=L||0, out=[], add=id=>{ if(id && !out.includes(id)) out.push(id); };
+  if(focus==="base") return ["gem","s20","atc","out41"];
+  if(focus==="light"){ add("focus"); add(pickRot([...pool("scoring","train",L),...pool("finishing","train",L)].filter(isJD),seed)); add("s20"); return out; }
+  add(warmFor(L,focus));
+  if(focus==="scoring"){ add("s20"); add(pickRot(pool("scoring","train",L),seed,out)); add(seed%2?"gem":"g501"); }
+  if(focus==="doubles"){ add("s20"); add(pickRot(pool("doubles","train",L),seed,out)); add("atc"); add(seed%2?"bob":"dub"); }
+  if(focus==="finishing"){ add("s20"); add(pickRot(pool("finishing","train",L),seed,out)); add(lv>=75?"out61":"out41"); add("g501"); }
+  return out;
+}
+function planFor(pid,ahead){
+  ahead=ahead||0;
+  const {L,G,A}=areasOf(pid), te=ahead?[]:todayEntries(pid), fixed=te.find(h=>h.session.f);
+  const when=new Date(Date.now()+ahead*864e5);
+  let focus;
+  if(fixed) focus=fixed.session.f;
+  else {
+    const missing=Object.keys(A).filter(k=>A[k].r==null);
+    if(missing.length>=2) focus="base";
+    else if(when.getDay()===0 && store.data.history.length>20) focus="light";
+    else {
+      const ks=weakOrder(A);
+      const rf=ahead?[planFor(pid,0).focus,...recentFoci(pid)]:recentFoci(pid); focus=ks[0];
+      if(rf[0]===focus && rf[1]===focus && ks[1]) focus=ks[1];
+    }
+  }
+  return {focus,list:listFor(focus,L,dayNum(ahead)),L,G,A};
+}
+function whoIds(){ const D=store.data, P=D.players; if(D.me==="all" && P.length>1) return P.map(p=>p.id); const p=P.find(x=>x.id===D.me)||P[0]; return [p.id]; }
+function mePid(){ return whoIds()[0]; }
+function startToday(from){
+  const ids=whoIds(), pl=planFor(ids[0]);
+  const done=new Set(todayEntries(ids[0]).map(h=>h.ex));
+  let list=pl.list.slice();
+  if(from==null){ const rest=list.filter(id=>!done.has(id)); if(rest.length) list=rest; }
+  else list=list.slice(from);
+  voice.autoOn();
+  startGame(list[0], ids, {ph:"dag", f:pl.focus, i:0, list, done:[], sid:"d"+dayKey(Date.now())});
+}
+function streakOf(pid){
+  const set=new Set(store.data.history.filter(h=>!h.match && h.res.some(r=>r.pid===pid)).map(h=>dayKey(h.at)));
+  const d=new Date(); if(!set.has(dayKey(d))) d.setDate(d.getDate()-1);
+  let n=0; while(set.has(dayKey(d))){ n++; d.setDate(d.getDate()-1); } return n;
+}
+function dartsWeek(pid){ const w=weekStart(Date.now()); return store.data.history.filter(h=>h.at>=w).reduce((a,h)=>{ const r=h.res.find(x=>x.pid===pid); return a+((r&&r.darts)||0); },0); }
+function ringSVG(L,G){
+  const f=L==null?0:Math.max(0,Math.min(1,(L-(G-10))/10)), r=50, c=2*Math.PI*r;
+  let ticks=''; for(let i=0;i<20;i++){ const a=(i*18-90)*Math.PI/180; ticks+='<line x1="'+(60+57*Math.cos(a)).toFixed(1)+'" y1="'+(60+57*Math.sin(a)).toFixed(1)+'" x2="'+(60+60*Math.cos(a)).toFixed(1)+'" y2="'+(60+60*Math.sin(a)).toFixed(1)+'" stroke="'+(i%2?'var(--green)':'var(--red)')+'" stroke-width="3"/>'; }
+  return '<svg viewBox="0 0 120 120" role="img" aria-label="Niveau '+(L==null?'nog onbekend':fmt(L))+', volgende stap '+G+' gemiddeld">'+ticks
+   +'<circle cx="60" cy="60" r="'+r+'" fill="none" stroke="var(--line2)" stroke-width="9"/>'
+   +'<circle cx="60" cy="60" r="'+r+'" fill="none" stroke="var(--red)" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(c*f).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 60 60)"/>'
+   +'<text x="60" y="66" text-anchor="middle" font-family="Bebas Neue,Impact,sans-serif" font-size="38" fill="var(--cream)">'+(L==null?'?':fmt(L))+'</text>'
+   +'<text x="60" y="84" text-anchor="middle" font-family="Barlow,sans-serif" font-size="11" fill="var(--muted)">gem. → '+G+'</text></svg>';
+}
+function renderToday(){
+  const D=store.data, P=D.players, ids=whoIds(), pid=ids[0], pl=planFor(pid), L=pl.L, G=pl.G, A=pl.A;
+  const resume=game && !gameDone(game) ? '<button class="resume" data-act="resume"><b>Verder met '+esc(isMatch(game)?'de wedstrijd':getEx(game.ex).name)+'</b><span>Je was nog bezig. Tik om verder te gooien.</span></button>' : '';
+  const who=P.length>1?'<div class="who-pick" role="group" aria-label="Wie traint er?">'+P.map(p=>'<button data-act="who" data-v="'+p.id+'" aria-pressed="'+(ids.length===1&&ids[0]===p.id)+'">'+esc(p.name)+'</button>').join('')+'<button data-act="who" data-v="all" aria-pressed="'+(ids.length>1)+'">Samen</button></div>':'';
+  const ladder='<div class="ladder">'+MILES.map(([a,t])=>'<div class="rung'+(L!=null&&L>=a?' done':a===G?' next':'')+'"><b>'+a+'</b><span>'+t+'</span></div>').join('')+'</div>';
+  const gap=L==null?'Doe de nulmeting en je ziet waar je staat.':(L>=90?'Je zit op Q-School-niveau. Houd het vast onder druk.':'Nog <b>'+fmt(Math.max(0,G-L))+'</b> tot '+G+' gemiddeld.');
+  const te=todayEntries(pid), doneIds=new Set(te.map(h=>h.ex));
+  const nDone=pl.list.filter(id=>doneIds.has(id)).length, all=nDone===pl.list.length;
+  const mins=pl.list.reduce((a,id)=>a+(MIN[id]||8),0);
+  const items=pl.list.map((id,i)=>{ const e=EX[id], ok=doneIds.has(id), h=ok?te.filter(x=>x.ex===id).sort((a,b)=>b.at-a.at)[0]:null, r=h?h.res.find(x=>x.pid===pid):null;
+    return '<li class="'+(ok?'ok':'')+'"><span class="pn">'+(ok?'✓':i+1)+'</span><span><span class="pt">'+esc(e.name)+'</span><br><span class="ph">'+(r?'Score '+sv(e,r.score)+(e.nomax?'':'/'+h.max):(isJD(id)?'Just Darts · ':'Meting · ')+esc(e.howLong)+' · ±'+(MIN[id]||8)+' min')+'</span></span><button class="pgo" data-act="planone" data-i="'+i+'">'+(ok?'Opnieuw':'Start')+'</button></li>'; }).join('');
+  const ft=FOCUS_TXT[pl.focus][0], fw=FOCUS_TXT[pl.focus][1];
+  const startLbl=all?'Nog een ronde':nDone?'Verder ('+nDone+'/'+pl.list.length+' klaar)':'Start training';
+  const areas='<div class="areas">'+Object.entries(A).map(([k,a])=>'<div class="area'+(k===pl.focus?' weak':'')+'"><span class="kicker" style="font-size:11px;letter-spacing:.08em">'+esc(a.n)+'</span><span class="v tab">'+(a.v==null?'–':a.fmt(a.v))+'</span><span class="muted">doel '+a.fmt(a.t)+'</span><div class="bar"><i style="width:'+(a.r==null?0:Math.min(100,Math.round(a.r*100)))+'%;background:'+(a.r!=null&&a.r>=1?'var(--green)':'var(--red)')+'"></i></div></div>').join('')+'</div>';
+  const coach=coachHTML();
+  $("#app").innerHTML='<div class="wrap">'
+   +'<div class="hero">'+boardSVG()+'<div><h1>Dart<span>trainer</span></h1><p class="muted">Elke dag een stap dichter bij Q-School</p></div></div>'
+   + navHTML() + (voice.on()?voiceBar():'') + resume + who
+   +'<div class="today"><span class="kicker">Vandaag · '+pl.list.length+' oefeningen · ±'+mins+' min</span><h2>Focus: '+esc(ft)+'</h2><p class="why">'+esc(fw)+'</p>'
+   +'<button class="session" data-act="today"><span class="play-ic" aria-hidden="true">▶</span><span><b>'+startLbl+'</b><span>'+(ids.length>1?'Samen, om de beurt · ':'')+'De app gaat vanzelf door naar de volgende oefening</span></span></button>'
+   +'<ol class="plan">'+items+'</ol></div>'
+   +'<div class="qroute">'+ringSVG(L,G)+'<div><span class="kicker">Route naar Q-School · '+esc(pName(pid))+'</span><p style="margin:4px 0 10px">'+gap+'</p>'+ladder+'</div></div>'
+   +'<section><h2>Waar sta je</h2>'+areas+'<p class="muted small">Gemiddelde van je laatste 5 keer. Rood omrand is de focus van vandaag.</p></section>'
+   +'<div class="minis"><div><b class="tab">'+streakOf(pid)+'</b><span class="muted small">dagen op rij</span></div><div><b class="tab">'+weekCount(pid)+((D.weekGoal||0)?'<span class="of">/'+D.weekGoal+'</span>':'')+'</b><span class="muted small">oefeningen deze week</span></div><div><b class="tab">'+dartsWeek(pid)+'</b><span class="muted small">pijlen deze week</span></div></div>'
+   + coach
+   + renderHome(true)
+   +'</div>';
+}
+function routeStatsHTML(){
+  const rows=store.data.players.map(p=>{ const o=areasOf(p.id); if(o.L==null && Object.values(o.A).every(a=>a.v==null)) return '';
+    return '<div class="tile"><span class="who2"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</span><span class="v tab">'+(o.L==null?'–':fmt(o.L))+'<span class="of"> gem. → '+o.G+'</span></span>'
+      +Object.values(o.A).map(a=>'<span class="muted small">'+esc(a.n)+': '+(a.v==null?'–':a.fmt(a.v))+' · doel '+a.fmt(a.t)+'</span>').join('')+'</div>'; }).join('');
+  return rows?'<section><h2>Route naar Q-School</h2><p class="muted small">Niveau = gemiddelde van Basisgemiddelde scoren, Scoren op de 20 (× 0,03), 501 solo en je 501-wedstrijden. Voor een Tour Card op Q-School gooi je rond de 90.</p><div class="week">'+rows+'</div></section>':'';
+}
+/* ---------- Coach: ingebouwd, zonder AI en zonder kosten ---------- */
+let coachDraft="", coachAll=false, coachSug=[];
+const sug=(...ids)=>ids.flat().forEach(id=>{ if(id && EX[id] && !coachSug.includes(id)) coachSug.push(id); });
+const COACH_CHIPS=["Wat train ik morgen?","Maak een weekplan","Hoe ver ben ik van Q-School?","Hoe word ik beter op dubbels?","Hoe gooi ik 87 uit?","Ik zit vast, wat nu?"];
+const FNAME={scoring:"scoren",doubles:"dubbels",finishing:"uitgooien",base:"de nulmeting",light:"een lichte sessie"};
+/* --- cijfers --- */
+function seriesOf(exId,pid,f){ f=f||1; return store.data.history.filter(h=>h.ex===exId).map(h=>({at:h.at,r:h.res.find(r=>r.pid===pid)})).filter(x=>x.r).sort((a,b)=>a.at-b.at).map(x=>({at:x.at,v:x.r.score*f})); }
+function trendOf(exId,pid,f){ const s=seriesOf(exId,pid,f); if(s.length<4) return null; const k=Math.min(5,Math.floor(s.length/2)); const now=meanOf(s.slice(-k).map(x=>x.v)), prev=meanOf(s.slice(-2*k,-k).map(x=>x.v)); return {now,prev,d:now-prev,n:s.length}; }
+function levelWeeks(pid){
+  const pts=[["gem",1],["s20",.03],["g501",1],["match501",1]].flatMap(([id,f])=>seriesOf(id,pid,f));
+  const w={}; pts.forEach(p=>{ const k=weekStart(p.at); (w[k] ||= []).push(p.v); });
+  return Object.keys(w).map(Number).sort((a,b)=>a-b).map(k=>({w:k,v:meanOf(w[k])}));
+}
+function slopePerWeek(pid){
+  const W=levelWeeks(pid); if(W.length<3) return null;
+  const xs=W.map(p=>(p.w-W[0].w)/(7*DAY)), ys=W.map(p=>p.v), mx=meanOf(xs), my=meanOf(ys);
+  const num=xs.reduce((a,x,i)=>a+(x-mx)*(ys[i]-my),0), den=xs.reduce((a,x)=>a+(x-mx)*(x-mx),0);
+  return den?{s:num/den,weeks:W.length}:null;
+}
+function recordRecent(pid){
+  const since=Date.now()-2*DAY;
+  for(const h of store.data.history){ if(h.at<since || h.match) continue; const r=h.res.find(x=>x.pid===pid); if(!r) continue;
+    const prev=store.data.history.filter(x=>x.ex===h.ex && x.at<h.at).map(x=>x.res.find(y=>y.pid===pid)).filter(Boolean).map(y=>y.score);
+    if(prev.length>=2 && r.score>Math.max(...prev)) return {name:(EX[h.ex]||{}).name||h.name, score:r.score, ex:EX[h.ex]}; }
+  return null;
+}
+const pctTxt=v=>Math.round(v)+"%";
+function trendLine(label,t,fmtv){ if(!t) return null; const same=Math.abs(t.d)<Math.max(0.5,Math.abs(t.prev)*0.02);
+  return label+": "+fmtv(t.prev)+" → "+fmtv(t.now)+(same?" (stabiel)":t.d>0?" (stijgend)":" (dalend)"); }
+/* --- inzicht van de dag (Vandaag-scherm) --- */
+function coachInsight(pid){
+  const pl=planFor(pid), nm=pName(pid);
+  if(pl.L==null) return "Welkom "+nm+". Start vandaag met de nulmeting; daarna kies ik elke dag waar jij de meeste punten wint.";
+  const rec=recordRecent(pid); if(rec) return "Nieuw record op "+rec.name+": "+sv(rec.ex,rec.score)+". Dat is precies hoe je naar "+pl.G+" groeit. Vandaag: "+FNAME[pl.focus]+".";
+  const st=streakOf(pid); if(st>=7 && st%7===0) return st+" dagen op rij getraind. Die regelmaat is wat Q-School-spelers onderscheidt. Vandaag: "+FNAME[pl.focus]+".";
+  const sl=slopePerWeek(pid);
+  if(sl && sl.s>0.3){ const wk=Math.ceil((pl.G-pl.L)/sl.s); return "Je gemiddelde stijgt met "+fmt(sl.s)+" per week. Zo haal je "+pl.G+" over ongeveer "+wk+" week"+(wk===1?"":"en")+". Vandaag: "+FNAME[pl.focus]+"."; }
+  if(sl && sl.s<-0.3) return "Je gemiddelde zakt de laatste weken iets ("+fmt(sl.s)+" per week). Geen paniek: focus vandaag op "+FNAME[pl.focus]+" en houd je worp rustig.";
+  const a=pl.A[pl.focus]; if(a && a.v!=null) return "Grootste winst zit nu in "+FNAME[pl.focus]+": je staat op "+a.fmt(a.v)+", het doel voor "+pl.G+" is "+a.fmt(a.t)+".";
+  return FOCUS_TXT[pl.focus][1];
+}
+/* --- antwoorden --- */
+function ansPlan(pid,q){
+  const tm=/morgen/.test(q||""), pl=planFor(pid,tm?1:0), a=pl.A[pl.focus];
+  const why=pl.focus==="base"?"Ik heb nog niet genoeg cijfers, dus eerst de nulmeting.":a&&a.v!=null?"Waarom: "+a.n.toLowerCase()+" staat op "+a.fmt(a.v)+", je doel voor "+pl.G+" is "+a.fmt(a.t)+". Daar win je nu het meest.":FOCUS_TXT[pl.focus][1];
+  const goals=pl.list.map(id=>"- "+EX[id].name+targetFor(id,pl)).join("\n");
+  sug(pl.list);
+  return (tm?"Morgen":"Vandaag")+": focus op "+FOCUS_TXT[pl.focus][0].toLowerCase()+". "+why+"\n\nJe sessie (±"+pl.list.reduce((x,id)=>x+(MIN[id]||8),0)+" min):\n"+goals+(tm?"\n\nMorgen staat dit klaar onder Start training.":"\n\nTik op Start training, de app loopt alles na elkaar af.");
+}
+function targetFor(id,pl){
+  const G=pl.G;
+  const t={s20:" · doel "+Math.round(G/0.03)+" per 100 pijlen", atc:" · doel "+Math.round((G-20)/2)+"% raak", bob:" · doel boven "+(G<=60?50:G<=70?100:G<=80?200:300),
+    g501:" · doel "+G+" gemiddeld", gem:" · doel "+G+" per beurt", out41:" · doel "+Math.max(3,Math.round((G-45)*1.5/5))+" van 20", out61:" · doel "+Math.max(3,Math.round((G-55)*1.5/5))+" van 20",
+    dub:" · doel "+Math.round((G-20)/2*0.3)+" van 30"};
+  return t[id]||"";
+}
+function ansWeek(pid){
+  const pl=planFor(pid), ks=Object.keys(pl.A).filter(k=>pl.A[k].r!=null).sort((a,b)=>pl.A[a].r-pl.A[b].r);
+  if(ks.length<2) return "Voor een weekplan heb ik eerst je nulmeting nodig. Doe vandaag Start training; morgen maak ik je weekplan.";
+  const [w1,w2,w3]=[ks[0],ks[1],ks[2]||ks[0]];
+  const days=[["Ma",w1],["Di",w2],["Wo",w1],["Do",w3],["Vr",w1],["Za","match"],["Zo","light"]];
+  const occ={}, base0=dayNum(1);
+  const lines=days.map(([d,f],i)=>d+": "+(f==="match"?"501 solo of een wedstrijd (best of 5), speel alsof het telt":FOCUS_TXT[f][0]+" – "+listFor(f,pl.L,base0+(occ[f]=(occ[f]||0)+1)-1).map(id=>EX[id].name).join(", ")));
+  return "Weekplan voor "+pName(pid)+" (zwakste punt het vaakst):\n"+lines.join("\n")+"\n\nDe app volgt dit vanzelf: elke dag kiest hij je zwakste punt, nooit drie dagen na elkaar hetzelfde, en zondag licht.";
+}
+function ansQschool(pid){
+  const pl=planFor(pid); if(pl.L==null) return "Dat kan ik pas zeggen na je nulmeting. Op Q-School gooien de spelers die een Tour Card winnen rond de 90 gemiddeld.";
+  const sl=slopePerWeek(pid);
+  let t="Je staat op "+fmt(pl.L)+" gemiddeld. Q-School-niveau is ongeveer 90, dus nog "+fmt(Math.max(0,90-pl.L))+". Volgende stap: "+pl.G+" ("+MILES.find(m=>m[0]===pl.G)[1]+").";
+  if(sl && sl.s>0.1){ const w=Math.ceil((pl.G-pl.L)/sl.s), w90=Math.ceil((90-pl.L)/sl.s); t+="\n\nIn je laatste "+sl.weeks+" weken stijg je "+fmt(sl.s)+" per week. Aan dat tempo haal je "+pl.G+" over ±"+w+(w===1?" week":" weken")+(pl.G<90?" en 90 over ±"+Math.round(w90/4.3)+" maanden":"")+". Hoe hoger je komt, hoe trager het gaat, dus reken ruimer.";
+  } else if(sl) t+="\n\nJe gemiddelde staat de laatste weken stil. Dat is normaal na een eerste sprong; vraag me \"ik zit vast\" voor een aanpak.";
+  else t+="\n\nNa 3 weken trainen kan ik je tempo berekenen en een verwachting geven.";
+  return t;
+}
+function ansDoubles(pid,q){
+  const pl=planFor(pid), G=pl.G, p=store.data.players.find(x=>x.id===pid)||{}, fav=p.fav||20;
+  const m=q.match(/\b(?:d|dubbel\s*)(\d{1,2})\b/i), dn=m?+m[1]:null;
+  const lines=[];
+  const ta=trendLine("Rond de klok op dubbels",trendOf("atc",pid),pctTxt), td=trendLine("Basisgemiddelde dubbels",trendOf("dub",pid,100/30),pctTxt), tb=trendLine("Bob's 27",trendOf("bob",pid),v=>Math.round(v));
+  [ta,td,tb].filter(Boolean).forEach(x=>lines.push(x));
+  if(pl.A.doubles.v!=null) lines.unshift("Je dubbels: "+pctTxt(pl.A.doubles.v)+" raak, doel voor "+G+": "+pctTxt(pl.A.doubles.t)+"."+(pl.A.doubles.v>=pl.A.doubles.t?" Je zit al boven je doel; houd het vast en bouw door naar het doel van de stap erna ("+pctTxt((Math.min(90,G+10)-20)/2)+").":""));
+  if(dn && dn>=1 && dn<=20) lines.push("Voor D"+dn+": zet D"+dn+" als favoriete dubbel bij Spelers en speel Dubbel na single uit Just Darts (eerst S"+opposite(dn)+", recht tegenover, dan twee pijlen op D"+dn+"). Doel: "+Math.round((G-20)/2*0.4)+" van 40.");
+  const jd=pool("doubles","train",pl.L).concat(pool("doubles","warm",pl.L));
+  if(dn) sug(fits("setup1",pl.L)?"setup1":fits("setup2",pl.L)?"setup2":null);
+  sug(jd,"atc","bob");
+  const jl=jdLine(jd); if(jl) lines.push(jl);
+  lines.push("Meten en onder druk: dagelijks Rond de klok op dubbels (doel "+pctTxt(pl.A.doubles.t)+"), 2× per week Bob's 27 (doel boven "+(G<=60?50:G<=70?100:200)+"). Gooi met dezelfde snelheid als op de 20, richt op het midden van het vak en adem uit voor je gooit.");
+  if(fav!==16 && fav!==20 && fav!==8) lines.push("Tip: kies D16 of D20 als vaste dubbel. Mis je D16, dan sta je op D8; mis je D20, dan op D10.");
+  return lines.join("\n");
+}
+function ansCheckout(n){
+  if(n>170||n<2) return n+" kun je niet in één beurt uitgooien. Het hoogste is 170 (T20 T20 Bull).";
+  const r3=route(n,3), r2=route(n,2), r1=route(n,1);
+  if(!r3){ const r=route(n-57,2); return n+" is een bogey-getal: niet uit te gooien met drie pijlen. Gooi eerst T19 (dan sta je op "+(n-57)+(r?", uit met "+r:"")+") of zet jezelf op een mooie finish."; }
+  let t=n+" uitgooien: "+r3+".";
+  if(r2 && r2!==r3) t+="\nMet 2 pijlen: "+r2+".";
+  if(r1 && r1!==r2) t+="\nMet 1 pijl: "+r1+".";
+  if(n<=40 && n%2===0 && (n&(n-1))===0) t+="\nMooie finish: na een miss in de single blijf je op een dubbel staan.";
+  const oid=n<=60?"out41":n<=80?"out61":"g501"; sug(oid, n<=60?"drie":"setup2", "setup1");
+  t+="\nOefen dit met "+EX[oid].name+(oid!=="g501"?" uit Just Darts":"")+".";
+  return t;
+}
+function ansScoring(pid){
+  const pl=planFor(pid), G=pl.G, lines=[];
+  const ts=trendLine("Scoren op de 20",trendOf("s20",pid,.03),fmt), tg=trendLine("Basisgemiddelde scoren",trendOf("gem",pid),fmt), t5=trendLine("501 solo",trendOf("g501",pid),fmt);
+  if(pl.L!=null) lines.push("Scoring nu: "+fmt(pl.L)+" gemiddeld, volgende stap "+G+". Daarvoor heb je ±"+Math.round(G/0.03)+" punten per 100 pijlen op de 20 nodig.");
+  [ts,tg,t5].filter(Boolean).forEach(x=>lines.push(x));
+  const jd=[warmFor(pl.L,"scoring"),...pool("scoring","train",pl.L)];
+  sug(jd,"s20");
+  lines.push((pl.L||0)<60?"Op jouw niveau wint groeperen het meest. Elke pijl in het 20-vak (ook single) telt; 1 en 5 vermijden is belangrijker dan triples jagen.":"Werk aan triples. Valt de 20 dicht, ga naar de 19 in plaats van te forceren.");
+  lines.push(jdLine(jd)+" Meet je vooruitgang met Scoren op de 20.");
+  lines.push("Elke beurt hetzelfde: stand, grip, één punt kiezen, uitademen, gooien, arm uitstrekken tot het eind.");
+  return lines.join("\n");
+}
+function ansStuck(pid){
+  const pl=planFor(pid), sl=slopePerWeek(pid), wk=weekCount(pid);
+  const lines=[];
+  if(sl && sl.s>0.3) lines.push("Goed nieuws: je cijfers zeggen dat je wél vooruitgaat, +"+fmt(sl.s)+" per week over "+sl.weeks+" weken. Voelt het toch als stilstand, probeer dan dit:");
+  else if(sl) lines.push("Je trend: "+fmt(sl.s)+" per week over "+sl.weeks+" weken. Tijd om iets te veranderen:");
+  if(wk<4) lines.push("Je trainde deze week "+wk+" keer. Meer dan wat ook: train 5 dagen per week, ook al is het maar 20 minuten.");
+  lines.push("- Wissel 1 week van routine: alleen Just Darts "+((pl.L||0)<60?"Beginner":(pl.L||0)<75?"Gevorderd":"Prof")+" (Oefenen → Volledige training).\n- Film één leg met je gsm en kijk naar je elleboog: blijft die stil?\n- Speel 2× per week een wedstrijd: druk leert wat oefenen niet leert.\n- Neem één rustdag; vermoeide spieren gooien slordig.");
+  const wk1=weakOrder(pl.A)[0], jd=pool(wk1,null,pl.L).filter(isJD); sug(jd);
+  lines.push("Zwakste punt nu: "+FNAME[wk1]+". Daar zit de snelste winst. "+jdLine(jd));
+  return lines.join("\n");
+}
+function ansProgress(pid){
+  const ids=[...new Set(store.data.history.filter(h=>!h.match && h.res.some(r=>r.pid===pid)).map(h=>h.ex))];
+  const rows=ids.map(id=>{ const s=seriesOf(id,pid); if(s.length<2) return null; const k=Math.min(3,Math.floor(s.length/2)); const a=meanOf(s.slice(0,k).map(x=>x.v)), b=meanOf(s.slice(-k).map(x=>x.v)); const e=EX[id]; return e?{n:e.name,a,b,d:b-a,e}:null; }).filter(Boolean).sort((x,y)=>Math.abs(y.d)-Math.abs(x.d)).slice(0,6);
+  if(!rows.length) return "Nog te weinig gespeeld om vooruitgang te tonen. Na een paar dagen trainen zie je hier per oefening van waar je kwam en waar je nu staat.";
+  const fv=(e,v)=>e===EX.atc?pctTxt(v):e.avg?fmt(v):String(Math.round(v));
+  return "Je vooruitgang (eerste keren → laatste keren):\n"+rows.map(r=>"- "+r.n+": "+fv(r.e,r.a)+" → "+fv(r.e,r.b)+(r.d>0?" ▲":r.d<0?" ▼":"")).join("\n")+"\n\nMeer in detail: tabblad Cijfers.";
+}
+const TIPS={
+  mental:"Onder druk:\n- Vaste routine voor elke beurt: voeten, grip, uitademen, gooien. Altijd even lang.\n- Denk aan het doel, niet aan de stand. \"Midden van D16\", niet \"ik moet deze raken\".\n- Train druk: de oefening Focus (één misser en het is voorbij) en 501 solo met een doel voor je pijlen per leg.\n- Speel wekelijks wedstrijden tegen je medespelers in het tabblad Wedstrijd.",
+  technique:"Techniekcheck:\n- Stand: voorste voet tegen de oche, gewicht licht naar voren, schouder in lijn met het bord.\n- Grip: ontspannen, niet knijpen; de pijl vliegt recht als je vingers tegelijk loslaten.\n- Elleboog blijft stil en is het draaipunt; alleen je onderarm beweegt.\n- Uitstrekken: je arm wijst na de worp naar het doel.\nFilm 1 leg met je gsm van opzij en vergelijk met deze lijst.",
+  rest:"Rust is ook training. Bij pijn in schouder, elleboog of pols: 2 à 3 dagen niet gooien. Doe op een rustdag alleen de oefening Focus of laat de dag over; je reeks is minder belangrijk dan een gezonde arm.",
+  match:"Voor wedstrijden: speel minstens 1× per week een echte best-of tegen een medespeler (tabblad Wedstrijd). Kijk daarna bij Cijfers naar je first 9: als die veel hoger ligt dan je gemiddelde, verlies je punten bij het uitgooien."
+};
+function ansHelp(pid){
+  return coachInsight(pid)+"\n\nJe kunt me bijvoorbeeld vragen:\n- Wat train ik morgen? · Maak een weekplan\n- Hoe ver ben ik van Q-School?\n- Hoe word ik beter op dubbels / op D16?\n- Hoe gooi ik 87 uit?\n- Hoe word ik beter in scoren?\n- Ik zit vast, wat nu? · Ben ik vooruitgegaan?\n- Tips voor techniek, zenuwen of wedstrijden";
+}
+function coachAnswer(pid,q){
+  coachSug=[];
+  const t=q.toLowerCase();
+  const num=(t.match(/\b(\d{1,3})\b/)||[])[1];
+  if(num && /uit|finish|checkout|route|gooi ik|outshot/.test(t) && !/^d\d/.test(t)) return ansCheckout(+num);
+  if(/week|schema|planning/.test(t)) return ansWeek(pid);
+  if(/q-?school|tour ?card|hoe ver|hoe lang|wanneer|niveau|haal ik/.test(t)) return ansQschool(pid);
+  if(/vast|plateau|stilstand|motivat|geen zin|niet beter|achteruit|slecht/.test(t)) return ansStuck(pid);
+  if(/vooruit|progress|beter geworden|vergelijk|verbeter/.test(t)) return ansProgress(pid);
+  if(/zenuw|druk|mentaal|stress|spanning|choke|focus/.test(t)){ sug("focus","bob","g501"); return TIPS.mental; }
+  if(/grip|worp|stand|release|techniek|houding|elleboog|arm/.test(t)){ const L=levelOf(pid), w=warmFor(L,"scoring"); sug(w,fits("r201918",L)?"r201918":"trippels"); return TIPS.technique+"\nOefen je worp met "+EX[w].name+" uit Just Darts: groeperen laat meteen zien of je worp herhaalbaar is."; }
+  if(/pijn|blessure|moe|rust|vermoeid/.test(t)) return TIPS.rest;
+  if(/wedstrijd|match|tegenstander|first ?9/.test(t)){ sug("g501","focus"); return TIPS.match; }
+  if(/dubbel|\bd\d{1,2}\b|bull|bob|uitgooien|uitgooi|checkout|finish/.test(t)) return /uitgooi|checkout|finish/.test(t) && !/dubbel|\bd\d/.test(t) ? ansFinishing(pid) : ansDoubles(pid,t);
+  if(/scor|triple|trippel|t20|t19|gemiddeld|average|180|groeper/.test(t)) return ansScoring(pid);
+  if(/morgen|vandaag|train|oefen|wat moet|wat doe/.test(t)) return ansPlan(pid,t);
+  return ansHelp(pid);
+}
+function ansFinishing(pid){
+  const pl=planFor(pid), hi=(pl.L||0)>=75, id=hi?"out61":"out41";
+  const tr=trendLine(EX[id].name,trendOf(id,pid,5),pctTxt);
+  const lines=[];
+  if(pl.A.finishing.v!=null) lines.push("Uitgooien: "+pctTxt(pl.A.finishing.v)+" van je finishes, doel voor "+pl.G+": "+pctTxt(pl.A.finishing.t)+".");
+  if(tr) lines.push(tr);
+  const jd=pool("finishing","train",pl.L); sug(jd,id,"g501");
+  const jl=jdLine(jd); if(jl) lines.push(jl);
+  lines.push("Meet het met "+EX[id].name+" (doel "+Math.max(3,Math.round(pl.A.finishing.t/5))+" van 20) en speel 501 solo. Ken je routes: vraag me gerust \"hoe gooi ik 76 uit?\". Mis je je setup-pijl, reken dan eerst rustig opnieuw en kies een nieuwe route.");
+  return lines.join("\n");
+}
+/* --- weergave --- */
+function coachHTML(){
+  const pid=mePid(), log=(store.data.coach||[]).filter(c=>c.pid===pid), show=coachAll?log:log.slice(-3);
+  const items=show.map(c=>'<div class="cq"><span class="muted small">'+dShort(c.at)+' · jij</span><p>'+esc(c.q)+'</p></div><div class="coachbox">'+esc(c.a)+((c.ex||[]).filter(id=>EX[id]).length?'<div class="nchips">'+c.ex.filter(id=>EX[id]).map(id=>'<button data-act="cstart" data-ex="'+id+'">▶ '+esc(EX[id].name)+'</button>').join('')+'</div>':'')+'</div>').join('');
+  return '<section><h2>Coach</h2>'
+   +'<div class="coachbox"><span class="kicker" style="font-size:11px">Coach zegt</span>\n'+esc(coachInsight(pid))+'</div>'
+   +(log.length>3?'<button class="linkbtn" data-act="call">'+(coachAll?'Toon alleen de laatste 3':'Toon alle '+log.length+' vragen')+'</button>':'')
+   +(items?'<div class="clog">'+items+'</div>':'')
+   +'<div class="nchips">'+COACH_CHIPS.map(q=>'<button data-act="cchip" data-q="'+esc(q)+'">'+esc(q)+'</button>').join('')+'</div>'
+   +'<textarea id="cq" placeholder="Of typ je eigen vraag…" aria-label="Vraag aan de coach">'+esc(coachDraft)+'</textarea>'
+   +'<button class="primary" data-act="cask">Vraag de coach</button>'
+   +'<p class="muted small">De coach zit in de app zelf: hij rekent met jouw resultaten, werkt zonder internet en kost niets.</p></section>';
+}
+function askCoach(q){
+  q=String(q||"").trim(); if(!q) return;
+  const pid=mePid(), a=coachAnswer(pid,q);
+  coachDraft="";
+  (store.data.coach ||= []).push({id:uid(),pid,at:Date.now(),q,a,src:"coach",ex:coachSug.slice(0,4)});
+  store.data.coach=store.data.coach.slice(-60);
+  store.save(); render();
+  setTimeout(()=>{ const l=document.querySelectorAll(".clog .coachbox"); if(l.length) l[l.length-1].scrollIntoView({block:"center",behavior:"smooth"}); },50);
+}
+/* invoer per beurt (Scoren op de 20, 501 solo) en snelle doeltoetsen */
+const UNDO_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>';
+const BACK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 5H9l-6 7 6 7h12z"/><path d="m16 9-5 6M11 9l5 6"/></svg>';
+function exPad(ex,s,mods,nums){
+  const vis=!!ex.visits, tm=vis && game.inMode==="total";
+  const modeSeg=vis?'<div class="seg modeseg" role="group" aria-label="Invoer"><button data-act="imode" data-v="dart" aria-pressed="'+!tm+'">Per pijl</button><button data-act="imode" data-v="total" aria-pressed="'+tm+'">Totaal per beurt</button></div>':'';
+  if(tm){
+    const pv=pendingVis;
+    if(pv) return '<div class="pad tpad" style="grid-template-rows:auto auto auto 1fr">'+modeSeg+'<div class="tdisp tab" aria-live="polite">Uit met '+pv.v+'!</div><p class="muted" style="text-align:center">Met hoeveel pijlen in deze beurt?</p><div class="digits">'+[1,2,3].map(n=>'<button class="k'+(pv.ns.includes(n)?' ok':'')+'" data-act="vn" data-v="'+n+'"'+(pv.ns.includes(n)?'':' disabled')+'>'+n+'</button>').join('')+'<button class="k" data-act="vx" style="grid-column:1/-1">Annuleren</button></div></div>';
+    const quick=[26,41,45,60,81,85,100,140,180].map(v=>'<button class="k q" data-act="qt" data-v="'+v+'">'+v+'</button>').join('');
+    const digits=[1,2,3,4,5,6,7,8,9].map(n=>'<button class="k" data-act="td" data-v="'+n+'">'+n+'</button>').join('')+'<button class="k" data-act="tback" aria-label="Wissen">'+BACK_SVG+'</button><button class="k" data-act="td" data-v="0">0</button><button class="k ok" data-act="tok">OK</button>';
+    return '<div class="pad tpad" style="grid-template-rows:auto auto auto 1fr">'+modeSeg+'<div class="tdisp tab" aria-live="polite">'+(kbuf?esc(kbuf):'<span class="muted">Totaal van je beurt</span>')+'</div><div class="quick">'+quick+'</div><div class="digits">'+digits+'</div></div>';
+  }
+  const Q=ex.quick?ex.quick(game,s):null;
+  const qrow=Q?'<div class="qrow">'+Q.map(([seg,m])=>'<button class="k qk'+(m===3?' t':m===2?' d':m===0?' miss':'')+'" data-act="qd" data-seg="'+seg+'" data-m="'+m+'">'+(m===0?'Mis':esc(tl(seg,m)))+'</button>').join('')+'</div>':'';
+  const rows=[vis&&'auto',Q&&'auto','auto','1fr','auto'].filter(Boolean).join(' ');
+  return '<div class="pad" style="grid-template-rows:'+rows+'">'+modeSeg+qrow+'<div class="mods">'+mods+'<button class="k miss" data-act="miss">Mis</button><button class="k undo" data-act="undo" aria-label="Laatste pijl wissen">'+UNDO_SVG+'</button></div><div class="nums">'+nums+'</div><div class="mods two"><button class="k bull g" data-act="b25">25</button><button class="k bull" data-act="b50">Bull</button></div></div>';
+}
+function addVisit(v){
+  if(!game || isMatch(game)) return;
+  const st=derive(game); if(st.done) return;
+  const s=st.S[st.cp];
+  if(!(v>=0 && v<=180) || IMPOSSIBLE.has(v)){ toast(v+" kan niet met drie pijlen."); render(); return; }
+  if(s.cur.length){ toast("Geef het totaal in aan het begin van een beurt."); render(); return; }
+  if(game.ex==="g501" && v===s.rem){ const ns=[1,2,3].filter(n=>route(v,n)); if(!ns.length){ toast(v+" kun je niet uitgooien."); render(); return; } pendingVis={v,ns}; render(); return; }
+  addDart({v,vis:1});
+  render();
+}
+
 /* ---------- statistieken ---------- */
-function navHTML(){ return '<div class="nav nav3" role="group" aria-label="Onderdeel"><button data-act="tab" data-t="train" aria-pressed="'+(tab==="train")+'">Trainen</button><button data-act="tab" data-t="match" aria-pressed="'+(tab==="match")+'">Wedstrijd</button><button data-act="tab" data-t="stats" aria-pressed="'+(tab==="stats")+'">Statistieken</button></div>'; }
+function navHTML(){ return '<div class="nav nav4" role="group" aria-label="Onderdeel">'+[["today","Vandaag"],["train","Oefenen"],["match","Wedstrijd"],["stats","Cijfers"]].map(([t,l])=>'<button data-act="tab" data-t="'+t+'" aria-pressed="'+(tab===t)+'">'+l+'</button>').join('')+'</div>'; }
 function renderMatchHome(){
   const resume=game && !gameDone(game) ? '<button class="resume" data-act="resume"><b>Verder met '+esc(isMatch(game)?'de wedstrijd':getEx(game.ex).name)+'</b><span>Je was nog bezig. Tik om verder te gaan.</span></button>' : '';
   $("#app").innerHTML='<div class="wrap">'
@@ -1520,6 +2005,7 @@ function renderStats(){
   $("#app").innerHTML='<div class="wrap">'
     +'<div class="hero">'+boardSVG()+'<div><h1>Statis<span>tieken</span></h1><p class="muted">Week van '+dShort(tw)+' (week '+isoWeek(tw)+')</p></div></div>'
     + navHTML() + sub
+    + routeStatsHTML()
     +'<section><h2>Deze week</h2><div class="week">'+tiles+'</div></section>'
     + basisHTML()
     +'<section><h2>Per oefening</h2>'+blocks+'</section>'
@@ -1629,11 +2115,12 @@ function mergeData(base, inc){
   for(const c of (inc.customs||[])) if(!out.customs.some(x=>x.id===c.id)) out.customs.push(c);
   out.history=out.history.filter(h=>!removed.has(h.id)).sort((a,b)=>b.at-a.at||(a.id<b.id?-1:1)).slice(0,CAP);
   out.customs=out.customs.filter(c=>!removed.has(c.id));
+  { const cm={}; [...(base.coach||[]),...(inc.coach||[])].forEach(c=>{ if(c&&c.id) cm[c.id]=Object.assign({},c,{pid:map[c.pid]||c.pid}); }); out.coach=Object.values(cm).sort((a,b)=>a.at-b.at).slice(-60); }
   out.removed=[...removed].slice(-3000);
   return {data:out,map};
 }
 const RN_DEFAULT={tim:"Tim",jan:"Jan"};
-function shareable(d){ return {darttrainer:3, players:d.players||[], history:(d.history||[]).map(unpackEntry).sort((a,b)=>b.at-a.at||(a.id<b.id?-1:1)).map(packEntry), customs:d.customs||[], removed:[...new Set(d.removed||[])].sort()}; }
+function shareable(d){ return {darttrainer:3, players:d.players||[], history:(d.history||[]).map(unpackEntry).sort((a,b)=>b.at-a.at||(a.id<b.id?-1:1)).map(packEntry), customs:d.customs||[], coach:d.coach||[], removed:[...new Set(d.removed||[])].sort()}; }
 function applyMerged(res){
   const D=store.data, before=JSON.stringify(shareable(D));
   Object.assign(D, res.data);
@@ -1949,6 +2436,7 @@ function parseKeys(s, allowTotal){
   return {darts:out};
 }
 function commitKbuf(){
+  if(game && !isMatch(game) && game.inMode==="total" && /^\d{1,3}$/.test(kbuf)){ const v=+kbuf; kbuf=""; return addVisit(v); }
   const r=parseKeys(kbuf, isMatch(game)); const raw=kbuf; kbuf="";
   if(!r){ render(); return; }
   if(r.error){ toast("Niet begrepen: "+raw); render(); return; }
@@ -1968,7 +2456,7 @@ function manageRows(scope){
       const sid=h.session.sid; if(seen.has(sid)) continue; seen.add(sid);
       const items=H.filter(x=>x.session && x.session.sid===sid);
       rows.push({kind:"training", at:Math.max(...items.map(x=>x.at)), ids:items.map(x=>x.id), items,
-        title:"Training "+(PHASE_NAME[h.session.ph]||""), sub:items.length+" van 7 oefeningen", who:[...new Set(items.flatMap(x=>x.res.map(r=>r.pid)))]});
+        title:"Training "+(PHASE_NAME[h.session.ph]||""), sub:items.length+" oefeningen", who:[...new Set(items.flatMap(x=>x.res.map(r=>r.pid)))]});
     } else rows.push({kind:k, at:h.at, ids:[h.id], items:[h], title:(getEx(h.ex)||{}).name||h.name,
       sub: k==="match" ? h.res.map(r=>esc(pName(r.pid,r.name))+' '+((r.extra&&r.extra.legs)||0)).join(' – ')+' legs' : h.res.map(r=>esc(pName(r.pid,r.name))+' '+sv(getEx(h.ex),r.score)).join(' · '),
       who:h.res.map(r=>r.pid)});
@@ -2032,11 +2520,11 @@ document.addEventListener("click",e=>{
     case "mpick": { const c=matchDraft; const id=b.dataset.id; if(c.players.includes(id)){ if(c.players.length>2) c.players=c.players.filter(x=>x!==id); } else { c.players=[...c.players.slice(-1),id]; } c.starter=0; D.matchCfg=c; store.save(); render(); break; }
     case "mstart": voice.autoOn(); startMatch(matchDraft); break;
     case "rematch": { voice.autoOn(); const c=Object.assign({},D.matchCfg||{}, {players:game.players.slice(), start:game.start, doubleIn:game.doubleIn, bestOf:game.bestOf, starter:(game.starter+1)%game.players.length}); startMatch(c); break; }
-    case "imode": game.inMode=b.dataset.v; D.inMode=b.dataset.v; store.save(); kbuf=""; saveGame(); render(); break;
-    case "qt": addMatchEvent({t:"total",v:+b.dataset.v}); break;
+    case "imode": game.inMode=b.dataset.v; if(isMatch(game)) D.inMode=b.dataset.v; else D.exInMode=b.dataset.v; pendingVis=null; store.save(); kbuf=""; saveGame(); render(); break;
+    case "qt": if(isMatch(game)) addMatchEvent({t:"total",v:+b.dataset.v}); else addVisit(+b.dataset.v); break;
     case "td": if(kbuf.length<3){ kbuf+=b.dataset.v; } render(); break;
     case "tback": if(kbuf) kbuf=kbuf.slice(0,-1); else undo(); render(); break;
-    case "tok": if(kbuf){ const v=+kbuf; kbuf=""; addMatchEvent({t:"total",v}); } break;
+    case "tok": if(kbuf){ const v=+kbuf; kbuf=""; if(isMatch(game)) addMatchEvent({t:"total",v}); else addVisit(v); } break;
     case "outn": { const p=pendingOut; pendingOut=null; if(p) addMatchEvent({t:"total",v:p.v,n:+b.dataset.v}); break; }
     case "outx": pendingOut=null; render(); break;
     case "session": pickEx="__session"; render(); break;
@@ -2052,6 +2540,17 @@ document.addEventListener("click",e=>{
       break; }
     case "goal": D.weekGoal = +b.dataset.v; store.save(); render(); break;
     case "again": { voice.autoOn(); if(isMatch(game)){ const c={players:game.players.slice(),start:game.start,doubleIn:game.doubleIn,bestOf:game.bestOf,starter:(game.starter+1)%game.players.length}; startMatch(c); } else startGame(game.ex, game.players, game.session); break; }
+    case "qd": addDart(+b.dataset.m===0?{seg:0,mult:0}:{seg:+b.dataset.seg,mult:+b.dataset.m}); modSel=1; if(screen==="play") render(); break;
+    case "vn": { const p=pendingVis; pendingVis=null; if(p) addDart({v:p.v,vis:1,n:+b.dataset.v}); else render(); break; }
+    case "vx": pendingVis=null; render(); break;
+    case "s20n": if(game){ game.n=+b.dataset.v; D.s20n=game.n; store.save(); saveGame(); render(); } break;
+    case "who": D.me=b.dataset.v; store.save(); render(); break;
+    case "today": startToday(); break;
+    case "planone": startToday(+b.dataset.i); break;
+    case "cask": { const el=$("#cq"); askCoach(el?el.value:""); break; }
+    case "cchip": askCoach(b.dataset.q); break;
+    case "cstart": voice.autoOn(); startGame(b.dataset.ex, whoIds()); break;
+    case "call": coachAll=!coachAll; render(); break;
     case "num": addDart({seg:+b.dataset.n, mult:modSel}); modSel=1; if(screen==="play") render(); break;
     case "mod": modSel = (modSel===+b.dataset.m && modSel!==1) ? 1 : +b.dataset.m; render(); break;
     case "miss": addDart({seg:0,mult:0}); modSel=1; if(screen==="play") render(); break;
@@ -2078,6 +2577,7 @@ document.addEventListener("click",e=>{
     case "lang": D.lang=b.dataset.v; store.save(); if(voice.rec) voice.rec.lang=D.lang; render(); break;
   }
 });
+document.addEventListener("input",e=>{ if(e.target && e.target.id==="cq") coachDraft=e.target.value; });
 document.addEventListener("change",e=>{
   const t=e.target;
   if(t.matches('select.vsel')){ if(t.dataset.lang==="en") store.data.voiceEn=t.value; else store.data.voiceNl=t.value; store.save(); const L=t.dataset.lang; speaker.say([...scoreCall(180,L)],{lang:L}); return; }
