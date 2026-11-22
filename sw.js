@@ -1,5 +1,5 @@
 // Darttrainer: werkt ook zonder internet. Nieuwe versie? Verhoog VERSION.
-const VERSION = "darttrainer-v4";
+const VERSION = "darttrainer-v5";
 const FILES = [
   "./", "index.html", "manifest.webmanifest", "apple-touch-icon.png", "icon-192.png", "icon-512.png",
   "fonts/barlow-condensed-latin-600-normal.woff2", "fonts/barlow-condensed-latin-700-normal.woff2",

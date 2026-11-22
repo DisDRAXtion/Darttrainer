@@ -1358,7 +1358,7 @@ function goalStrip(){
   return '<div class="goals"><span class="kicker">Weekdoel · '+g+' oefeningen</span><div class="grow">'+store.data.players.map(p=>{ const n=weekCount(p.id), pct=Math.min(100,Math.round(100*n/g));
     return '<div class="gitem'+(n>=g?' done':'')+'"><span class="who2"><i class="dot" style="background:'+pColor(p.id)+'"></i>'+esc(p.name)+'</span><span class="tab">'+n+'/'+g+(n>=g?' ✓':'')+'</span><div class="bar"><i style="width:'+pct+'%;background:'+pColor(p.id)+'"></i></div></div>'; }).join('')+'</div></div>';
 }
-function renderHome(onlySecs){
+function renderHome(onlySecs,extra){
   const P=store.data.players, ph=store.data.phase||1;
   const resume=game && !gameDone(game) ? '<button class="resume" data-act="resume"><b>Verder met '+esc(getEx(game.ex).name)+'</b><span>Je was nog bezig. Tik om verder te gooien.</span></button>' : '';
   const favOpts=f=>range(1,20).map(n=>'<option value="'+n+'"'+(n===(f||20)?' selected':'')+'>D'+n+'</option>').join('');
@@ -1379,7 +1379,7 @@ function renderHome(onlySecs){
     +'<div class="setrow"><span>Geluid bij raak/mis</span><div class="seg" role="group" aria-label="Geluid"><button data-act="sound" data-v="1" aria-pressed="'+(store.data.sound!==false)+'">Aan</button><button data-act="sound" data-v="0" aria-pressed="'+(store.data.sound===false)+'">Uit</button></div></div>'
     +(voice.mode==="web"?'<div class="setrow"><span>Spraak</span><div class="seg" role="group" aria-label="Taal spraak"><button data-act="lang" data-v="nl-BE" aria-pressed="'+((store.data.lang||"nl-BE")==="nl-BE")+'">Vlaams</button><button data-act="lang" data-v="nl-NL" aria-pressed="'+(store.data.lang==="nl-NL")+'">Nederlands</button></div></div>':'');
   const linked=sync.on();
-  const secsH='<div class="secs">'
+  const secsH='<div class="secs">'+(extra||'')
    + secHTML("help","Zo werkt het","Spraak, knoppen en tips",helpHTML())
    + secHTML("players","Spelers",P.map(p=>p.name).join(", "),'<div class="players">'+players+'</div>')
    + secHTML("settings","Instellingen","Stem, microfoon, geluid, weekdoel",settings)
@@ -1630,7 +1630,7 @@ function renderToday(){
   const ft=FOCUS_TXT[pl.focus][0], fw=FOCUS_TXT[pl.focus][1];
   const startLbl=all?'Nog een ronde':nDone?'Verder ('+nDone+'/'+pl.list.length+' klaar)':'Start training';
   const areas='<div class="areas">'+Object.entries(A).map(([k,a])=>'<div class="area'+(k===pl.focus?' weak':'')+'"><span class="kicker" style="font-size:11px;letter-spacing:.08em">'+esc(a.n)+'</span><span class="v tab">'+(a.v==null?'–':a.fmt(a.v))+'</span><span class="muted">doel '+a.fmt(a.t)+'</span><div class="bar"><i style="width:'+(a.r==null?0:Math.min(100,Math.round(a.r*100)))+'%;background:'+(a.r!=null&&a.r>=1?'var(--green)':'var(--red)')+'"></i></div></div>').join('')+'</div>';
-  const coach=coachHTML();
+  const coach=secHTML("coach","Coach",coachSub(pid),coachHTML());
   $("#app").innerHTML='<div class="wrap">'
    +'<div class="hero">'+boardSVG()+'<div><h1>Dart<span>trainer</span></h1><p class="muted">Elke dag een stap dichter bij Q-School</p></div></div>'
    + navHTML() + (voice.on()?voiceBar():'') + resume + who
@@ -1638,10 +1638,7 @@ function renderToday(){
    +'<button class="session" data-act="today"><span class="play-ic" aria-hidden="true">▶</span><span><b>'+startLbl+'</b><span>'+(ids.length>1?'Samen, om de beurt · ':'')+'De app gaat vanzelf door naar de volgende oefening</span></span></button>'
    +'<ol class="plan">'+items+'</ol></div>'
    +'<div class="qroute">'+ringSVG(L,G)+'<div><span class="kicker">Route naar Q-School · '+esc(pName(pid))+'</span><p style="margin:4px 0 10px">'+gap+'</p>'+ladder+'</div></div>'
-   +'<section><h2>Waar sta je</h2>'+areas+'<p class="muted small">Gemiddelde van je laatste 5 keer. Rood omrand is de focus van vandaag.</p></section>'
-   +'<div class="minis"><div><b class="tab">'+streakOf(pid)+'</b><span class="muted small">dagen op rij</span></div><div><b class="tab">'+weekCount(pid)+((D.weekGoal||0)?'<span class="of">/'+D.weekGoal+'</span>':'')+'</b><span class="muted small">oefeningen deze week</span></div><div><b class="tab">'+dartsWeek(pid)+'</b><span class="muted small">pijlen deze week</span></div></div>'
-   + coach
-   + renderHome(true)
+   + renderHome(true, secHTML("stand","Waar sta je",Object.values(A).map(a=>a.n+" "+(a.v==null?"–":a.fmt(a.v))).join(" · "),areas+'<p class="muted small">Gemiddelde van je laatste 5 keer. Rood omrand is de focus van vandaag.</p>'+'<div class="minis"><div><b class="tab">'+streakOf(pid)+'</b><span class="muted small">dagen op rij</span></div><div><b class="tab">'+weekCount(pid)+((D.weekGoal||0)?'<span class="of">/'+D.weekGoal+'</span>':'')+'</b><span class="muted small">oefeningen deze week</span></div><div><b class="tab">'+dartsWeek(pid)+'</b><span class="muted small">pijlen deze week</span></div></div>')+coach)
    +'</div>';
 }
 function routeStatsHTML(){
@@ -1821,17 +1818,18 @@ function ansFinishing(pid){
   return lines.join("\n");
 }
 /* --- weergave --- */
+function coachSub(pid){ const n=(store.data.coach||[]).filter(c=>c.pid===pid).length; return "Advies, weekplan en je vragen"+(n?" · "+n+" gesteld":""); }
 function coachHTML(){
   const pid=mePid(), log=(store.data.coach||[]).filter(c=>c.pid===pid), show=coachAll?log:log.slice(-3);
   const items=show.map(c=>'<div class="cq"><span class="muted small">'+dShort(c.at)+' · jij</span><p>'+esc(c.q)+'</p></div><div class="coachbox">'+esc(c.a)+((c.ex||[]).filter(id=>EX[id]).length?'<div class="nchips">'+c.ex.filter(id=>EX[id]).map(id=>'<button data-act="cstart" data-ex="'+id+'">▶ '+esc(EX[id].name)+'</button>').join('')+'</div>':'')+'</div>').join('');
-  return '<section><h2>Coach</h2>'
+  return ''
    +'<div class="coachbox"><span class="kicker" style="font-size:11px">Coach zegt</span>\n'+esc(coachInsight(pid))+'</div>'
    +(log.length>3?'<button class="linkbtn" data-act="call">'+(coachAll?'Toon alleen de laatste 3':'Toon alle '+log.length+' vragen')+'</button>':'')
    +(items?'<div class="clog">'+items+'</div>':'')
    +'<div class="nchips">'+COACH_CHIPS.map(q=>'<button data-act="cchip" data-q="'+esc(q)+'">'+esc(q)+'</button>').join('')+'</div>'
    +'<textarea id="cq" placeholder="Of typ je eigen vraag…" aria-label="Vraag aan de coach">'+esc(coachDraft)+'</textarea>'
    +'<button class="primary" data-act="cask">Vraag de coach</button>'
-   +'<p class="muted small">De coach zit in de app zelf: hij rekent met jouw resultaten, werkt zonder internet en kost niets.</p></section>';
+   +'<p class="muted small">De coach zit in de app zelf: hij rekent met jouw resultaten, werkt zonder internet en kost niets.</p>';
 }
 function askCoach(q){
   q=String(q||"").trim(); if(!q) return;
